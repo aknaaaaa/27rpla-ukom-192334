@@ -1,10 +1,9 @@
-@extends('template.template')
+@extends('layouts.template')
 
 @section('title', 'Halaman Utama')
 
 @section('content')
 <style>
-/* === HERO SECTION === */
 .superhero-section {
   position: relative;
   height: 70vh;
@@ -32,8 +31,6 @@
   letter-spacing: 2px;
   font-family: 'Aboreto', cursive;
 }
-
-/* === ABOUT SECTION === */
 .about-section {
   background-color: #fff;
   padding-top: 100px;
@@ -61,40 +58,6 @@
   height: 2px;
   background-color: #b22222;
   margin: 8px auto 0;
-}
-
-/* === NAVBAR === */
-.navbar-custom {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  background-color: rgba(255, 255, 255, 0.5) !important;
-  backdrop-filter: blur(5px);
-  box-shadow: none;
-  z-index: 1000;
-  transition: all 0.4s ease;
-}
-.navbar-custom.scrolled {
-  background-color: white !important;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-.navbar .nav-link {
-  color: #000 !important;
-  transition: color 0.3s ease;
-}
-.btn-dark {
-  background-color: rgb(20, 20, 20);
-  color: white;
-}
-.btn-dark:hover {
-  background-color: rgba(255,255,255,0.4);
-  color: rgb(0,0,0);
-  transition: all 0.5s ease-in-out;
-}
-
-/* === DISCOVER MULTI-CAROUSEL === */
-#discoverCarousel {
-  margin-top: 50px;
 }
 .carousel-item {
   display: flex;
@@ -135,32 +98,22 @@
     </p>
   </div>
 
-  <br><br>
-
-  <!-- DISCOVER SECTION -->
   <div class="container">
     <h2 class="warna-h2 fw-bold mb-3 font-aboreto garis-bawah">DISCOVER</h2>
-
     <div id="discoverCarousel" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-inner">
-
-        <!-- SLIDE 1 -->
         <div class="carousel-item active">
           <img src="{{ asset('images/discover (1).jpg') }}" alt="Discover 1">
           <img src="{{ asset('images/discover (2).jpg') }}" alt="Discover 2">
           <img src="{{ asset('images/discover (3).jpg') }}" alt="Discover 3">
         </div>
-
-        <!-- SLIDE 2 -->
         <div class="carousel-item">
           <img src="{{ asset('images/discover (4).jpg') }}" alt="Discover 4">
           <img src="{{ asset('images/discover (2).jpg') }}" alt="Discover 2">
           <img src="{{ asset('images/discover (3).jpg') }}" alt="Discover 3">
         </div>
-
       </div>
 
-      <!-- Controls -->
       <button class="carousel-control-prev" type="button" data-bs-target="#discoverCarousel" data-bs-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
       </button>
@@ -168,7 +121,6 @@
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
       </button>
 
-      <!-- Indicators -->
       <div class="carousel-indicators mt-3">
         <button type="button" data-bs-target="#discoverCarousel" data-bs-slide-to="0" class="active"></button>
         <button type="button" data-bs-target="#discoverCarousel" data-bs-slide-to="1"></button>
@@ -176,11 +128,4 @@
     </div>
   </div>
 </section>
-
-<script>
-window.addEventListener('scroll', function() {
-  const navbar = document.querySelector('.navbar-custom');
-  navbar.classList.toggle('scrolled', window.scrollY > 50);
-});
-</script>
 @endsection

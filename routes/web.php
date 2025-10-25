@@ -1,12 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\LayoutsController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-
-Route::get('/template', [TemplateController::class, 'index'])->name('template.index');
-
+// 🔹 Halaman utama langsung ke controller
+Route::get('/layouts', [LayoutsController::class, 'index'])->name('layouts.index');

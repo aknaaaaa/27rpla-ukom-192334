@@ -8,6 +8,8 @@
                 <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Produk</a></li>
                 <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Layanan</a></li>
                 <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Kontak</a></li>
+                <li class="nav-item"><a class="nav-link px-3" href="#"><img src="images/person-circle.svg"></a></li>
+
             </ul>
         </div>
     </div>
