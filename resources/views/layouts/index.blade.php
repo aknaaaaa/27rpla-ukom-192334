@@ -4,6 +4,7 @@
 
 @section('content')
 <style>
+/* === HERO SECTION === */
 .superhero-section {
   position: relative;
   height: 70vh;
@@ -31,6 +32,8 @@
   letter-spacing: 2px;
   font-family: 'Aboreto', cursive;
 }
+
+/* === ABOUT SECTION === */
 .about-section {
   background-color: #fff;
   padding-top: 100px;
@@ -59,21 +62,45 @@
   background-color: #b22222;
   margin: 8px auto 0;
 }
-.carousel-item {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-}
-.carousel-item img {
-  width: 32%;
-  height: 250px;
+
+/* === DISCOVER CAROUSEL === */
+.discover-carousel .carousel-item img {
+  width: 100%;
+  height: 450px;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+
+/* tombol prev & next lebih deket */
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+}
+.carousel-control-prev { left: 10%; }
+.carousel-control-next { right: 10%; }
+
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
+  width: 30px;
+  height: 30px;
   filter: invert(100%);
 }
+
+/* transisi halus tapi tetap geser */
+.carousel-item {
+  transition: transform 0.5s ease-in-out; /* lebih cepat dan lembut */
+}
+.carousel-inner {
+  overflow: hidden;
+}
+
+/* efek scale lembut saat aktif */
+.carousel-item.active img {
+  transform: scale(1.02);
+  transition: transform 0.5s ease-in-out;
+}
+
 .carousel-indicators [data-bs-target] {
   background-color: #AB886D;
 }
@@ -98,33 +125,34 @@
     </p>
   </div>
 
-  <div class="container">
+  <!-- DISCOVER -->
+  <div class="container mt-5">
     <h2 class="warna-h2 fw-bold mb-3 font-aboreto garis-bawah">DISCOVER</h2>
+
     <div id="discoverCarousel" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner">
+      <div class="carousel-inner text-center">
         <div class="carousel-item active">
-          <img src="{{ asset('images/discover (1).jpg') }}" alt="Discover 1">
-          <img src="{{ asset('images/discover (2).jpg') }}" alt="Discover 2">
-          <img src="{{ asset('images/discover (3).jpg') }}" alt="Discover 3">
+          <img src="{{ asset('images/discover%20(1).jpg') }}" class="d-block mx-auto img-fluid" alt="Discover 1"
+               style="max-width:300px; height:auto; border-radius:12px;">
         </div>
         <div class="carousel-item">
-          <img src="{{ asset('images/discover (4).jpg') }}" alt="Discover 4">
-          <img src="{{ asset('images/discover (2).jpg') }}" alt="Discover 2">
-          <img src="{{ asset('images/discover (3).jpg') }}" alt="Discover 3">
+          <img src="{{ asset('images/discover%20(2).jpg') }}" class="d-block mx-auto img-fluid" alt="Discover 2"
+               style="max-width:300px; height:auto; border-radius:12px;">
+        </div>
+        <div class="carousel-item">
+          <img src="{{ asset('images/discover%20(3).jpg') }}" class="d-block mx-auto img-fluid" alt="Discover 3"
+               style="max-width:300px; height:auto; border-radius:12px;">
         </div>
       </div>
 
       <button class="carousel-control-prev" type="button" data-bs-target="#discoverCarousel" data-bs-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
       </button>
       <button class="carousel-control-next" type="button" data-bs-target="#discoverCarousel" data-bs-slide="next">
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
       </button>
-
-      <div class="carousel-indicators mt-3">
-        <button type="button" data-bs-target="#discoverCarousel" data-bs-slide-to="0" class="active"></button>
-        <button type="button" data-bs-target="#discoverCarousel" data-bs-slide-to="1"></button>
-      </div>
     </div>
   </div>
 </section>
