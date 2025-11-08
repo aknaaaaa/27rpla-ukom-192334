@@ -146,20 +146,38 @@
 </a>
 
 <main class="page">
-    <form class="card" method="POST">
+    <form class="card" method="POST" action="{{route('register')}}">
         @csrf
 
         <h2 class="title">DAFTAR</h2>
         <div class="divider"></div>
 
+        {{-- 💡 KODE UNTUK MENAMPILKAN PESAN SUKSES --}}
+    @if(Session::has('success_message'))
+        <div class="alert alert-success" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+            {{ Session::get('success_message') }}
+        </div>
+    @endif
+    
+    {{-- Kode untuk menampilkan pesan error validasi --}}
+    @if ($errors->any())
+        <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
         <div class="field">
             <label class="label">NAMA LENGKAP</label>
-            <input class="input" type="text" name="name" placeholder="Nama lengkap" required>
+            <input class="input" type="text" name="nama_user" placeholder="Nama lengkap" required>
         </div>
 
         <div class="field">
             <label class="label">NOMOR TELEPON</label>
-            <input class="input" type="tel" name="phone" placeholder="08xxxxxxxxxx" required>
+            <input class="input" type="tel" name="phone_number" placeholder="08xxxxxxxxxx" required>
         </div>
 
         <div class="field">
@@ -175,6 +193,9 @@
         <div class="field">
             <label class="label">KONFIRMASI PASSWORD</label>
             <input class="input" type="password" name="password_confirmation" placeholder="********" required>
+            @error('password_confirmation')
+            <p style="color: red; font-size: 0.9em;">{{ $message }}</p>
+        @enderror
         </div>
 
         <button class="btn" type="submit">Daftar</button>

@@ -8,3 +8,5 @@ use App\Http\Controllers\LayoutsController;
 Route::get('/', [LayoutsController::class, 'index'])->name('layouts.index');
 Route::get('/register', [LayoutsController::class, 'daftar'])->name('layouts.register');
 Route::get('/login', [LayoutsController::class, 'masuk'])->name('layouts.login');
+
+Route::post('/register', [AuthController::class, 'register'])->name('register');

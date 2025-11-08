@@ -14,39 +14,23 @@ class AuthController extends Controller
 {
     public function register(Request $request) 
     {
-        // Tentukan ID Role Default Anda
-    $defaultRoleId = 2; 
+        // Tentukan ID Role Default Anda 
     
     // Gabungkan data request dengan nilai default
-    $dataToValidate = array_merge($request->all(), [
-        'id_role' => $defaultRoleId // Tambahkan nilai default ke array validasi
-    ]);
         // 1. Validasi Data
-        $userData = Validator::make($dataToValidate, [
-            // Validasi untuk kolom 'nama_user'
+        $userData = Validator::make($request->all(), [
             'nama_user' => 'required|string|max:100', 
-            
-            // Validasi untuk kolom 'phone_number'
             'phone_number' => 'required|string|max:20', 
-            
-            // Pastikan Anda menggunakan nama tabel yang benar: 'user' atau 'users'
             'email' => 'required|email|unique:user,email', 
-            
-            'password' => 'required|min:6',
-            'id_role' => 'required|integer|exists:roles,id_role'
+            'password' => 'required|min:6|confirmed',
         ]);
 
         if ($userData->fails()) {
-            // Jika validasi gagal, kembalikan error 422
-            return response()->json($userData->errors(), 422);
+            return redirect()->back()->withErrors($userData)->withInput();
         }
 
-        // 2. Tentukan ID Role Default
-        // Anda HARUS tahu ID role mana yang merupakan "Pelanggan" (misal: 2)
-        // Jika Anda belum membuat tabel 'roles', Anda harus membuatnya terlebih dahulu.
-        $defaultRoleId = 2; // Ganti dengan ID role "Pelanggan" yang sesungguhnya
+        $defaultRoleId = 2;
 
-        // 3. Simpan User ke Database
         $user = User::create([
             'id_role' => $defaultRoleId, 
             'nama_user' => $request->nama_user,
@@ -56,11 +40,7 @@ class AuthController extends Controller
         ]);
 
         // 4. Berikan Respons Sukses
-        return response()->json([
-            'success' => true,
-            'message' => 'Pendaftaran berhasil. Silakan login.',
-            'user' => $user->only(['id_user', 'nama_user', 'email']) // Hanya tampilkan data aman
-        ], 201);
+        return redirect()->back()->with('success_message', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
     }
     public function login(Request $request) {
         $userData = Validator::make($request->all(), [
