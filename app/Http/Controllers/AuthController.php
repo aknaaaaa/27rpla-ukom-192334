@@ -6,23 +6,60 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 // use laravel\Passport\HasApiTokens;
 
 class AuthController extends Controller
 {
-    public function registerPage(){ return view('auth.register'); }
-    public function register(Request $request) {
-        $userData = Validator::make($request->all(), [
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6'
+    public function register(Request $request) 
+    {
+        // Tentukan ID Role Default Anda
+    $defaultRoleId = 2; 
+    
+    // Gabungkan data request dengan nilai default
+    $dataToValidate = array_merge($request->all(), [
+        'id_role' => $defaultRoleId // Tambahkan nilai default ke array validasi
+    ]);
+        // 1. Validasi Data
+        $userData = Validator::make($dataToValidate, [
+            // Validasi untuk kolom 'nama_user'
+            'nama_user' => 'required|string|max:100', 
+            
+            // Validasi untuk kolom 'phone_number'
+            'phone_number' => 'required|string|max:20', 
+            
+            // Pastikan Anda menggunakan nama tabel yang benar: 'user' atau 'users'
+            'email' => 'required|email|unique:user,email', 
+            
+            'password' => 'required|min:6',
+            'id_role' => 'required|integer|exists:roles,id_role'
         ]);
+
         if ($userData->fails()) {
+            // Jika validasi gagal, kembalikan error 422
             return response()->json($userData->errors(), 422);
         }
-        // $user = Auth::user();
+
+        // 2. Tentukan ID Role Default
+        // Anda HARUS tahu ID role mana yang merupakan "Pelanggan" (misal: 2)
+        // Jika Anda belum membuat tabel 'roles', Anda harus membuatnya terlebih dahulu.
+        $defaultRoleId = 2; // Ganti dengan ID role "Pelanggan" yang sesungguhnya
+
+        // 3. Simpan User ke Database
+        $user = User::create([
+            'id_role' => $defaultRoleId, 
+            'nama_user' => $request->nama_user,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'password' => Hash::make($request->password), // Wajib di-hash
+        ]);
+
+        // 4. Berikan Respons Sukses
         return response()->json([
             'success' => true,
-            'message' => 'User berhasil didaftarkan'
+            'message' => 'Pendaftaran berhasil. Silakan login.',
+            'user' => $user->only(['id_user', 'nama_user', 'email']) // Hanya tampilkan data aman
         ], 201);
     }
     public function login(Request $request) {
