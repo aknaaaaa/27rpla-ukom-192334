@@ -1,6 +1,6 @@
 @extends('layouts.template')
 
-@section('title', 'daftar')
+@section('title', 'masuk')
 
 @section('content')
 <style>
@@ -15,7 +15,7 @@
 
     body{
       margin:0;
-      font-family: 'Aboreto', cursive;
+      font-family: 'Inter', system-ui, sans-serif;
       color: var(--text);
     }
 
@@ -39,7 +39,6 @@
       pointer-events:none;
     }
 
-    /* Tombol Back */
     .back{
       position: fixed;
       top: 18px; left: 18px;
@@ -60,7 +59,6 @@
 
     .back svg{ width:16px; height:16px }
 
-    /* Kartu form */
     .card{
       position: relative;
       z-index: 2;
@@ -149,18 +147,8 @@
     <form class="card" method="POST">
         @csrf
 
-        <h2 class="title">DAFTAR</h2>
+        <h2 class="title">MASUK</h2>
         <div class="divider"></div>
-
-        <div class="field">
-            <label class="label">NAMA LENGKAP</label>
-            <input class="input" type="text" name="name" placeholder="Nama lengkap" required>
-        </div>
-
-        <div class="field">
-            <label class="label">NOMOR TELEPON</label>
-            <input class="input" type="tel" name="phone" placeholder="08xxxxxxxxxx" required>
-        </div>
 
         <div class="field">
             <label class="label">EMAIL</label>
@@ -172,16 +160,11 @@
             <input class="input" type="password" name="password" placeholder="********" required>
         </div>
 
-        <div class="field">
-            <label class="label">KONFIRMASI PASSWORD</label>
-            <input class="input" type="password" name="password_confirmation" placeholder="********" required>
-        </div>
-
-        <button class="btn" type="submit">Daftar</button>
+        <button class="btn" type="submit">Login</button>
 
         <p class="muted">
-            Sudah punya akun?
-            <a href="{{ route('layouts.login') }}">Masuk</a>.
+            Belum punya akun?
+            <a href="{{ route('layouts.register') }}">Daftar</a>.
         </p>
     </form>
 </main>
