@@ -13,9 +13,6 @@ return new class extends Migration
     {
         Schema::create('kamars', function (Blueprint $table) {
             $table->id('id_kamar');
-            $table->foreignId('id_kategori')                           // FK -> kategori.id_kategori
-                  ->constrained('kategoris', 'id_kategori')
-                  ->cascadeOnDelete();
             $table->string('nama_kamar', 100);
             $table->decimal('harga_permalam', 12, 2);
             $table->string('ukuran_kamar', 50)->nullable();

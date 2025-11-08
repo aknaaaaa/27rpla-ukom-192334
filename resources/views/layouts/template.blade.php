@@ -55,9 +55,6 @@
 </head>
 <body>
 
-    {{-- 🔹 Navbar --}}
-    @include('layouts.navigation')
-
     {{-- 🔹 Konten Halaman --}}
     <main>
         @yield('content')

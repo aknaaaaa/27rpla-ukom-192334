@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    public function registerPage(){ return view('auth.register'); }
     public function register(Request $request) {
         $userData = Validator::make($request->all(), [
             'email' => 'required|email|unique:users,email',

@@ -11,4 +11,8 @@ class LayoutsController extends Controller
         // Panggil view index yang ada di resources/views/layouts/index.blade.php
         return view('layouts.index');
     }
+    public function daftar()
+    {
+        return view('layouts.register');
+    }
 }
