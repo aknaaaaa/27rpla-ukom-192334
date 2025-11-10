@@ -161,4 +161,6 @@
     </div>
   </div>
 </section>
+
+@include('components.kamar-detail')
 @endsection
