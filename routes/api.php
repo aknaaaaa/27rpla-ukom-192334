@@ -10,7 +10,7 @@ Route::prefix('auth')->group(function () {
 });
 
 // (opsional) endpoint helper ketika sudah login (dengan token)
-Route::middleware('auth:api')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', fn (\Illuminate\Http\Request $r) => $r->user());
     Route::get('check-auth', [AuthController::class, 'check']);
 });

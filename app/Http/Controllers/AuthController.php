@@ -21,7 +21,7 @@ class AuthController extends Controller
         $userData = Validator::make($request->all(), [
             'nama_user' => 'required|string|max:100', 
             'phone_number' => 'required|string|max:20', 
-            'email' => 'required|email|unique:users,email', 
+            'email' => 'required|email|unique:user,email', 
             'password' => 'required|min:6|confirmed',
         ]);
 
@@ -79,7 +79,7 @@ class AuthController extends Controller
 
         // Generate Token menggunakan Passport
         $tokenResult = $user->createToken('authToken');
-        $accessToken = $tokenResult->accessToken;
+        $accessToken = $tokenResult->plainTextToken;
 
         return response()->json([
             'success' => true,
