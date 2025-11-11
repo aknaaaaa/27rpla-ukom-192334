@@ -15,7 +15,7 @@
 
     body{
       margin:0;
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Aboreto', cursive;
       color: var(--text);
     }
 
@@ -144,11 +144,27 @@
 </a>
 
 <main class="page">
-    <form class="card" method="POST">
-        @csrf
+    <form class="card" id="loginForm" method="POST" action="{{ route('auth.api') }}">
 
         <h2 class="title">MASUK</h2>
         <div class="divider"></div>
+
+        @if(Session::has('success_message'))
+        <div class="alert alert-success" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+            {{ Session::get('success_message') }}
+        </div>
+    @endif
+    
+    {{-- Kode untuk menampilkan pesan error validasi --}}
+    @if ($errors->any())
+        <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
         <div class="field">
             <label class="label">EMAIL</label>
@@ -160,7 +176,7 @@
             <input class="input" type="password" name="password" placeholder="********" required>
         </div>
 
-        <button class="btn" type="submit">Login</button>
+        <button class="btn" type="submit" id="loginBtn">Login</button>
 
         <p class="muted">
             Belum punya akun?
@@ -168,5 +184,63 @@
         </p>
     </form>
 </main>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+
+  const form = e.target;
+  const payload = {
+    email: form.email.value,
+    password: form.password.value
+  };
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Tidak perlu CSRF karena ini hit ke /api (stateless)
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Login gagal');
+      btn.disabled = false; btn.textContent = 'Login';
+      return;
+    }
+
+    // Simpan token untuk request berikutnya
+    localStorage.setItem('access_token', data.access_token);
+
+    // (opsional) langsung cek profil untuk verifikasi token
+    const me = await fetch('/api/auth/profile', {
+      headers: {
+        'Authorization': 'Bearer ' + data.access_token
+      }
+    });
+
+    if (me.ok) {
+      // Redirect ke halaman setelah login (ganti sesuai kebutuhan)
+      window.location.href = "{{ route('layouts.index') }}";
+    } else {
+      alert('Token tidak valid.');
+      btn.disabled = false; btn.textContent = 'Login';
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert('Terjadi kesalahan jaringan.');
+    btn.disabled = false; btn.textContent = 'Login';
+  }
+});
+</script>
+
 
 @endsection

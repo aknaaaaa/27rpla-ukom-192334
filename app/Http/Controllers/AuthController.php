@@ -21,7 +21,7 @@ class AuthController extends Controller
         $userData = Validator::make($request->all(), [
             'nama_user' => 'required|string|max:100', 
             'phone_number' => 'required|string|max:20', 
-            'email' => 'required|email|unique:user,email', 
+            'email' => 'required|email|unique:users,email', 
             'password' => 'required|min:6|confirmed',
         ]);
 
@@ -42,27 +42,51 @@ class AuthController extends Controller
         // 4. Berikan Respons Sukses
         return redirect()->back()->with('success_message', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
     }
-    public function login(Request $request) {
+    public function login(Request $request) 
+    {
         $userData = Validator::make($request->all(), [
-            'email' => 'required',
+            'email' => 'required|email',
             'password' => 'required'
         ]);
+
         if ($userData->fails()) {
-            return response()->json($userData->errors(), 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $userData->errors()
+            ], 422);
         }
+
         $credentials = $request->only('email', 'password');
+        
+        // Cek kredensial
         if (!Auth::attempt($credentials)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Email dan Password salah'
+                'message' => 'Email atau Password salah.'
             ], 401);
         }
+
         $user = Auth::user();
-        $token = $user->createToken('authToken')->accessToken;
+
+        // Cek apakah Passport sudah dikonfigurasi dan HasApiTokens digunakan
+        if (!method_exists($user, 'createToken')) {
+             return response()->json([
+                'success' => false,
+                'message' => 'Passport/Sanctum belum dikonfigurasi pada model User.'
+            ], 500);
+        }
+
+        // Generate Token menggunakan Passport
+        $tokenResult = $user->createToken('authToken');
+        $accessToken = $tokenResult->accessToken;
+
         return response()->json([
             'success' => true,
+            'message' => 'Login berhasil!',
             'user' => $user,
-            'token' => $token
+            'token_type' => 'Bearer',
+            'access_token' => $accessToken,
         ], 200);
     }
     public function check(Request $request) {

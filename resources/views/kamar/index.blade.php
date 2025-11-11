@@ -3,7 +3,7 @@
 @section('title', 'Daftar Kamar - D\'Kasuari')
 
 @section('content')
-<div class="container my-4">
+<div class="container" style="margin-top: 75px;">
     {{-- Form Check-in / Check-out --}}
     <div class="d-flex justify-content-center mb-5">
         <form class="d-flex gap-3 align-items-center">
