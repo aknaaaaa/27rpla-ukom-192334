@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\EnsureSanctumGuest;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,7 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+      // aktifkan stateful agar cookies/CSRF berlaku untuk API
+      $middleware->appendToGroup('api', EnsureFrontendRequestsAreStateful::class);
+  })
+    ->withMiddleware(function (Middleware $middleware): void {
+        // 👉 daftarkan alias middleware di sini
+        $middleware->alias([
+            'sanctum.guest' => EnsureSanctumGuest::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

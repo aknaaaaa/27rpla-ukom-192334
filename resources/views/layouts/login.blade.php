@@ -136,6 +136,51 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // 1. Konfigurasi Axios
+    axios.defaults.withCredentials = true;
+
+    // 2. Fungsi Login menggunakan Axios (AJAX)
+    async function doLogin(email, password) {
+        try {
+            // A. Dapatkan CSRF Cookie
+            await axios.get('/sanctum/csrf-cookie');
+
+            // B. Lakukan Login POST ke Web Route (menggunakan 'web' middleware)
+            const response = await axios.post('{{ route('auth.api') }}', { email, password }); 
+            
+            // C. Jika berhasil, alihkan pengguna
+            location.href = '/'; 
+
+        } catch (error) {
+            // D. Tangani error (misalnya, email/password salah atau validasi)
+            console.error("Login Gagal:", error.response);
+
+            // Tampilkan pesan error ke user (Anda perlu menambahkan div untuk menampilkan error ini)
+            // Contoh sederhana: alert(error.response.data.message || "Email atau Password Salah.");
+            
+            // Untuk demo, kita alert saja
+            alert(error.response.data.message || (error.response.data.errors && error.response.data.errors.email[0]) || "Terjadi kesalahan saat login.");
+        }
+    }
+
+    // 3. Tambahkan Event Listener setelah DOM dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        
+        // Mencegah submit form secara tradisional
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            const email = loginForm.elements.email.value;
+            const password = loginForm.elements.password.value;
+            
+            doLogin(email, password);
+        });
+    });
+</script>
+
 <a class="back" href="{{ route('layouts.index') }}">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -185,62 +230,6 @@
     </form>
 </main>
 
-<script>
-document.getElementById('loginForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
-
-  const btn = document.getElementById('loginBtn');
-  btn.disabled = true; btn.textContent = 'Logging in...';
-
-  const form = e.target;
-  const payload = {
-    email: form.email.value,
-    password: form.password.value
-  };
-
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // Tidak perlu CSRF karena ini hit ke /api (stateless)
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      alert(data.message || 'Login gagal');
-      btn.disabled = false; btn.textContent = 'Login';
-      return;
-    }
-
-    // Simpan token untuk request berikutnya
-    localStorage.setItem('access_token', data.access_token);
-
-    // (opsional) langsung cek profil untuk verifikasi token
-    const me = await fetch('/api/auth/profile', {
-      headers: {
-        'Authorization': 'Bearer ' + data.access_token
-      }
-    });
-
-    if (me.ok) {
-      // Redirect ke halaman setelah login (ganti sesuai kebutuhan)
-      window.location.href = "{{ route('layouts.index') }}";
-    } else {
-      alert('Token tidak valid.');
-      btn.disabled = false; btn.textContent = 'Login';
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert('Terjadi kesalahan jaringan.');
-    btn.disabled = false; btn.textContent = 'Login';
-  }
-});
-</script>
 
 
 @endsection
