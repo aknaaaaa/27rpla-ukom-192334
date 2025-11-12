@@ -22,7 +22,7 @@ class MediaController extends Controller
 
         $upload = Cloudinary::upload(
             $request->file('image')->getRealPath(),
-            ['folder' => env('CLOUDINARY_UPLOAD_FOLDER', 'uploads')]
+            ['folder' => env('CLOUDINARY_UPLOAD_FOLDER')]
         );
 
         $item = [
