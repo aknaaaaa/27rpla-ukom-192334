@@ -18,9 +18,15 @@ return Application::configure(basePath: dirname(__DIR__))
       $middleware->appendToGroup('api', EnsureFrontendRequestsAreStateful::class);
   })
     ->withMiddleware(function (Middleware $middleware): void {
-        // 👉 daftarkan alias middleware di sini
         $middleware->alias([
             'sanctum.guest' => EnsureSanctumGuest::class,
+        ]);
+    })
+    ->withMiddleware(function (Middleware $middleware) {
+        // Alias middleware yang kamu pakai di routes:
+        $middleware->alias([
+            'auth'  => \App\Http\Middleware\Authenticate::class,
+            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
