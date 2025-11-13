@@ -49,8 +49,4 @@ class KamarController extends Controller
 
         return view('kamar.detail', compact('kamar'));
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> c744583985de79c63527125b81123ee127e9ef34

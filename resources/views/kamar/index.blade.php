@@ -3,10 +3,8 @@
 @section('title', 'Daftar Kamar - D\'Kasuari')
 
 @section('content')
-<<<<<<< HEAD
 <div class="container my-4">
     {{-- Form Check-in / Check-out --}}
-=======
 
 <style>
 .back{
@@ -38,7 +36,6 @@
         </svg>
         <span>Back</span>
     </a>
->>>>>>> c744583985de79c63527125b81123ee127e9ef34
     <div class="d-flex justify-content-center mb-5">
         <form class="d-flex gap-3 align-items-center">
             <div>
@@ -65,8 +62,5 @@
 
 {{-- Modal Detail --}}
 @include('components.kamar-detail')
-<<<<<<< HEAD
 @endsection
-=======
 @endsection
->>>>>>> c744583985de79c63527125b81123ee127e9ef34
