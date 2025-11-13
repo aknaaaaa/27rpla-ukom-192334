@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Template')</title>
+    <title>@yield('title', 'D\'Kasuari')</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Aboreto&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
     <style>
         body {
-            margin: 0;
-            padding: 0;
+            background-color: #f8f6f4;
+            font-family: 'Aboreto', cursive;
+        }
+        .modal-backdrop.show {
+            opacity: 0.3;
         }
         .navbar-custom {
             position: fixed;
@@ -41,27 +40,12 @@
             font-family: 'Aboreto', system-ui;
         }
     </style>
-
-    <script>
-        window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar-custom');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-    </script>
 </head>
 <body>
-
-    {{-- 🔹 Konten Halaman --}}
-    <main>
+    @include('layouts.navigation')
+    <main class="py-4">
         @yield('content')
     </main>
-
-    {{-- 🔹 Footer --}}
-    @include('layouts.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
