@@ -1,4 +1,6 @@
 @extends('layouts.template')
+{{-- 🔹 Navbar --}}
+    @include('layouts.navigation')
 
 @section('title', 'Halaman Utama')
 
@@ -63,54 +65,58 @@
   margin: 8px auto 0;
 }
 
-/* === DISCOVER CAROUSEL === */
-.discover-carousel .carousel-item img {
-  width: 100%;
-  height: 450px;
-  object-fit: cover;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+/* === DISCOVER CAROUSEL (fix width & arrows near image) === */
+#discoverCarousel {
+  max-width: 340px;     
+  margin: 0 auto;      
+  position: relative;
 }
 
-/* tombol prev & next lebih deket */
-.carousel-control-prev,
-.carousel-control-next {
-  width: 5%;
-}
-.carousel-control-prev { left: 10%; }
-.carousel-control-next { right: 10%; }
-
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-  width: 30px;
-  height: 30px;
-  filter: invert(100%);
-}
-
-/* transisi halus tapi tetap geser */
-.carousel-item {
-  transition: transform 0.5s ease-in-out; /* lebih cepat dan lembut */
-}
-.carousel-inner {
+#discoverCarousel .carousel-inner {
+  border-radius: 12px;
   overflow: hidden;
 }
 
-/* efek scale lembut saat aktif */
-.carousel-item.active img {
-  transform: scale(1.02);
-  transition: transform 0.5s ease-in-out;
+#discoverCarousel .carousel-control-prev,
+#discoverCarousel .carousel-control-next {
+  width: auto;
+  height: 48px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.9;
 }
 
-.carousel-indicators [data-bs-target] {
-  background-color: #AB886D;
+#discoverCarousel .carousel-control-prev {
+  left: -28px;  
 }
+
+#discoverCarousel .carousel-control-next {
+  right: -28px; 
+}
+
+#discoverCarousel .carousel-control-prev-icon,
+#discoverCarousel .carousel-control-next-icon {
+  width: 24px;
+  height: 24px;
+  filter: invert(100%);
+}
+
+/* transisi & efek gambar (opsional, bisa pertahankan punyamu) */
+#discoverCarousel .carousel-item {
+  transition: transform 0.5s ;
+}
+#discoverCarousel .carousel-item.active img {
+  transform: scale(1.02);
+  transition: transform 0.5s ;
+}
+
 </style>
 
 <!-- HERO -->
 <div class="superhero-section">
   <div class="superhero-content">
     <h1>HOTEL D'KASUARI</h1>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odit, officia!</p>
+    <p>Warisan Lama, Kemewahan Modern.</p>
   </div>
 </div>
 
@@ -120,8 +126,7 @@
     <p class="warna-p warna-emas text-uppercase mb-1 font-aboreto">WELCOME TO</p>
     <h2 class="warna-h2 fw-bold mb-3 font-aboreto garis-bawah">HOTEL D'KASUARI</h2>
     <p class="warna-p warna-emas text-secondary mb-4 font-aboreto">
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit sunt, doloribus quo voluptatem veniam ea,
-      consequatur tempore beatae, doloremque voluptate ipsam aliquam.
+      Menghadirkan harmoni antara warisan arsitektur tradisional dan kemewahan modern. Setiap sudut dirancang untuk memberikan kenyamanan, keanggunan, dan pengalaman menginap yang tak terlupakan. Temukan ketenangan masa lalu yang dipadukan dengan sentuhan kemewahan masa kini.
     </p>
   </div>
 
@@ -156,4 +161,6 @@
     </div>
   </div>
 </section>
+
+@include('components.kamar-detail')
 @endsection

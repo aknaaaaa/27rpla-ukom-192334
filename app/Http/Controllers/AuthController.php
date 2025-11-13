@@ -6,45 +6,87 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 // use laravel\Passport\HasApiTokens;
 
 class AuthController extends Controller
 {
-    public function register(Request $request) {
+    public function register(Request $request) 
+    {
+        // Tentukan ID Role Default Anda 
+    
+    // Gabungkan data request dengan nilai default
+        // 1. Validasi Data
         $userData = Validator::make($request->all(), [
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6'
+            'nama_user' => 'required|string|max:100', 
+            'phone_number' => 'required|string|max:20', 
+            'email' => 'required|email|unique:user,email', 
+            'password' => 'required|min:6|confirmed',
         ]);
+
         if ($userData->fails()) {
-            return response()->json($userData->errors(), 422);
+            return redirect()->back()->withErrors($userData)->withInput();
         }
-        // $user = Auth::user();
-        return response()->json([
-            'success' => true,
-            'message' => 'User berhasil didaftarkan'
-        ], 201);
+
+        $defaultRoleId = 2;
+
+        $user = User::create([
+            'id_role' => $defaultRoleId, 
+            'nama_user' => $request->nama_user,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'password' => Hash::make($request->password), // Wajib di-hash
+        ]);
+
+        // 4. Berikan Respons Sukses
+        return redirect()->back()->with('success_message', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
     }
-    public function login(Request $request) {
+    public function login(Request $request) 
+    {
         $userData = Validator::make($request->all(), [
-            'email' => 'required',
+            'email' => 'required|email',
             'password' => 'required'
         ]);
+
         if ($userData->fails()) {
-            return response()->json($userData->errors(), 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $userData->errors()
+            ], 422);
         }
+
         $credentials = $request->only('email', 'password');
+        
+        // Cek kredensial
         if (!Auth::attempt($credentials)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Email dan Password salah'
+                'message' => 'Email atau Password salah.'
             ], 401);
         }
+
         $user = Auth::user();
-        $token = $user->createToken('authToken')->accessToken;
+
+        // Cek apakah Passport sudah dikonfigurasi dan HasApiTokens digunakan
+        if (!method_exists($user, 'createToken')) {
+             return response()->json([
+                'success' => false,
+                'message' => 'Passport/Sanctum belum dikonfigurasi pada model User.'
+            ], 500);
+        }
+
+        // Generate Token menggunakan Passport
+        $tokenResult = $user->createToken('authToken');
+        $accessToken = $tokenResult->plainTextToken;
+
         return response()->json([
             'success' => true,
+            'message' => 'Login berhasil!',
             'user' => $user,
-            'token' => $token
+            'token_type' => 'Bearer',
+            'access_token' => $accessToken,
         ], 200);
     }
     public function check(Request $request) {
