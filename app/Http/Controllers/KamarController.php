@@ -3,19 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kamar;
-use App\Models\Pemesanan;
 use Illuminate\Http\Request;
 
 class KamarController extends Controller
 {
     public function index(Request $request)
     {
-        $checkIn = $request->input('check_in');
-        $checkOut = $request->input('check_out');
+        // Ambil input tanggal dari form
+        // ambil nilai checkin dan checkout dari form
+        $checkIn = $request->input('checkin');
+        $checkOut = $request->input('checkout');
+
+        $query = Kamar::query();
+
+        // filter kamar jika tanggal diisi
+        if ($checkIn && $checkOut) {
+            $query->whereDoesntHave('pemesanans', function ($q) use ($checkIn, $checkOut) {
+                $q->where(function ($sub) use ($checkIn, $checkOut) {
+                    // bentrok jika checkin < checkout dan checkout > checkin
+                    $sub->where('check_in', '<', $checkOut)
+                        ->where('check_out', '>', $checkIn);
+                });
+            });
+        }
+
 
         // Ambil semua kamar
         $query = Kamar::query();
 
+        /*
+        // 🔒 Logika filter tanggal — sementara dinonaktifkan
         if ($checkIn && $checkOut) {
             // Filter kamar yang tidak memiliki pemesanan bentrok
             $query->whereDoesntHave('pemesanans', function ($q) use ($checkIn, $checkOut) {
@@ -27,10 +44,11 @@ class KamarController extends Controller
                 });
             });
         }
+        */
 
+        // Ambil semua kamar tanpa filter
         $kamars = $query->get();
 
         return view('kamar.index', compact('kamars', 'checkIn', 'checkOut'));
     }
 }
-
