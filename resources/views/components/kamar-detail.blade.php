@@ -35,8 +35,4 @@ document.addEventListener('show.bs.modal', function (event) {
     document.getElementById('modalNamaKamar').textContent = nama;
     document.getElementById('modalDeskripsiKamar').textContent = deskripsi;
 });
-<<<<<<< HEAD
 </script>
-=======
-</script>
->>>>>>> c744583985de79c63527125b81123ee127e9ef34

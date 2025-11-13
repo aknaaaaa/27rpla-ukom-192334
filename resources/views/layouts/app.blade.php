@@ -19,12 +19,6 @@
         .modal-backdrop.show {
             opacity: 0.3;
         }
-<<<<<<< HEAD
-    </style>
-</head>
-<body>
-    @include('components.navbar')
-=======
         .navbar-custom {
             position: fixed;
             top: 0;
@@ -52,7 +46,6 @@
 </head>
 <body>
     @include('layouts.navigation')
->>>>>>> c744583985de79c63527125b81123ee127e9ef34
     <main class="py-4">
         @yield('content')
     </main>

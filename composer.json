@@ -9,9 +9,8 @@
         "php": "^8.2",
         "cloudinary-labs/cloudinary-laravel": "^3.0",
         "doctrine/dbal": "^4.3",
-        "filament/filament": "4.0",
         "laravel/framework": "^12.0",
-        "laravel/sanctum": "^4.2",
+        "laravel/sanctum": "*",
         "laravel/tinker": "^2.10.1",
         "midtrans/midtrans-php": "^2.6"
     },
