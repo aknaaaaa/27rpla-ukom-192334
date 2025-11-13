@@ -21,7 +21,8 @@ async function cekProfil(){
   if(!token){ window.location.href = "{{ route('layouts.register') }}"; return; }
   const res = await fetch('/api/auth/profile', {
     headers: { 'Authorization': 'Bearer ' + token }
-  });
+  }
+);
   const data = await res.json();
   if(res.ok){
     console.log('User:', data.user);

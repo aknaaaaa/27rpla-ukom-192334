@@ -14,5 +14,6 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/register', [LayoutsController::class, 'daftar'])->name('layouts.register');
     Route::get('/login', [LayoutsController::class, 'masuk'])->name('layouts.login');
-    
 });
+
+Route::get('/profile', [LayoutsController::class, 'profile'])->name('profile.profile');
