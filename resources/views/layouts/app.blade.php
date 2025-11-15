@@ -10,9 +10,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body {
+         body {
             background-color: #f8f6f4;
             font-family: 'Aboreto', cursive;
+            background-image: url("public/images/background.jpg");
+            background-repeat: no-repeat;
+            margin-right: 200px;
+            background-attachment: fixed;
         }
         .modal-backdrop.show {
             opacity: 0.3;
@@ -25,10 +29,12 @@
             backdrop-filter: blur(5px);
             z-index: 10;
             transition: background-color 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,.16);
         }
         .navbar-custom.scrolled {
             background-color: rgba(255, 255, 255) !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            
         }
         .navbar-brand {
             font-size: 2rem;
