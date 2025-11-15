@@ -149,6 +149,13 @@
 
             // B. Lakukan Login POST ke Web Route (menggunakan 'web' middleware)
             const response = await axios.post('{{ route('auth.api') }}', { email, password }); 
+
+            if(response.data?.access_token){
+                const token = response.data.access_token;
+                localStorage.setItem('access_token', token);
+                const encoded = encodeURIComponent(token);
+                document.cookie = `sanctum_token=${encoded}; path=/; SameSite=Lax`;
+            }
             
             // C. Jika berhasil, alihkan pengguna
             location.href = '/'; 
