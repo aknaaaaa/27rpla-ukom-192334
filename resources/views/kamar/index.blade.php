@@ -4,7 +4,7 @@
 
 @section('content')
 <style>
-    /* logo elegan */
+/* logo elegan */
 .navbar-brand-logo {
     font-family: "Mea Culpa", cursive;
     font-size: 32px;

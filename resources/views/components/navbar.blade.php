@@ -4,7 +4,7 @@
     <div>
         <h3 class="navbar-brand-logo">D'Kasauri</h3>
         <p class="navbar-address mb-0">
-            <img src="{{ asset('icons/location.svg') }}" width="12" class="me-1">
+            <i class="bi bi-geo-alt-fill"></i>
             JL.KASUARI RT 03 RW 18
         </p>
     </div>
