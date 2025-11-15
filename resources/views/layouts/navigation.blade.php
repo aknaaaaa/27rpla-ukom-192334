@@ -18,17 +18,32 @@
 <script>
 async function cekProfil(){
   const token = localStorage.getItem('access_token');
-  if(!token){ window.location.href = "{{ route('layouts.register') }}"; return; }
-  const res = await fetch('/api/auth/profile', {
-    headers: { 'Authorization': 'Bearer ' + token }
+
+  if(!token){
+    window.location.href = "{{ route('layouts.register') }}";
+    return;
   }
-);
-  const data = await res.json();
-  if(res.ok){
-    console.log('User:', data.user);
-    alert('Halo, ' + (data.user?.nama_user || data.user?.email));
-  } else {
-    alert('Unauthorized');
+
+  try{
+    const res = await fetch('/api/check-auth', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/json'
+      },
+      credentials: 'include',
+    });
+
+    if(res.ok){
+      window.location.href = "{{ route('profile.profile') }}";
+      return;
+    }
+  }catch(e){
+    console.error(e);
   }
+
+  localStorage.removeItem('access_token');
+  document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  window.location.href = "{{ route('layouts.register') }}";
 }
 </script>

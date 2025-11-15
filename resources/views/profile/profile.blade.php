@@ -49,9 +49,11 @@
     .profile-header {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       padding: 22px 26px;
       background: linear-gradient(120deg, #ffffff, #f7eee7);
       border-bottom: 1px solid var(--border-soft);
+      gap: 16px;
     }
 
     .logo {
@@ -190,6 +192,23 @@
       color: var(--primary);
     }
 
+    .logout-btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 999px;
+      background: #c0392b;
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: .5px;
+      cursor: pointer;
+      transition: opacity .2s ease;
+    }
+
+    .logout-btn[disabled] {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .profile-content {
@@ -200,15 +219,22 @@
 </head>
 
 <body>
+  @php
+    $displayName = $user->nama_user ?? $user->email;
+    $initial = strtoupper(mb_substr($displayName ?? 'U', 0, 1));
+    $memberSince = optional($user->created_at)->format('d M Y');
+  @endphp
   <div class="profile-page">
     <!-- HEADER -->
     <header class="profile-header">
       <div class="logo">D'kasuari</div>
 
       <div style="display: flex; align-items: center; gap: 10px;">
-        <div class="avatar-mini">A</div>
-        <span>Akmal</span>
+        <div class="avatar-mini">{{ $initial }}</div>
+        <span>{{ $displayName }}</span>
       </div>
+
+      <button class="logout-btn" id="logoutBtn">Logout</button>
     </header>
 
     <!-- CONTENT -->
@@ -217,47 +243,47 @@
       <!-- LEFT -->
       <section class="profile-card">
         <div class="profile-top">
-          <div class="avatar-large">A</div>
+          <div class="avatar-large">{{ $initial }}</div>
           <div>
-            <h2>Akmal Falah</h2>
+            <h2>{{ $displayName }}</h2>
             <p style="font-size: 13px; color: var(--text-muted);">
-              Member sejak 2022 · 14 malam menginap
+              Member sejak {{ $memberSince ?? '-' }}
             </p>
-            <div class="badge">Member Gold</div>
+            <div class="badge">Member Aktif</div>
           </div>
         </div>
 
         <div class="profile-details">
           <div class="detail-box">
             <span>Email</span>
-            <strong>akmal@example.com</strong>
+            <strong>{{ $user->email }}</strong>
           </div>
           <div class="detail-box">
             <span>Telepon</span>
-            <strong>+62 812 3456 7890</strong>
+            <strong>{{ $user->phone_number ?? '-' }}</strong>
           </div>
           <div class="detail-box">
-            <span>Kota</span>
-            <strong>Jakarta</strong>
+            <span>ID Pengguna</span>
+            <strong>{{ $user->id_user }}</strong>
           </div>
           <div class="detail-box">
-            <span>Bahasa</span>
-            <strong>Indonesia</strong>
+            <span>Email Terverifikasi</span>
+            <strong>{{ $user->email_verified_at ? 'Ya' : 'Belum' }}</strong>
           </div>
         </div>
 
         <div class="stats-row">
           <div class="stat-card">
-            <span class="label">Poin Reward</span>
-            <div class="value">1.280</div>
+            <span class="label">Token Aktif</span>
+            <div class="value">{{ $user->tokens()->count() }}</div>
           </div>
           <div class="stat-card">
-            <span class="label">Reservasi Aktif</span>
-            <div class="value">2</div>
+            <span class="label">Nomor Telepon</span>
+            <div class="value">{{ $user->phone_number ?? '-' }}</div>
           </div>
           <div class="stat-card">
-            <span class="label">Malam Menginap</span>
-            <div class="value">14</div>
+            <span class="label">Status</span>
+            <div class="value">{{ $user->email_verified_at ? 'Verified' : 'Guest' }}</div>
           </div>
         </div>
       </section>
@@ -303,5 +329,36 @@
 
   </div>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      if (!logoutBtn) {
+        return;
+      }
+
+      logoutBtn.addEventListener('click', async function () {
+        logoutBtn.disabled = true;
+        const token = localStorage.getItem('access_token');
+
+        try {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': token ? 'Bearer ' + token : ''
+            },
+            credentials: 'include',
+          });
+        } catch (error) {
+          console.error('Logout gagal', error);
+        }
+
+        localStorage.removeItem('access_token');
+        document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        window.location.href = "{{ route('layouts.register') }}";
+      });
+    });
+  </script>
 </body>
 </html>
