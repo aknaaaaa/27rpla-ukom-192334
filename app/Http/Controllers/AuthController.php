@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cookie;
+use Laravel\Sanctum\PersonalAccessToken;
 use App\Models\User;
 // use laravel\Passport\HasApiTokens;
 
@@ -112,17 +114,42 @@ class AuthController extends Controller
 
         // Hapus token Sanctum aktif + sesi web
         if ($token = $user->currentAccessToken()) {
-            $token->delete();
+            if (method_exists($token, 'delete')) {
+                $token->delete();
+            }
+        }
+
+        $tokens = [];
+        if ($bearer = $request->bearerToken()) {
+            $tokens[] = $bearer;
+        }
+
+        if ($cookieToken = $request->cookie('sanctum_token')) {
+            $tokens[] = urldecode($cookieToken);
+        }
+
+        foreach ($tokens as $plainTextToken) {
+            if (! $plainTextToken) {
+                continue;
+            }
+
+            $tokenModel = PersonalAccessToken::findToken($plainTextToken);
+            if ($tokenModel) {
+                $tokenModel->delete();
+            }
         }
 
         Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Berhasil logout'
-        ], 200);
+        ], 200)->withCookie(Cookie::forget('sanctum_token'));
     }
     public function user(Request $request)
 {
