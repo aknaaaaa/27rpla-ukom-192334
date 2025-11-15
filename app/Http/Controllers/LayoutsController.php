@@ -18,4 +18,7 @@ class LayoutsController extends Controller
     public function masuk(){
         return view('layouts.login');
     }
+    public function profile(){
+        return view('profile.profile');
+    }
 }

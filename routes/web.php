@@ -21,6 +21,6 @@ Route::resource('pemesanan', PemesananController::class);
 Route::middleware('auth')->group(function () {
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/register', [AuthController::class, 'register'])->name('register');
-
-    
 });
+
+Route::get('/profile', [LayoutsController::class, 'profile'])->name('profile.profile');
