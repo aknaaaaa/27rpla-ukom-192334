@@ -14,7 +14,7 @@ class AuthController extends Controller
 {
     public function register(Request $request) 
     {
-        // Tentukan ID Role Default Anda 
+        return view('auth.register');
     
     // Gabungkan data request dengan nilai default
         // 1. Validasi Data
@@ -44,6 +44,7 @@ class AuthController extends Controller
     }
     public function login(Request $request) 
     {
+        return view('auth.login');
         $userData = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required'
