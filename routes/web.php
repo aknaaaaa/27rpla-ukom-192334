@@ -19,7 +19,8 @@ Route::resource('pemesanan', PemesananController::class);
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/register', [LayoutsController::class, 'daftar'])->name('layouts.register');
-    Route::get('/login', [LayoutsController::class, 'masuk'])->name('layouts.login');
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/register', [AuthController::class, 'register'])->name('register');
+
     
 });

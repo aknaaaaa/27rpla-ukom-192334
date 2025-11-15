@@ -14,4 +14,5 @@
         <a href="{{ route('login') }}" class="btn btn-masuk">Masuk</a>
         <a href="{{ route('register') }}" class="btn btn-daftar">Daftar</a>
     </div>
+
 </nav>
