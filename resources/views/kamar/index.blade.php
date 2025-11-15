@@ -4,6 +4,49 @@
 
 @section('content')
 <style>
+    /* logo elegan */
+.navbar-brand-logo {
+    font-family: "Mea Culpa", cursive;
+    font-size: 32px;
+    margin: 0;
+    line-height: 1;
+}
+
+/* alamat kecil */
+.navbar-address {
+    font-family: "Aboreto", serif;
+    font-size: 11px;
+    opacity: 0.9;
+}
+
+/* tombol */
+.btn-masuk {
+    background: #b89376; /* coklat muda seperti gambar */
+    color: white;
+    padding: 8px  twenty 16px;
+    border-radius: 10px;
+}
+
+.btn-masuk:hover {
+    opacity: 0.8;
+}
+
+.btn-daftar {
+    background: #272727; /* hitam keabu */
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+}
+
+.btn-daftar:hover {
+    opacity: 0.85;
+}
+
+/* Navbar container */
+.navbar-custom {
+    background: white;
+}
+
 .back {
     position: fixed; top: 100px; left: 18px;
     z-index: 5; display: inline-flex; align-items: center; gap: 8px;
@@ -47,7 +90,10 @@ label {
     font-weight: 600;
     color: white;
 }
+
 </style>
+
+@include('components.navbar')
 
 <div class="container" style="margin-top: 75px;">
     <a class="back" href="{{ url('/') }}">

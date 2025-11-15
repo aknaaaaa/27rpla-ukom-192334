@@ -1,15 +1,17 @@
-<nav class="navbar navbar-expand-lg navbar-light navbar-custom px-4">
-    <div class="w-100 d-flex align-items-center justify-content-between">
-        <a class="navbar-brand font-mea" href="#">D'Kasuari</a>
-        <div class="d-flex align-items-center">
-            <a href="{{ route('kamar.index') }}" class="btn btn-dark me-3 font-aboreto">PESAN SEKARANG</a>
-            <ul class="navbar-nav flex-row">
-                <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Tentang</a></li>
-                <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Produk</a></li>
-                <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Layanan</a></li>
-                <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Kontak</a></li>
-                <li class="nav-item"><a class="nav-link px-3" href="#"><img src="{{ asset('images/person-circle.svg') }}"></a></li>
-            </ul>
-        </div>
+<nav class="navbar-custom border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+
+    <!-- Kiri -->
+    <div>
+        <h3 class="navbar-brand-logo">D'Kasauri</h3>
+        <p class="navbar-address mb-0">
+            <img src="{{ asset('icons/location.svg') }}" width="12" class="me-1">
+            JL.KASUARI RT 03 RW 18
+        </p>
+    </div>
+
+    <!-- Kanan -->
+    <div class="d-flex align-items-center gap-2">
+        <a href="{{ route('login') }}" class="btn btn-masuk">Masuk</a>
+        <a href="{{ route('register') }}" class="btn btn-daftar">Daftar</a>
     </div>
 </nav>

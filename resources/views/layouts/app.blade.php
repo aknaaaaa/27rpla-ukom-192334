@@ -7,10 +7,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Aboreto&display=swap" rel="stylesheet">
-<<<<<<< HEAD
-=======
     <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
->>>>>>> c744583985de79c63527125b81123ee127e9ef34
     <style>
         body {
             background-color: #f8f6f4;
@@ -45,15 +42,10 @@
     </style>
 </head>
 <body>
-    @include('layouts.navigation')
     <main class="py-4">
         @yield('content')
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> c744583985de79c63527125b81123ee127e9ef34
