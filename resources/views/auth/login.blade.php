@@ -232,7 +232,7 @@
 
         <p class="muted">
             Belum punya akun?
-            <a href="{{ route('auth.register') }}">Daftar</a>.
+            <a href="{{ route('register') }}">Daftar</a>.
         </p>
     </form>
 </main>

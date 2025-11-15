@@ -46,7 +46,7 @@ async function cekProfil(){
   const token = localStorage.getItem('access_token');
 
   if(!token){
-    window.location.href = "{{ route('auth.register') }}";
+    window.location.href = "{{ route('register') }}";
     return;
   }
 
@@ -70,6 +70,6 @@ async function cekProfil(){
 
   localStorage.removeItem('access_token');
   document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
-  window.location.href = "{{ route('auth.register') }}";
+  window.location.href = "{{ route('register') }}";
 }
 </script>

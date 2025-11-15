@@ -202,7 +202,7 @@
 
         <p class="muted">
             Sudah punya akun?
-            <a href="{{ route('auth.login') }}">Masuk</a>.
+            <a href="{{ route('login') }}">Masuk</a>.
         </p>
     </form>
 </main>
