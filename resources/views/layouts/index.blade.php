@@ -1,6 +1,6 @@
 @extends('layouts.template')
 {{-- 🔹 Navbar --}}
-    @include('layouts.navigation')
+    @include('components.navigation')
 
 @section('title', 'Halaman Utama')
 
