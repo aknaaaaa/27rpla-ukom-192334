@@ -8,7 +8,7 @@
         <div class="d-flex align-items-center">
 
             <!-- Tombol Pesan -->
-            <a href="{{ route('kamar.index') }}" class="btn btn-dark me-3 font-aboreto">
+            <a href="{{ route('kamar.index') }}" class="btn btn-dark font-aboreto">
                 PESAN SEKARANG
             </a>
 
