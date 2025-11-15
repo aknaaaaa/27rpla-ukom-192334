@@ -146,7 +146,7 @@
 </a>
 
 <main class="page">
-    <form class="card" method="POST" action="{{route('register')}}">
+    <form class="card" method="POST" action="{{ route('register.perform') }}">
         @csrf
 
         <h2 class="title">DAFTAR</h2>
@@ -202,7 +202,7 @@
 
         <p class="muted">
             Sudah punya akun?
-            <a href="{{ route('layouts.login') }}">Masuk</a>.
+            <a href="{{ route('auth.login') }}">Masuk</a>.
         </p>
     </form>
 </main>

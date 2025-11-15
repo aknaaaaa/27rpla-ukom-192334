@@ -14,10 +14,10 @@ class LayoutsController extends Controller
     }
     public function daftar()
     {
-        return view('layouts.register');
+        return view('auth.register');
     }
     public function masuk(){
-        return view('layouts.login');
+        return view('auth.login');
     }
     public function profile(){
         $user = Auth::user();

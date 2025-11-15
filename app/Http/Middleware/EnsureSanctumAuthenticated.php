@@ -37,6 +37,6 @@ class EnsureSanctumAuthenticated
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        return redirect()->route('layouts.register');
+        return redirect()->route('register');
     }
 }

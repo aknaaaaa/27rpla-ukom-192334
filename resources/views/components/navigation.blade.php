@@ -42,31 +42,34 @@
     </div>
 </nav>
 <script>
-async function cekProfil() {
-    const token = localStorage.getItem('access_token');
+async function cekProfil(){
+  const token = localStorage.getItem('access_token');
 
-    // Jika belum login → arahkan ke halaman register
-    if (!token) {
-        window.location.href = "{{ route('register') }}";
-        return;
+  if(!token){
+    window.location.href = "{{ route('auth.register') }}";
+    return;
+  }
+
+  try{
+    const res = await fetch('/api/check-auth', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/json'
+      },
+      credentials: 'include',
+    });
+
+    if(res.ok){
+      window.location.href = "{{ route('profile.profile') }}";
+      return;
     }
+  }catch(e){
+    console.error(e);
+  }
 
-    try {
-        const res = await fetch('/api/auth/profile', {
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            alert('Halo, ' + (data.user?.nama_user || data.user?.email));
-        } else {
-            alert('Unauthorized');
-        }
-
-    } catch (err) {
-        alert('Terjadi kesalahan, coba lagi.');
-        console.error(err);
-    }
+  localStorage.removeItem('access_token');
+  document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  window.location.href = "{{ route('auth.register') }}";
 }
 </script>

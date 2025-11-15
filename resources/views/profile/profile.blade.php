@@ -356,7 +356,7 @@
 
         localStorage.removeItem('access_token');
         document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        window.location.href = "{{ route('layouts.register') }}";
+        window.location.href = "{{ route('auth.register') }}";
       });
     });
   </script>

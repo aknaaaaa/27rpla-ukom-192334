@@ -29,7 +29,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // kecualikan endpoint API auth dari pengecekan CSRF agar bisa dipanggil tanpa cookie XSRF
         $middleware->validateCsrfTokens([
             'api/auth/login',
-            'api/auth/register',
         ]);
 
         // cookie token diset dari client, jadi jangan dienkripsi/didekripsi oleh Laravel

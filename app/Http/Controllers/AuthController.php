@@ -13,10 +13,6 @@ class AuthController extends Controller
 {
     public function register(Request $request) 
     {
-        return view('auth.register');
-    
-    // Gabungkan data request dengan nilai default
-        // 1. Validasi Data
         $userData = Validator::make($request->all(), [
             'nama_user' => 'required|string|max:100', 
             'phone_number' => 'required|string|max:20', 
@@ -25,25 +21,28 @@ class AuthController extends Controller
         ]);
 
         if ($userData->fails()) {
-            return redirect()->back()->withErrors($userData)->withInput();
+            return redirect()
+                ->route('register')
+                ->withErrors($userData)
+                ->withInput();
         }
 
         $defaultRoleId = 2;
 
-        $user = User::create([
+        User::create([
             'id_role' => $defaultRoleId, 
             'nama_user' => $request->nama_user,
             'email' => $request->email,
             'phone_number' => $request->phone_number,
-            'password' => Hash::make($request->password), // Wajib di-hash
+            'password' => Hash::make($request->password),
         ]);
 
-        // 4. Berikan Respons Sukses
-        return redirect()->back()->with('success_message', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
+        return redirect()
+            ->route('login')
+            ->with('success_message', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
     }
     public function login(Request $request) 
     {
-        return view('auth.login');
         $userData = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required'

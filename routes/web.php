@@ -9,8 +9,9 @@ Route::get('/kamar', [KamarController::class, 'index'])->name('kamar.index');
 Route::get('/kamar/{id}', [KamarController::class, 'show'])->name('kamar.show');
 
 Route::middleware('guest')->group(function () {
-    Route::get('/register', [LayoutsController::class, 'daftar'])->name('layouts.register');
-    Route::get('/login', [LayoutsController::class, 'masuk'])->name('layouts.login');
+    Route::get('/register', [LayoutsController::class, 'daftar'])->name('auth.register');
+    Route::get('/login', [LayoutsController::class, 'masuk'])->name('auth.login');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.perform');
 });
 
 Route::middleware('sanctum.session')->group(function () {
