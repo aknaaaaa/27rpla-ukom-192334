@@ -9,10 +9,18 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 $caPath = __DIR__.'/../storage/cacert.pem';
 if (file_exists($caPath)) {
-    putenv('CURL_CA_BUNDLE='.$caPath);
-    putenv('SSL_CERT_FILE='.$caPath);
-    @ini_set('curl.cainfo', $caPath);
-    @ini_set('openssl.cafile', $caPath);
+    $caReal = realpath($caPath) ?: $caPath;
+    putenv('CURL_CA_BUNDLE='.$caReal);
+    putenv('SSL_CERT_FILE='.$caReal);
+    @ini_set('curl.cainfo', $caReal);
+    @ini_set('openssl.cafile', $caReal);
+    stream_context_set_default([
+        'ssl' => [
+            'cafile' => $caReal,
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+        ],
+    ]);
 }
 
 return Application::configure(basePath: dirname(__DIR__))
