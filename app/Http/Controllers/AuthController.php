@@ -81,12 +81,17 @@ class AuthController extends Controller
         $tokenResult = $user->createToken('authToken');
         $accessToken = $tokenResult->plainTextToken;
 
+        $isAdmin = (int) ($user->id_role ?? 0) === 1;
+        $redirectTo = $isAdmin ? route('admin.dashboard') : url('/');
+
         return response()->json([
             'success' => true,
             'message' => 'Login berhasil!',
             'user' => $user,
             'token_type' => 'Bearer',
             'access_token' => $accessToken,
+            'redirect_to' => $redirectTo,
+            'is_admin' => $isAdmin,
         ], 200);
     }
     public function check(Request $request) {

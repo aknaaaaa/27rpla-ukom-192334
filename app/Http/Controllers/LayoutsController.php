@@ -26,4 +26,54 @@ class LayoutsController extends Controller
             'user' => $user,
         ]);
     }
+
+    public function adminDashboard()
+    {
+        $metrics = [
+            'total_orders' => 12,
+            'occupied_rooms' => 136,
+            'available_rooms' => 24,
+            'total_revenue' => 'Rp 0',
+        ];
+
+        return view('admin.dashboard', [
+            'metrics' => $metrics,
+        ]);
+    }
+
+    public function adminRooms()
+    {
+        $rooms = [
+            [
+                'name' => 'Kamar Boedak',
+                'category' => '1 Orang',
+                'size' => '10 m2',
+                'type' => 'Single',
+                'breakfast' => 'Sarapan tidak tersedia',
+                'policy' => 'Tidak bisa refund & reschedule',
+                'occupied' => 10,
+                'vacant' => 14,
+                'count' => 24,
+                'price' => 'Rp20.000 / Malam',
+                'image' => asset('images/discover%20(1).jpg'),
+            ],
+            [
+                'name' => 'Kamar Boedak',
+                'category' => '1 Orang',
+                'size' => '10 m2',
+                'type' => 'Single',
+                'breakfast' => 'Sarapan tidak tersedia',
+                'policy' => 'Tidak bisa refund & reschedule',
+                'occupied' => 10,
+                'vacant' => 14,
+                'count' => 24,
+                'price' => 'Rp20.000 / Malam',
+                'image' => asset('images/discover%20(2).jpg'),
+            ],
+        ];
+
+        return view('admin.rooms', [
+            'rooms' => $rooms,
+        ]);
+    }
 }

@@ -7,6 +7,14 @@ use App\Http\Middleware\EnsureSanctumGuest;
 use App\Http\Middleware\EnsureSanctumAuthenticated;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
+$caPath = __DIR__.'/../storage/cacert.pem';
+if (file_exists($caPath)) {
+    putenv('CURL_CA_BUNDLE='.$caPath);
+    putenv('SSL_CERT_FILE='.$caPath);
+    @ini_set('curl.cainfo', $caPath);
+    @ini_set('openssl.cafile', $caPath);
+}
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -30,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens([
             'api/auth/login',
             'api/auth/register',
+            'admin/rooms',
         ]);
 
         // cookie token diset dari client, jadi jangan dienkripsi/didekripsi oleh Laravel
