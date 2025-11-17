@@ -146,6 +146,16 @@
             font-size: 13px;
             font-family: 'Aboreto', sans-serif;
         }
+        .tutup-btn {
+            background: #999;
+            color: white;
+            transition: 0.3s ease; /* biar halus */
+        }
+
+        .tutup-btn:hover {
+            background: #777; /* warna saat hover */
+            cursor: pointer;
+        }
         .rooms {
             display: grid;
             gap: 14px;
@@ -480,7 +490,18 @@
                                 </div>
 
                                 <div class="actions">
-                                    <a class="btn-pill" href="{{ route('admin.rooms.edit', $room->id_kamar) }}">Edit</a>
+                                    <button class="btn-pill"
+                                            type="button"
+                                            data-action="{{ route('admin.rooms.update', $room->id_kamar) }}"
+                                            data-nama="{{ $room->nama_kamar }}"
+                                            data-harga="{{ $room->harga_permalam }}"
+                                            data-ukuran="{{ $room->ukuran_kamar }}"
+                                            data-status="{{ $room->status_kamar }}"
+                                            data-deskripsi="{{ e($room->deskripsi) }}"
+                                            data-img="{{ $room->gambar }}"
+                                            onclick="openEditModal(this)">
+                                        Edit
+                                    </button>
                                     <button class="btn-pill btn-delete"
                                         type="button"
                                         data-room-id="{{ $room->id_kamar }}"
@@ -510,27 +531,29 @@
     <div class="modal" id="roomModal">
         <div class="form-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4 style="margin:0; letter-spacing:1px;">Buat kamar baru</h4>
-                <button type="button" class="btn-new" style="background:#999;" onclick="closeModal()">Tutup</button>
+                <h4 id="roomModalTitle" style="margin:0; letter-spacing:1px;">Buat kamar baru</h4>
+                <button type="button" class="btn-new tutup-btn" onclick="closeModal()">Tutup</button>
+
             </div>
-            <form method="POST" action="{{ route('admin.rooms.store') }}" enctype="multipart/form-data">
+            <form id="roomModalForm" method="POST" action="{{ route('admin.rooms.store') }}" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="_method" id="roomModalMethod" value="">
                 <div class="form-grid">
                     <div class="field">
                         <label>Nama kamar</label>
-                        <input type="text" name="nama_kamar" value="{{ old('nama_kamar') }}" required>
+                        <input id="roomNameInput" type="text" name="nama_kamar" value="{{ old('nama_kamar') }}" required>
                     </div>
                     <div class="field">
                         <label>Harga per malam</label>
-                        <input type="number" name="harga_permalam" min="0" step="1000" value="{{ old('harga_permalam') }}" required>
+                        <input id="roomHargaInput" type="number" name="harga_permalam" min="0" step="1000" value="{{ old('harga_permalam') }}" required>
                     </div>
                     <div class="field">
                         <label>Ukuran kamar</label>
-                        <input type="text" name="ukuran_kamar" value="{{ old('ukuran_kamar') }}" placeholder="contoh: 10 m2">
+                        <input id="roomUkuranInput" type="text" name="ukuran_kamar" value="{{ old('ukuran_kamar') }}" placeholder="contoh: 10 m2">
                     </div>
                     <div class="field">
                         <label>Status</label>
-                        <select name="status_kamar">
+                        <select id="roomStatusSelect" name="status_kamar">
                             <option value="Tersedia" {{ old('status_kamar') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
                             <option value="Telah di reservasi" {{ old('status_kamar') === 'Telah di reservasi' ? 'selected' : '' }}>Telah di reservasi</option>
                             <option value="Maintenance" {{ old('status_kamar') === 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
@@ -538,23 +561,78 @@
                     </div>
                     <div class="field" style="grid-column: 1 / -1;">
                         <label>Deskripsi</label>
-                        <textarea name="deskripsi" placeholder="Detail singkat kamar">{{ old('deskripsi') }}</textarea>
+                        <textarea id="roomDeskripsiInput" name="deskripsi" placeholder="Detail singkat kamar">{{ old('deskripsi') }}</textarea>
                     </div>
                     <div class="field">
-                        <label>Gambar</label>
-                        <input type="file" name="image" accept="image/*" required>
+                        <label>Gambar <small style="color:#777;">(kosongkan saat edit jika tidak diganti)</small></label>
+                        <input id="roomImageInput" type="file" name="image" accept="image/*" required>
                     </div>
                 </div>
                 <div class="actions-inline" style="margin-top:12px;">
-                    <button type="submit" class="btn-new">Simpan kamar</button>
+                    <button id="roomModalSubmit" type="submit" class="btn-new">Simpan kamar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        function openModal(){ document.getElementById('roomModal').classList.add('is-open'); }
-        function closeModal(){ document.getElementById('roomModal').classList.remove('is-open'); }
+        const roomModal = document.getElementById('roomModal');
+        const roomForm = document.getElementById('roomModalForm');
+        const methodInput = document.getElementById('roomModalMethod');
+        const titleEl = document.getElementById('roomModalTitle');
+        const submitBtn = document.getElementById('roomModalSubmit');
+        const nameInput = document.getElementById('roomNameInput');
+        const hargaInput = document.getElementById('roomHargaInput');
+        const ukuranInput = document.getElementById('roomUkuranInput');
+        const statusSelect = document.getElementById('roomStatusSelect');
+        const deskripsiInput = document.getElementById('roomDeskripsiInput');
+        const imageInput = document.getElementById('roomImageInput');
+
+        function openModal(){
+            resetForm();
+            titleEl.textContent = 'Buat kamar baru';
+            submitBtn.textContent = 'Simpan kamar';
+            methodInput.value = '';
+            roomForm.action = "{{ route('admin.rooms.store') }}";
+            imageInput.required = true;
+            roomModal.classList.add('is-open');
+        }
+        function closeModal(){ roomModal.classList.remove('is-open'); }
+
+        function resetForm() {
+            nameInput.value = "{{ old('nama_kamar') }}";
+            hargaInput.value = "{{ old('harga_permalam') }}";
+            ukuranInput.value = "{{ old('ukuran_kamar') }}";
+            statusSelect.value = "{{ old('status_kamar') ?? 'Tersedia' }}";
+            deskripsiInput.value = `{{ old('deskripsi') }}`;
+            imageInput.value = '';
+        }
+
+        function openEditModal(button){
+            const action = button.getAttribute('data-action');
+            const nama = button.getAttribute('data-nama') || '';
+            const harga = button.getAttribute('data-harga') || '';
+            const ukuran = button.getAttribute('data-ukuran') || '';
+            const status = button.getAttribute('data-status') || 'Tersedia';
+            const deskripsi = button.getAttribute('data-deskripsi') || '';
+            const img = button.getAttribute('data-img') || '';
+
+            roomForm.action = action;
+            methodInput.value = 'PUT';
+            titleEl.textContent = 'Edit kamar';
+            submitBtn.textContent = 'Update kamar';
+
+            nameInput.value = nama;
+            hargaInput.value = harga;
+            ukuranInput.value = ukuran;
+            statusSelect.value = status;
+            deskripsiInput.value = deskripsi;
+
+            imageInput.required = false;
+
+            roomModal.classList.add('is-open');
+        }
+
         @if($errors->any())
             // auto open modal when validation fails so user sees errors and data
             openModal();

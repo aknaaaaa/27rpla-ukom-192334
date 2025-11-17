@@ -180,10 +180,6 @@
     <div id="discoverCarousel" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-inner text-center">
         <div class="carousel-item active">
-          <img src="{{ asset('images/discover%20(1).jpg') }}" class="d-block mx-auto img-fluid" alt="Discover 1"
-               style="max-width:300px; height:auto; border-radius:12px;">
-        </div>
-        <div class="carousel-item">
           <img src="{{ asset('images/discover%20(2).jpg') }}" class="d-block mx-auto img-fluid" alt="Discover 2"
                style="max-width:300px; height:auto; border-radius:12px;">
         </div>

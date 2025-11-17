@@ -11,7 +11,17 @@
         *{box-sizing:border-box;}
         body{margin:0;font-family:'Aboreto',sans-serif;color:var(--text);background:#f9f9f9;}
         .dashboard-shell{display:flex;min-height:100vh;}
-        .sidebar{width:230px;background:#fff;box-shadow:8px 0 26px rgba(0,0,0,0.06);padding:28px 22px;z-index:2;}
+        .sidebar{
+            width:230px;
+            background:#fff;
+            box-shadow:8px 0 26px rgba(0,0,0,0.06);
+            padding:28px 22px;
+            z-index:2;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
         .brand{margin-bottom:18px;}
         .brand__name{font-family:'Mea Culpa',cursive;font-size:28px;margin:0;line-height:1.1;}
         .brand__address{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:0.4px;color:var(--muted);text-transform:uppercase;}

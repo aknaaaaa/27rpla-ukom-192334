@@ -1,4 +1,20 @@
-<aside class="sidebar">
+<style>
+.sidebar.sticky-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+@media (max-width: 960px) {
+    .sidebar.sticky-sidebar {
+        position: fixed;
+        height: 100%;
+        overflow-y: auto;
+    }
+}
+</style>
+
+<aside class="sidebar sticky-sidebar">
     <div class="brand">
         <p class="brand__name">D'Kasuari</p>
         <div class="brand__address">

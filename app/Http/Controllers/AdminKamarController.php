@@ -19,11 +19,8 @@ class AdminKamarController extends Controller
 
     public function edit($id)
     {
-        $room = Kamar::findOrFail($id);
-
-        return view('admin.room_edit', [
-            'room' => $room,
-        ]);
+        // Edit sekarang dilakukan via modal di halaman daftar kamar
+        return redirect()->route('admin.rooms')->with('edit_id', $id);
     }
 
     public function store(Request $request)
