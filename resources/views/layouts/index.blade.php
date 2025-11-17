@@ -96,6 +96,14 @@
   overflow: hidden;
 }
 
+#discoverCarousel .discover-img {
+  width: 100%;
+  max-width: 320px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
 #discoverCarousel .carousel-control-prev,
 #discoverCarousel .carousel-control-next {
   width: auto;
@@ -153,6 +161,44 @@
   border: 0;
 }
 
+/* === SEKILAS SECTION === */
+.sekilas-section {
+  background: #f1e1d4;
+  padding: 70px 0;
+}
+.sekilas-section h2 {
+  letter-spacing: 2px;
+  color: #493628;
+}
+.sekilas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+.sekilas-card {
+  background: linear-gradient(180deg, #c59a7a 0%, #9a6d4c 100%);
+  border-radius: 10px;
+  padding: 16px;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+.sekilas-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #d8c3b3;
+}
+.sekilas-card h5 {
+  margin: 0;
+  font-family: 'Aboreto', cursive;
+  letter-spacing: 1px;
+  font-size: 14px;
+}
+
 </style>
 
 <!-- HERO -->
@@ -179,14 +225,23 @@
 
     <div id="discoverCarousel" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-inner text-center">
-        <div class="carousel-item active">
-          <img src="{{ asset('images/discover%20(2).jpg') }}" class="d-block mx-auto img-fluid" alt="Discover 2"
-               style="max-width:300px; height:auto; border-radius:12px;">
-        </div>
-        <div class="carousel-item">
-          <img src="{{ asset('images/discover%20(3).jpg') }}" class="d-block mx-auto img-fluid" alt="Discover 3"
-               style="max-width:300px; height:auto; border-radius:12px;">
-        </div>
+        @if(!empty($discoverRooms) && $discoverRooms->count())
+          @foreach ($discoverRooms as $room)
+            @php
+              $image = $room->gambar ?: asset('images/discover%20(1).jpg');
+            @endphp
+            <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+              <img src="{{ $image }}" class="d-block mx-auto discover-img" alt="{{ $room->nama_kamar }}">
+            </div>
+          @endforeach
+        @else
+          <div class="carousel-item active">
+            <img src="{{ asset('images/discover%20(2).jpg') }}" class="d-block mx-auto discover-img" alt="Discover 2">
+          </div>
+          <div class="carousel-item">
+            <img src="{{ asset('images/discover%20(3).jpg') }}" class="d-block mx-auto discover-img" alt="Discover 3">
+          </div>
+        @endif
       </div>
 
       <button class="carousel-control-prev" type="button" data-bs-target="#discoverCarousel" data-bs-slide="prev">
@@ -201,11 +256,33 @@
   </div>
 </section>
 
+<!-- SEKILAS -->
+<section class="sekilas-section">
+  <div class="container text-center">
+    <h2 class="fw-bold mb-1 font-aboreto garis-bawah">SEKILAS</h2>
+    @if(!empty($sekilasRooms) && $sekilasRooms->count())
+      <div class="sekilas-grid">
+        @foreach ($sekilasRooms as $room)
+          @php
+            $image = $room->gambar ?: asset('images/discover%20(1).jpg');
+          @endphp
+          <div class="sekilas-card">
+            <img src="{{ $image }}" alt="{{ $room->nama_kamar }}">
+            <h5>{{ $room->nama_kamar }}</h5>
+          </div>
+        @endforeach
+      </div>
+    @else
+      <p class="text-muted font-aboreto">Belum ada data kamar untuk ditampilkan.</p>
+    @endif
+  </div>
+</section>
+
 <!-- LOCATION -->
 <section class="map-section">
   <div class="container">
     <h2 class="fw-bold mb-3 font-aboreto garis-bawah text-center">LOKASI</h2>
-    <p class="text-center text-muted mb-4">Kunjungi kami di lokasi berikut:</p>
+    <p class="text-center font-aboreto text-muted mb-4">Kunjungi kami di lokasi berikut:</p>
     <div class="map-embed">
       <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d491.638864232258!2d106.9682652393092!3d-6.241167466734645!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e698dabeb95492f%3A0xe7073bdd8ba43a30!2sVerticaland%20T-Shirt!5e1!3m2!1sid!2sid!4v1763359179669!5m2!1sid!2sid"
               allowfullscreen=""

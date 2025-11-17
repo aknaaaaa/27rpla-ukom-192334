@@ -124,9 +124,6 @@
                     <a href="{{ route('admin.pelanggan') }}" class="btn">
                         <i class="bi bi-arrow-left"></i> Kembali
                     </a>
-                    <a href="mailto:{{ $customer->email }}" class="btn btn-dark">
-                        <i class="bi bi-envelope"></i> Kirim Email
-                    </a>
                 </div>
             </div>
         </main>

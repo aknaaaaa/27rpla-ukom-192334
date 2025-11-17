@@ -120,10 +120,6 @@
             <div class="cards">
                 <div class="card">
                     <h4>Total Pengguna</h4>
-                    <div class="value">{{ $metrics['total_users'] }}</div>
-                </div>
-                <div class="card">
-                    <h4>Total Pelanggan</h4>
                     <div class="value">{{ $metrics['total_customers'] }}</div>
                 </div>
                 <div class="card">

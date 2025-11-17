@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kamar;
+use App\Models\Pembayaran;
+use App\Models\Pemesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,7 +13,10 @@ class LayoutsController extends Controller
     public function index()
     {
         // Panggil view index yang ada di resources/views/layouts/index.blade.php
-        return view('layouts.index');
+        $discoverRooms = Kamar::latest()->take(5)->get();
+        $sekilasRooms = Kamar::latest()->take(3)->get();
+
+        return view('layouts.index', compact('discoverRooms', 'sekilasRooms'));
     }
     public function daftar()
     {
@@ -29,11 +35,18 @@ class LayoutsController extends Controller
 
     public function adminDashboard()
     {
+        $totalOrders = Pemesanan::count();
+        $occupiedRooms = Kamar::where('status_kamar', 'Telah di reservasi')->count();
+        $availableRooms = Kamar::where('status_kamar', 'Tersedia')->count();
+        $maintenanceRooms = Kamar::where('status_kamar', 'Maintenance')->count();
+        $totalRevenue = Pembayaran::where('status_pembayaran', 'Telah dibayar')->sum('amount_paid');
+
         $metrics = [
-            'total_orders' => 12,
-            'occupied_rooms' => 136,
-            'available_rooms' => 24,
-            'total_revenue' => 'Rp 0',
+            'total_orders' => $totalOrders,
+            'occupied_rooms' => $occupiedRooms,
+            'available_rooms' => $availableRooms,
+            'maintenance_rooms' => $maintenanceRooms,
+            'total_revenue' => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),
         ];
 
         return view('admin.dashboard', [

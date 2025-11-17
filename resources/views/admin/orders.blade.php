@@ -77,7 +77,7 @@
         }
         @media(max-width:700px){
             .main{padding:18px;}
-            .filters{flex-direction:column;}
+            .filters{flex-direction:column;font-family: Aboreto;}
             .filters input,.filters select{width:100%;}
             .table-wrap{overflow-x:auto;}
             table{min-width:720px;}
@@ -115,9 +115,6 @@
                 <input type="text" placeholder="Cari nama / kode pesanan" aria-label="Cari">
                 <select aria-label="Filter tanggal">
                     <option>Tanggal</option>
-                </select>
-                <select aria-label="Filter status">
-                    <option>Status</option>
                 </select>
             </div>
 

@@ -1,12 +1,28 @@
 @php
     $imageUrl = $kamar->gambar ?: asset('images/default.jpg');
+    $statusLower = strtolower($kamar->status_kamar);
+    $isReserved = $statusLower === 'telah di reservasi';
+    $isMaintenance = $statusLower === 'maintenance';
+
+    $imageStyle = '';
+    if ($isReserved) {
+        $imageStyle = 'filter: grayscale(1);';
+    } elseif ($isMaintenance) {
+        $imageStyle = 'filter: grayscale(1) opacity(0.7);';
+    }
 @endphp
 <div class="card shadow-sm mb-3 room-card w-100">
     <div class="row g-0 align-items-stretch h-100">
         <div class="col-md-4">
-            <img src="{{ $imageUrl }}"
-                 class="img-fluid rounded-start room-card-img h-100"
-                 alt="{{ $kamar->nama_kamar }}">
+            <div class="position-relative h-100">
+                @if($isMaintenance)
+                    <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">Maintenance</span>
+                @endif
+                <img src="{{ $imageUrl }}"
+                    class="img-fluid rounded-start room-card-img h-100"
+                    alt="{{ $kamar->nama_kamar }}"
+                    style="{{ $imageStyle }}">
+            </div>
         </div>
         <div class="col-md-8">
             <div class="card-body">
@@ -29,8 +45,11 @@
                             data-url="{{ route('kamar.show', $kamar->id_kamar) }}">
                         Detail
                     </button>
-                    <a href="{{ route('kamar.show', $kamar->id_kamar) }}" class="btn btn-outline-secondary btn-sm">
-                        Halaman
+                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                        Pesan
+                    </a>
+                    <a href="#" class="btn btn-outline-primary btn-sm">
+                        Keranjang
                     </a>
                 </div>
             </div>
