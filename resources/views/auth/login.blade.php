@@ -157,8 +157,9 @@
                 document.cookie = `sanctum_token=${encoded}; path=/; SameSite=Lax`;
             }
             
-            // C. Jika berhasil, alihkan pengguna
-            location.href = '/'; 
+            // C. Jika berhasil, alihkan pengguna sesuai role
+            const redirectTo = response.data?.redirect_to || '/';
+            location.href = redirectTo; 
 
         } catch (error) {
             // D. Tangani error (misalnya, email/password salah atau validasi)

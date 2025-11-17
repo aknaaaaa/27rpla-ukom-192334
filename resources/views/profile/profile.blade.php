@@ -202,6 +202,7 @@
       letter-spacing: .5px;
       cursor: pointer;
       transition: opacity .2s ease;
+      font-family: aboreto;
     }
 
     .logout-btn[disabled] {

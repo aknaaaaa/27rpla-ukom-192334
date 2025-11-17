@@ -7,6 +7,22 @@ use App\Http\Middleware\EnsureSanctumGuest;
 use App\Http\Middleware\EnsureSanctumAuthenticated;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
+$caPath = __DIR__.'/../storage/cacert.pem';
+if (file_exists($caPath)) {
+    $caReal = realpath($caPath) ?: $caPath;
+    putenv('CURL_CA_BUNDLE='.$caReal);
+    putenv('SSL_CERT_FILE='.$caReal);
+    @ini_set('curl.cainfo', $caReal);
+    @ini_set('openssl.cafile', $caReal);
+    stream_context_set_default([
+        'ssl' => [
+            'cafile' => $caReal,
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+        ],
+    ]);
+}
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -29,7 +45,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // kecualikan endpoint API auth dari pengecekan CSRF agar bisa dipanggil tanpa cookie XSRF
         $middleware->validateCsrfTokens([
             'api/auth/login',
-            'api/auth/logout',
+            'api/auth/register',
+            'admin/rooms',
         ]);
 
         // cookie token diset dari client, jadi jangan dienkripsi/didekripsi oleh Laravel
