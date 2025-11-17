@@ -1,11 +1,11 @@
 @php
     $imageUrl = $kamar->gambar ?: asset('images/default.jpg');
 @endphp
-<div class="card shadow-sm mb-3">
-    <div class="row g-0 align-items-center">
+<div class="card shadow-sm mb-3 room-card w-100">
+    <div class="row g-0 align-items-stretch h-100">
         <div class="col-md-4">
             <img src="{{ $imageUrl }}"
-                 class="img-fluid rounded-start"
+                 class="img-fluid rounded-start room-card-img h-100"
                  alt="{{ $kamar->nama_kamar }}">
         </div>
         <div class="col-md-8">

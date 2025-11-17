@@ -12,7 +12,7 @@
             ['route' => 'admin.dashboard', 'icon' => 'bi-grid-1x2-fill', 'label' => 'Dashboard', 'key' => 'dashboard'],
             ['route' => 'admin.rooms', 'icon' => 'bi-door-open-fill', 'label' => 'Kamar', 'key' => 'rooms'],
             ['route' => 'admin.orders', 'icon' => 'bi-box-seam', 'label' => 'Pesanan', 'key' => 'orders'],
-            ['route' => '#', 'icon' => 'bi-people', 'label' => 'Pelanggan', 'key' => 'customers'],
+            ['route' => 'admin.pelanggan', 'icon' => 'bi-people', 'label' => 'Penginap', 'key' => 'customers'],
         ]
     )
 

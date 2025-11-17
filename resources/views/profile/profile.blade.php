@@ -94,21 +94,37 @@
     }
 
     .profile-top {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .avatar-wrapper {
       display: flex;
-      gap: 20px;
-      align-items: center;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
     }
 
     .avatar-large {
-      width: 80px;
-      height: 80px;
+      width: 96px;
+      height: 96px;
       border-radius: 50%;
       background: var(--primary);
       color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: grid;
+      place-items: center;
       font-size: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .avatar-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
     }
 
     .badge {
@@ -244,8 +260,12 @@
       <!-- LEFT -->
       <section class="profile-card">
         <div class="profile-top">
-          <div class="avatar-large">{{ $initial }}</div>
-          <div>
+          <div class="avatar-wrapper">
+            <div class="avatar-large">
+              <span id="avatarInitial">{{ $initial }}</span>
+            </div>
+          </div>
+          <div class="headline">
             <h2>{{ $displayName }}</h2>
             <p style="font-size: 13px; color: var(--text-muted);">
               Member sejak {{ $memberSince ?? '-' }}

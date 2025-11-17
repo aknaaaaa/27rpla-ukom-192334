@@ -18,16 +18,35 @@
   text-align: center;
   color: white;
   font-family: aboreto;
+  transition: opacity 0.4s ease;
+  overflow: hidden;
+}
+.superhero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hero-next, none) no-repeat center center;
+  background-size: cover;
+  opacity: 0;
+  transition: opacity 1s ease;
+  z-index: 1;
 }
 .superhero-section::after {
   content: '';
   position: absolute;
   inset: 0;
   background: rgba(0,0,0,0.3);
+  z-index: 2;
+}
+.superhero-section.is-fading {
+  opacity: 0.55;
+}
+.superhero-section.is-transitioning::before {
+  opacity: 1;
 }
 .superhero-content {
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 .superhero-content h1 {
   font-size: 48px;
@@ -110,6 +129,30 @@
   transition: transform 0.5s ;
 }
 
+.map-section {
+  background: #fff7ef;
+  padding: 80px 0;
+}
+.map-section h2 {
+  letter-spacing: 2px;
+  color: #493628;
+}
+.map-embed {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+.map-embed iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 </style>
 
 <!-- HERO -->
@@ -162,5 +205,49 @@
   </div>
 </section>
 
+<!-- LOCATION -->
+<section class="map-section">
+  <div class="container">
+    <h2 class="fw-bold mb-3 font-aboreto garis-bawah text-center">LOKASI</h2>
+    <p class="text-center text-muted mb-4">Kunjungi kami di lokasi berikut:</p>
+    <div class="map-embed">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d491.638864232258!2d106.9682652393092!3d-6.241167466734645!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e698dabeb95492f%3A0xe7073bdd8ba43a30!2sVerticaland%20T-Shirt!5e1!3m2!1sid!2sid!4v1763359179669!5m2!1sid!2sid"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </div>
+</section>
+
 @include('components.kamar-detail')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const hero = document.querySelector('.superhero-section');
+  if (!hero) return;
+
+  const images = [
+    "{{ asset('images/resort-bg.jpg') }}",
+    "{{ asset('images/discover%20(1).jpg') }}",
+    "{{ asset('images/discover%20(2).jpg') }}",
+    "{{ asset('images/discover%20(3).jpg') }}"
+  ];
+
+  let current = 0;
+  hero.style.backgroundImage = `url('${images[current]}')`;
+
+  const swap = () => {
+    const next = (current + 1) % images.length;
+    hero.style.setProperty('--hero-next', `url('${images[next]}')`);
+    hero.classList.add('is-transitioning');
+
+    setTimeout(() => {
+      hero.style.backgroundImage = `url('${images[next]}')`;
+      hero.classList.remove('is-transitioning');
+      current = next;
+    }, 1000);
+  };
+
+  setInterval(swap, 5000);
+});
+</script>
 @endsection

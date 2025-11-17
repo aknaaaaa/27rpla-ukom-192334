@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LayoutsController;
 use App\Http\Controllers\KamarController;
 use App\Http\Controllers\AdminKamarController;
+use App\Http\Controllers\AdminPelangganController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', [LayoutsController::class, 'index'])->name('layouts.index');
 Route::get('/kamar', [KamarController::class, 'index'])->name('kamar.index');
@@ -15,6 +17,8 @@ Route::get('/admin/rooms/{id}/edit', [AdminKamarController::class, 'edit'])->nam
 Route::put('/admin/rooms/{id}', [AdminKamarController::class, 'update'])->name('admin.rooms.update');
 Route::delete('/admin/rooms/{id}', [AdminKamarController::class, 'destroy'])->name('admin.rooms.destroy');
 Route::get('/admin/orders', [\App\Http\Controllers\AdminPemesananController::class, 'index'])->name('admin.orders');
+Route::get('/admin/customers', [AdminPelangganController::class, 'index'])->name('admin.pelanggan');
+Route::get('/admin/customers/{id}', [AdminPelangganController::class, 'show'])->name('admin.pelanggan.show');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [LayoutsController::class, 'daftar'])->name('layouts.register');

@@ -24,6 +24,22 @@
     }
 
     .back svg{ width:16px; height:16px }
+
+    .room-card {
+        height: 100%;
+    }
+    .room-card .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+    }
+    .room-card-img {
+        width: 100%;
+        height: 100%;
+        min-height: 260px;
+        object-fit: cover;
+    }
 </style>
 
 <div class="container" style="margin-top: 75px;">
@@ -51,7 +67,7 @@
     {{-- Daftar kamar --}}
     <div class="row">
         @forelse ($kamars as $kamar)
-            <div class="col-md-6 mb-4">
+            <div class="col-md-6 mb-4 d-flex">
                 @include('components.kamar-card', ['kamar' => $kamar])
             </div>
         @empty
