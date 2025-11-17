@@ -338,17 +338,42 @@
         return;
       }
 
+      const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+      };
+
       logoutBtn.addEventListener('click', async function () {
         logoutBtn.disabled = true;
         const token = localStorage.getItem('access_token');
 
+        // Pastikan CSRF cookie sudah tersedia supaya middleware stateful sanctum tidak menolak request
         try {
+          await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
+        } catch (error) {
+          console.warn('Gagal mengambil CSRF cookie', error);
+        }
+
+        const xsrf = getCookie('XSRF-TOKEN');
+        try {
+          const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          };
+
+          if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+          }
+
+          if (xsrf) {
+            headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf);
+          }
+
           await fetch('/api/auth/logout', {
             method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': token ? 'Bearer ' + token : ''
-            },
+            headers,
             credentials: 'include',
           });
         } catch (error) {
@@ -356,7 +381,9 @@
         }
 
         localStorage.removeItem('access_token');
-        document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        ['sanctum_token', 'XSRF-TOKEN', 'laravel_session'].forEach((name) => {
+          document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        });
         window.location.href = "{{ route('layouts.register') }}";
       });
     });

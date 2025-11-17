@@ -11,6 +11,10 @@ Route::get('/kamar/{id}', [KamarController::class, 'show'])->name('kamar.show');
 Route::get('/admin/dashboard', [LayoutsController::class, 'adminDashboard'])->name('admin.dashboard');
 Route::get('/admin/rooms', [AdminKamarController::class, 'index'])->name('admin.rooms');
 Route::post('/admin/rooms', [AdminKamarController::class, 'store'])->name('admin.rooms.store');
+Route::get('/admin/rooms/{id}/edit', [AdminKamarController::class, 'edit'])->name('admin.rooms.edit');
+Route::put('/admin/rooms/{id}', [AdminKamarController::class, 'update'])->name('admin.rooms.update');
+Route::delete('/admin/rooms/{id}', [AdminKamarController::class, 'destroy'])->name('admin.rooms.destroy');
+Route::get('/admin/orders', [\App\Http\Controllers\AdminPemesananController::class, 'index'])->name('admin.orders');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [LayoutsController::class, 'daftar'])->name('layouts.register');
@@ -20,3 +24,6 @@ Route::middleware('guest')->group(function () {
 Route::middleware('sanctum.session')->group(function () {
     Route::get('/profile', [LayoutsController::class, 'profile'])->name('profile.profile');
 });
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get');

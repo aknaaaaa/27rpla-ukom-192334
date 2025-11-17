@@ -50,14 +50,31 @@
 
     {{-- Daftar kamar --}}
     <div class="row">
-        @foreach ($kamars as $kamar)
+        @forelse ($kamars as $kamar)
             <div class="col-md-6 mb-4">
                 @include('components.kamar-card', ['kamar' => $kamar])
             </div>
-        @endforeach
+        @empty
+            <div class="col-12 text-center text-muted py-5">
+                Belum ada kamar yang tersedia.
+            </div>
+        @endforelse
     </div>
 </div>
 
 {{-- Modal Detail --}}
 @include('components.kamar-detail')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const backBtn = document.querySelector('.back');
+    const loader = document.getElementById('pageLoader');
+    if (backBtn && loader) {
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loader.classList.remove('is-hidden');
+            location.href = backBtn.getAttribute('href');
+        });
+    }
+});
+</script>
 @endsection

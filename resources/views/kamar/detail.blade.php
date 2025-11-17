@@ -1,19 +1,20 @@
 @extends('layouts.app')
 
-@section('title', $kamar['nama'])
+@section('title', $kamar->nama_kamar)
 
 @section('content')
 <div class="row">
     <div class="col-md-6">
-        <img src="{{ asset($kamar['foto']) }}" class="img-fluid rounded shadow-sm mb-3" alt="{{ $kamar['nama'] }}">
+        <img src="{{ $kamar->gambar ?: asset('images/default.jpg') }}"
+             class="img-fluid rounded shadow-sm mb-3"
+             alt="{{ $kamar->nama_kamar }}">
     </div>
     <div class="col-md-6">
-        <h2 class="fw-bold text-uppercase">{{ $kamar['nama'] }}</h2>
-        <p class="text-muted mb-1">Rp{{ number_format($kamar['harga'], 0, ',', '.') }} / Malam</p>
-        <p>{{ $kamar['deskripsi'] }}</p>
-
-        <h5 class="mt-4 fw-semibold">Fasilitas</h5>
-        @include('kamar.components.fasilitas', ['fasilitas' => $kamar['fasilitas']])
+        <h2 class="fw-bold text-uppercase">{{ $kamar->nama_kamar }}</h2>
+        <p class="text-muted mb-1">Rp{{ number_format($kamar->harga_permalam, 0, ',', '.') }} / Malam</p>
+        <p class="mb-1">Ukuran: {{ $kamar->ukuran_kamar ?? 'Tidak dicantumkan' }}</p>
+        <p class="mb-3">Status: {{ $kamar->status_kamar }}</p>
+        <p>{{ $kamar->deskripsi ?? 'Belum ada deskripsi.' }}</p>
 
         <div class="mt-4">
             <a href="{{ route('kamar.index') }}" class="btn btn-outline-secondary">Kembali</a>

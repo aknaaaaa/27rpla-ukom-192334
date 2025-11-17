@@ -28,14 +28,20 @@ async function cekProfil(){
     const res = await fetch('/api/check-auth', {
       method: 'GET',
       headers: {
-        'Authorization': 'Bearer ' + token,
-        'Accept': 'application/json'
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/json'
       },
       credentials: 'include',
     });
 
     if(res.ok){
-      window.location.href = "{{ route('profile.profile') }}";
+      const data = await res.json().catch(() => ({}));
+      const roleId = Number(data?.user?.id_role ?? 0);
+      const target = roleId === 1
+        ? "{{ route('admin.dashboard') }}"
+        : "{{ route('profile.profile') }}";
+
+      window.location.href = target;
       return;
     }
   }catch(e){

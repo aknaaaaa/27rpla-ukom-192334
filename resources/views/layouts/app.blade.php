@@ -39,14 +39,51 @@
         .font-aboreto {
             font-family: 'Aboreto', system-ui;
         }
+        .page-loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .page-loader.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .page-loader__spinner {
+            width: 64px;
+            height: 64px;
+            border: 6px solid #d3c3a6;
+            border-top-color: #875f01;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
+    <div id="pageLoader" class="page-loader">
+        <div class="page-loader__spinner" role="status" aria-label="Loading"></div>
+    </div>
     @include('layouts.navigation')
     <main class="py-4">
         @yield('content')
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.classList.add('is-hidden');
+                setTimeout(() => loader.remove(), 300);
+            }
+        });
+    </script>
 </body>
 </html>

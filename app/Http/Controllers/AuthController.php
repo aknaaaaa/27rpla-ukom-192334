@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Laravel\Sanctum\PersonalAccessToken;
 // use laravel\Passport\HasApiTokens;
 
 class AuthController extends Controller
@@ -106,28 +107,41 @@ class AuthController extends Controller
         return response()->json(['message' => 'Unauthenticated'], 401);
     }
     public function logout(Request $request) {
-        $user = $request->user();
+        $bearer = $request->bearerToken();
+        $cookieToken = $request->cookie('sanctum_token');
+        $tokenString = $bearer ?: ($cookieToken ? urldecode($cookieToken) : null);
 
-        if (!$user) {
+        $accessToken = $tokenString ? PersonalAccessToken::findToken($tokenString) : null;
+        $user = $accessToken?->tokenable ?? $request->user();
+
+        // Jika ada token personal, hapus token itu
+        if ($accessToken) {
+            $accessToken->delete();
+        }
+
+        // Jika ada user terautentikasi, hapus semua token + logout session
+        if ($user) {
+            $user->tokens()->delete();
+            Auth::guard('web')->logout();
+        }
+
+        // Invalidate session jika ada
+        try {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        } catch (\Throwable $e) {
+            // abaikan jika session tidak tersedia
+        }
+
+        // Jika request JSON (API), kembalikan JSON; jika tidak, redirect ke login
+        if ($request->expectsJson()) {
             return response()->json([
-                'success' => false,
-                'message' => 'Sedang tidak login'
-            ], 401);
+                'success' => true,
+                'message' => 'Berhasil logout'
+            ], 200);
         }
 
-        // Hapus token Sanctum aktif + sesi web
-        if ($token = $user->currentAccessToken()) {
-            $token->delete();
-        }
-
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil logout'
-        ], 200);
+        return redirect()->route('layouts.login')->with('ok', 'Berhasil logout.');
     }
     public function user(Request $request)
 {
