@@ -64,22 +64,31 @@
         </form>
     </div>
 
-    {{-- Daftar kamar --}}
     <div class="row">
-        @forelse ($kamars as $kamar)
-            <div class="col-md-6 mb-4 d-flex">
-                @include('components.kamar-card', ['kamar' => $kamar])
+        <div class="col-lg-8">
+            {{-- Daftar kamar --}}
+            <div class="row">
+                @forelse ($kamars as $kamar)
+                    <div class="col-md-12 mb-4 d-flex">
+                        @include('components.kamar-card', ['kamar' => $kamar])
+                    </div>
+                @empty
+                    <div class="col-12 text-center text-muted py-5">
+                        Belum ada kamar yang tersedia.
+                    </div>
+                @endforelse
             </div>
-        @empty
-            <div class="col-12 text-center text-muted py-5">
-                Belum ada kamar yang tersedia.
-            </div>
-        @endforelse
+        </div>
+        <div class="col-lg-4">
+            @include('components.cart-panel')
+        </div>
     </div>
 </div>
 
 {{-- Modal Detail --}}
 @include('components.kamar-detail')
+@include('components.auth-alert')
+@include('components.cart-script')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const backBtn = document.querySelector('.back');

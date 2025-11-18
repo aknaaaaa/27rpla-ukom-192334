@@ -3,7 +3,7 @@
 @section('title', $kamar->nama_kamar)
 
 @section('content')
-<div class="row">
+<div class="row mt-5">
     <div class="col-md-6">
         <img src="{{ $kamar->gambar ?: asset('images/default.jpg') }}"
              class="img-fluid rounded shadow-sm mb-3"
@@ -20,10 +20,19 @@
 
                 <div class="mt-4">
                     <a href="{{ route('kamar.index') }}" class="btn btn-outline-secondary">Kembali</a>
-                    <button class="btn btn-dark">Pilih</button>
+                    <button class="btn btn-dark"
+                            type="button"
+                            data-requires-auth="true"
+                            data-url="{{ route('kamar.show', $kamar->id_kamar) }}"
+                            data-nama="{{ $kamar->nama_kamar }}"
+                            data-gambar="{{ $kamar->gambar ?: asset('images/default.jpg') }}">
+                        Pilih
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@include('components.auth-alert')
 @endsection

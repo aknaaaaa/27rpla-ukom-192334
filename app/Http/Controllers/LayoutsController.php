@@ -33,6 +33,15 @@ class LayoutsController extends Controller
         ]);
     }
 
+    public function checkout()
+    {
+        $user = Auth::user();
+
+        return view('kamar.checkout', [
+            'user' => $user,
+        ]);
+    }
+
     public function adminDashboard()
     {
         $totalOrders = Pemesanan::count();

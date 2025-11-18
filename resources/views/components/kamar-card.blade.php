@@ -45,10 +45,14 @@
                             data-url="{{ route('kamar.show', $kamar->id_kamar) }}">
                         Detail
                     </button>
-                    <a href="#" class="btn btn-outline-secondary btn-sm">
-                        Pesan
-                    </a>
-                    <a href="#" class="btn btn-outline-primary btn-sm">
+                    <a href="{{ route('kamar.show', $kamar->id_kamar) }}"
+                       class="btn btn-outline-primary btn-sm"
+                       data-requires-auth="true"
+                       data-action="add-to-cart"
+                       data-id="{{ $kamar->id_kamar }}"
+                       data-price="{{ $kamar->harga_permalam }}"
+                       data-nama="{{ $kamar->nama_kamar }}"
+                       data-gambar="{{ $imageUrl }}">
                         Keranjang
                     </a>
                 </div>

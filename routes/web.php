@@ -6,6 +6,7 @@ use App\Http\Controllers\KamarController;
 use App\Http\Controllers\AdminKamarController;
 use App\Http\Controllers\AdminPelangganController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', [LayoutsController::class, 'index'])->name('layouts.index');
 Route::get('/kamar', [KamarController::class, 'index'])->name('kamar.index');
@@ -27,6 +28,8 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('sanctum.session')->group(function () {
     Route::get('/profile', [LayoutsController::class, 'profile'])->name('profile.profile');
+    Route::get('/checkout', [LayoutsController::class, 'checkout'])->name('checkout');
+    Route::post('/payments/charge', [PaymentController::class, 'charge'])->name('payments.charge');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
