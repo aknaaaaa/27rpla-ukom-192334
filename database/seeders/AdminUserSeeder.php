@@ -17,6 +17,13 @@ class AdminUserSeeder extends Seeder
                 'phone_number' => '089529622167',
                 'password' => Hash::make('password_admin'),
                 'id_role' => 1, // kalau ada
+            ],
+            ['email' => 'admin2@gmail.com'], // kunci unik
+            [
+                'nama_user' => 'Admin2',
+                'phone_number' => '082113750847',
+                'password' => Hash::make('password_admin2'),
+                'id_role' => 1, // kalau ada
             ]
         );
     }

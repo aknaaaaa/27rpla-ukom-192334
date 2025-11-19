@@ -237,10 +237,6 @@
                         <p class="card__value">{{ $metrics['occupied_rooms'] }}</p>
                     </div>
                     <div class="card">
-                        <p class="card__title">Jumlah Kamar Tersisa</p>
-                        <p class="card__value">{{ $metrics['available_rooms'] }}</p>
-                    </div>
-                    <div class="card">
                         <p class="card__title">Jumlah Kamar Maintenance</p>
                         <p class="card__value">{{ $metrics['maintenance_rooms'] }}</p>
                     </div>
