@@ -27,9 +27,15 @@ class LayoutsController extends Controller
     }
     public function profile(){
         $user = Auth::user();
+        $orders = Pemesanan::with(['kamar', 'pembayaran'])
+            ->where('id_user', $user?->id_user)
+            ->latest()
+            ->take(3)
+            ->get();
 
         return view('profile.profile', [
             'user' => $user,
+            'orders' => $orders,
         ]);
     }
 

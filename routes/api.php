@@ -21,5 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('check-auth', [AuthController::class, 'check']);
 });
 
-// Test-only: charge Midtrans tanpa CSRF/session (gunakan server key di backend).
-Route::post('/payments/charge', [PaymentController::class, 'charge'])->name('api.payments.charge');
+// Charge Midtrans, gunakan middleware web agar session/auth dapat terpakai.
+Route::middleware('web')->post('/payments/charge', [PaymentController::class, 'charge'])->name('api.payments.charge');
+
+// Webhook/notification Midtrans (tanpa CSRF)
+Route::post('/midtrans/notify', [PaymentController::class, 'notify'])->name('midtrans.notify');

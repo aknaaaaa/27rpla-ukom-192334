@@ -6,6 +6,10 @@
 
 @section('content')
 <style>
+  html{
+    scroll-behavior: smooth;
+  }
+
 /* === HERO SECTION === */
 .superhero-section {
   position: relative;
@@ -210,7 +214,7 @@
 </div>
 
 <!-- ABOUT -->
-<section class="hero-section about-section text-center py-5">
+<section class="hero-section about-section text-center py-5" id="about">
   <div class="container">
     <p class="warna-p warna-emas text-uppercase mb-1 font-aboreto">WELCOME TO</p>
     <h2 class="warna-h2 fw-bold mb-3 font-aboreto garis-bawah">HOTEL D'KASUARI</h2>
@@ -284,10 +288,7 @@
     <h2 class="fw-bold mb-3 font-aboreto garis-bawah text-center">LOKASI</h2>
     <p class="text-center font-aboreto text-muted mb-4">Kunjungi kami di lokasi berikut:</p>
     <div class="map-embed">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d491.638864232258!2d106.9682652393092!3d-6.241167466734645!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e698dabeb95492f%3A0xe7073bdd8ba43a30!2sVerticaland%20T-Shirt!5e1!3m2!1sid!2sid!4v1763359179669!5m2!1sid!2sid"
-              allowfullscreen=""
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2703.179759142655!2d106.96760971915546!3d-6.240947803802314!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e698d002216f93b%3A0xc7118451e369e673!2sHotel%20D&#39;Kasuari!5e1!3m2!1sid!2sid!4v1763450796483!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
   </div>
 </section>

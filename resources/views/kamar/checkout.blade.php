@@ -133,9 +133,10 @@
             <div class="row mt-4 g-4">
                 <div class="col-lg-7">
                     <div class="pill-card">
+                        <input type="hidden" id="orderIdHidden" value="{{ session('checkout_order.id_pemesanan') ?? request('order_id') }}">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="mb-0">Pilih Metode Pembayaran</h6>
-                            <small class="mini-label">BCA | BNI | GOPAY | OVO | DANA | QRIS</small>
+                            <small class="mini-label">BCA | BNI | GOPAY | QRIS</small>
                         </div>
 
                         <div class="method-list">
@@ -286,6 +287,7 @@
             const payBtn = document.getElementById('payBtn');
             const resultBox = document.getElementById('paymentResult');
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const orderId = document.getElementById('orderIdHidden')?.value?.trim();
 
             const setResult = (html, variant = 'info') => {
                 if (!resultBox) return;
@@ -325,11 +327,15 @@
                 payment_method: method,
                 amount: total,
                 items: items.map((item) => ({
+                    id: item.id ?? item.kamar_id ?? item.room_id,
                     name: item.nama || 'Kamar',
                     price: Number(item.harga || 0),
                     quantity: Number(item.quantity || 1),
                 })),
             };
+            if (orderId) {
+                payload.id_pemesanan = orderId;
+            }
 
             setResult('Membuat transaksi ke Midtrans...', 'info');
             payBtn.disabled = true;
@@ -337,12 +343,14 @@
                 try {
                     const res = await fetch("{{ route('api.payments.charge') }}", {
                         method: 'POST',
+                        credentials: 'same-origin',
                         headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                });
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrf,
+                        },
+                        body: JSON.stringify(payload),
+                    });
                 const data = await res.json();
                 if (!res.ok) {
                     const msg = data?.message || 'Gagal membuat pembayaran.';
