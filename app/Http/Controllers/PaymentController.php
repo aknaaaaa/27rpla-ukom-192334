@@ -83,6 +83,7 @@ class PaymentController extends Controller
         $orderId = 'HOTEL-' . Str::uuid();
         $amount = (int) $request->amount;
         $pemesananId = $request->id_pemesanan;
+        $bookingInfo = $request->input('booking', []);
 
         $items = collect($request->input('items', []))
             ->values()
@@ -123,17 +124,30 @@ class PaymentController extends Controller
                 ], 422);
             }
 
+            $checkInInput = data_get($bookingInfo, 'check_in');
+            $checkOutInput = data_get($bookingInfo, 'check_out');
+            $checkInDate = $checkInInput ? Carbon::parse($checkInInput) : Carbon::today();
+            $checkOutDate = $checkOutInput ? Carbon::parse($checkOutInput) : $checkInDate->copy()->addDay();
+            if ($checkOutDate->lessThanOrEqualTo($checkInDate)) {
+                $checkOutDate = $checkInDate->copy()->addDay();
+            }
+            $totalDays = max(1, $checkInDate->diffInDays($checkOutDate));
+
             $pemesanan = Pemesanan::create([
                 'id_user' => Auth::id(),
                 'id_kamar' => $firstItemId,
                 'booking_code' => 'BOOK-' . Str::upper(Str::random(6)),
-                'check_in' => Carbon::today(),
-                'check_out' => Carbon::today()->addDay(),
-                'total_hari' => 1,
+                'check_in' => $checkInDate,
+                'check_out' => $checkOutDate,
+                'total_hari' => $totalDays,
             ]);
             $pemesananId = $pemesanan->id_pemesanan;
             $orderId = 'PMS-' . $pemesananId . '-' . Str::upper(Str::random(6));
         }
+
+        $customerName = data_get($bookingInfo, 'name', data_get($request->customer, 'first_name'));
+        $customerEmail = data_get($bookingInfo, 'email', data_get($request->customer, 'email'));
+        $customerPhone = data_get($bookingInfo, 'phone', data_get($request->customer, 'phone'));
 
         $baseParams = [
             'transaction_details' => [
@@ -142,9 +156,9 @@ class PaymentController extends Controller
             ],
             'item_details' => $items->toArray(),
             'customer_details' => [
-                'first_name' => data_get($request->customer, 'first_name'),
-                'email' => data_get($request->customer, 'email'),
-                'phone' => data_get($request->customer, 'phone'),
+                'first_name' => $customerName,
+                'email' => $customerEmail,
+                'phone' => $customerPhone,
             ],
         ];
 
@@ -200,6 +214,13 @@ class PaymentController extends Controller
                         'status_pembayaran' => $status,
                     ]
                 );
+
+                session([
+                    'last_payment' => [
+                        'status' => $status === 'Telah dibayar' ? 'success' : 'pending',
+                        'order' => $orderId,
+                    ]
+                ]);
             }
 
             return response()->json($response);

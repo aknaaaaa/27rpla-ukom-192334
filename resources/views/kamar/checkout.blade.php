@@ -18,6 +18,44 @@
         box-shadow: 0 6px 20px rgba(0,0,0,0.04);
         border: 1px solid #e8e8e8;
     }
+    .booking-shell {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 20px;
+    }
+    @media (max-width: 992px) {
+        .booking-shell {
+            grid-template-columns: 1fr;
+        }
+    }
+    .info-card {
+        border: 1px solid #d6d6d6;
+        border-radius: 16px;
+        padding: 20px;
+        background: #fbfbfb;
+    }
+    .info-card h6 {
+        letter-spacing: 0.8px;
+        margin-bottom: 16px;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+    }
+    .form-grid label {
+        display: block;
+        font-size: 12px;
+        color: #7c7c7c;
+        margin-bottom: 4px;
+    }
+    .form-grid input,
+    .form-grid textarea {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        background: #fff;
+    }
     .brand-title {
         font-family: 'Mea Culpa', cursive;
         font-size: 32px;
@@ -28,6 +66,37 @@
         letter-spacing: 0.6px;
         text-transform: uppercase;
         color: #7a7a7a;
+    }
+    .summary-card {
+        border: 1px solid #cda582;
+        border-radius: 16px;
+        padding: 20px;
+        background: linear-gradient(135deg, #fdf3ea, #f6ebe0);
+    }
+    .summary-header {
+        font-weight: 700;
+        color: #6b5138;
+        margin-bottom: 12px;
+    }
+    .summary-item {
+        border: 1px solid #d3b59a;
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(255,255,255,0.75);
+        margin-bottom: 10px;
+    }
+    .summary-item strong {
+        color: #704c2f;
+    }
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        font-size: 16px;
+        font-weight: 700;
+        color: #5a4129;
+        margin-top: 12px;
+        border-top: 1px solid #d3b59a;
+        padding-top: 10px;
     }
     .pill-card {
         border: 1px solid #d5d5d5;
@@ -130,8 +199,56 @@
                 </div>
             </div>
 
+            <div class="booking-shell mt-4">
+                <div class="info-card">
+                    <h6>Informasi Tamu</h6>
+                    <div class="form-grid mb-3">
+                        <div>
+                            <label>Nama Lengkap</label>
+                            <input type="text" id="guestName" value="{{ $user->nama_user ?? '' }}" placeholder="Nama pemesan">
+                        </div>
+                        <div>
+                            <label>Email</label>
+                            <input type="email" id="guestEmail" value="{{ $user->email ?? '' }}" placeholder="email@example.com">
+                        </div>
+                        <div>
+                            <label>Nomor Telepon</label>
+                            <input type="text" id="guestPhone" value="{{ $user->phone_number ?? '' }}" placeholder="08xxxxxxxxxxx">
+                        </div>
+                        <div>
+                            <label>Check-in</label>
+                            <input type="date" id="checkInInput">
+                        </div>
+                        <div>
+                            <label>Check-out</label>
+                            <input type="date" id="checkOutInput">
+                        </div>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="otherGuestSwitch">
+                        <label class="form-check-label" for="otherGuestSwitch">Saya memesan untuk orang lain</label>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-header">Ringkasan Pemesanan Anda</div>
+                    <div id="summaryItems"></div>
+                    <div class="summary-item" id="dateSummary">
+                        <div>Check-in: <strong id="summaryCheckIn">-</strong></div>
+                        <div>Check-out: <strong id="summaryCheckOut">-</strong></div>
+                    </div>
+                    <div class="summary-item d-flex justify-content-between align-items-center">
+                        <span>Pajak & Service (10%)</span>
+                        <strong id="summaryTax">Rp0</strong>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total</span>
+                        <span id="summaryTotal">Rp0</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="row mt-4 g-4">
-                <div class="col-lg-7">
+                <div class="col-12">
                     <div class="pill-card">
                         <input type="hidden" id="orderIdHidden" value="{{ session('checkout_order.id_pemesanan') ?? request('order_id') }}">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -186,32 +303,8 @@
                         <small class="text-muted d-block mt-2" style="font-size: 12px;">Jumlah pembayaran mengikuti ringkasan pesanan di kanan.</small>
                     </div>
                 </div>
-
-                <div class="col-lg-5">
-                    <div class="order-box">
-                        <h6 class="mb-3">Data Pesanan</h6>
-                        <div id="orderEmpty" class="alert alert-warning py-2 px-3 small">
-                            Keranjang masih kosong. Tambah kamar dulu agar data pembayaran sama dengan konfirmasi sebelumnya.
-                        </div>
-                        <div id="orderItems" class="d-flex flex-column gap-3 mb-3"></div>
-                        <hr>
-                        <div class="order-line">
-                            <span>Subtotal</span>
-                            <strong id="orderSubtotal">Rp0</strong>
-                        </div>
-                        <div class="order-line">
-                            <span>Tax & Service (10%)</span>
-                            <strong id="orderTax">Rp0</strong>
-                        </div>
-                        <div class="order-line" style="font-size: 14px; font-weight: 700;">
-                            <span>Total</span>
-                            <strong id="orderTotal">Rp0</strong>
-                        </div>
-                        <p class="text-muted mt-3 mb-0" style="font-size: 12px;">Angka di atas diambil dari keranjang/konfirmasi sebelumnya. Saat integrasi Core API, kirim total ini ke backend untuk dibuatkan charge Midtrans.</p>
-                        <div id="paymentResult" class="mt-3 small"></div>
-                    </div>
-                </div>
             </div>
+            <div id="paymentResult" class="mt-3 small"></div>
         </div>
     </div>
 </div>
@@ -224,56 +317,63 @@
             minimumFractionDigits: 0,
         }).format(num || 0);
 
-        const renderOrder = () => {
+        const summaryItems = document.getElementById('summaryItems');
+        const summaryTotal = document.getElementById('summaryTotal');
+        const summaryTax = document.getElementById('summaryTax');
+        const summaryCheckIn = document.getElementById('summaryCheckIn');
+        const summaryCheckOut = document.getElementById('summaryCheckOut');
+        const payBtn = document.getElementById('payBtn');
+        const resultBox = document.getElementById('paymentResult');
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const orderId = document.getElementById('orderIdHidden')?.value?.trim();
+
+        const guestName = document.getElementById('guestName');
+        const guestEmail = document.getElementById('guestEmail');
+        const guestPhone = document.getElementById('guestPhone');
+        const checkInInput = document.getElementById('checkInInput');
+        const checkOutInput = document.getElementById('checkOutInput');
+        const otherGuestSwitch = document.getElementById('otherGuestSwitch');
+
+        const updateDates = () => {
+            if (summaryCheckIn) summaryCheckIn.textContent = checkInInput?.value || '-';
+            if (summaryCheckOut) summaryCheckOut.textContent = checkOutInput?.value || '-';
+        };
+        checkInInput?.addEventListener('change', updateDates);
+        checkOutInput?.addEventListener('change', updateDates);
+
+        const renderSummary = () => {
             const items = JSON.parse(localStorage.getItem('room_cart') || '[]');
-            const list = document.getElementById('orderItems');
-            const empty = document.getElementById('orderEmpty');
-            const subtotalEl = document.getElementById('orderSubtotal');
-            const taxEl = document.getElementById('orderTax');
-            const totalEl = document.getElementById('orderTotal');
-            const payBtn = document.getElementById('payBtn');
+            if (!summaryItems) return;
 
-            if (!list) return;
-
-            list.innerHTML = '';
-
+            summaryItems.innerHTML = '';
             if (!items.length) {
-                empty?.classList.remove('d-none');
-                subtotalEl.textContent = fmt(0);
-                taxEl.textContent = fmt(0);
-                totalEl.textContent = fmt(0);
+                summaryItems.innerHTML = `<div class="alert alert-warning py-2 px-3 small">Keranjang masih kosong. Tambah kamar dahulu.</div>`;
+                summaryTotal.textContent = fmt(0);
+                summaryTax.textContent = fmt(0);
                 if (payBtn) payBtn.disabled = true;
                 return;
             }
 
-            empty?.classList.add('d-none');
             let subtotal = 0;
-
             items.forEach((item) => {
                 const qty = Number(item.quantity || 1);
                 const price = Number(item.harga || 0);
-                const img = item.gambar || "{{ asset('images/default.jpg') }}";
                 subtotal += price * qty;
 
-                const row = document.createElement('div');
-                row.className = 'order-item';
-                row.innerHTML = `
-                    <img src="${img}" alt="${item.nama || 'Kamar'}" class="order-thumb">
-                    <div class="flex-grow-1">
-                        <div class="fw-semibold">${item.nama || 'Kamar'}</div>
-                        <div class="text-muted" style="font-size: 12px;">${qty} x ${fmt(price)}</div>
-                    </div>
-                    <div class="fw-semibold">${fmt(price * qty)}</div>
+                const div = document.createElement('div');
+                div.className = 'summary-item';
+                div.innerHTML = `
+                    <strong>${item.nama || 'Kamar'}</strong>
+                    <div style="font-size:12px;color:#7a6b5f;">${qty} x ${fmt(price)}</div>
+                    <div style="text-align:right;font-weight:700;">${fmt(price * qty)}</div>
                 `;
-                list.appendChild(row);
+                summaryItems.appendChild(div);
             });
 
             const tax = Math.round(subtotal * 0.10);
             const total = subtotal + tax;
-
-            subtotalEl.textContent = fmt(subtotal);
-            taxEl.textContent = fmt(tax);
-            totalEl.textContent = fmt(total);
+            summaryTax.textContent = fmt(tax);
+            summaryTotal.textContent = fmt(total);
 
             if (payBtn) {
                 payBtn.disabled = false;
@@ -281,33 +381,47 @@
             }
         };
 
-        window.addEventListener('DOMContentLoaded', renderOrder);
-        window.addEventListener('cart:updated', renderOrder);
+        window.addEventListener('DOMContentLoaded', () => {
+            renderSummary();
+            updateDates();
+        });
+        window.addEventListener('cart:updated', renderSummary);
 
-            const payBtn = document.getElementById('payBtn');
-            const resultBox = document.getElementById('paymentResult');
-            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            const orderId = document.getElementById('orderIdHidden')?.value?.trim();
+        const setResult = (html, variant = 'info') => {
+            if (!resultBox) return;
+            resultBox.className = `mt-3 small alert alert-${variant}`;
+            resultBox.innerHTML = html;
+        };
 
-            const setResult = (html, variant = 'info') => {
-                if (!resultBox) return;
-                resultBox.className = `mt-3 small alert alert-${variant}`;
-                resultBox.innerHTML = html;
-            };
-            const copyVA = async (text, buttonEl) => {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    buttonEl.textContent = 'Disalin';
-                    setTimeout(() => { buttonEl.textContent = 'Copy'; }, 1200);
-                } catch (err) {
-                    setResult('Gagal menyalin VA. Salin manual: ' + text, 'warning');
-                }
-            };
+        const copyVA = async (text, buttonEl) => {
+            try {
+                await navigator.clipboard.writeText(text);
+                buttonEl.textContent = 'Disalin';
+                setTimeout(() => { buttonEl.textContent = 'Copy'; }, 1200);
+            } catch (err) {
+                setResult('Gagal menyalin VA. Salin manual: ' + text, 'warning');
+            }
+        };
 
-            payBtn?.addEventListener('click', async () => {
-                const items = JSON.parse(localStorage.getItem('room_cart') || '[]');
-                if (!items.length) {
-                    setResult('Keranjang masih kosong. Tambah kamar dulu.', 'warning');
+        const getBookingData = () => ({
+            name: guestName?.value?.trim() || '',
+            email: guestEmail?.value?.trim() || '',
+            phone: guestPhone?.value?.trim() || '',
+            check_in: checkInInput?.value || '',
+            check_out: checkOutInput?.value || '',
+            other_guest: !!otherGuestSwitch?.checked,
+        });
+
+        payBtn?.addEventListener('click', async () => {
+            const items = JSON.parse(localStorage.getItem('room_cart') || '[]');
+            if (!items.length) {
+                setResult('Keranjang masih kosong. Tambah kamar dulu.', 'warning');
+                return;
+            }
+
+            const booking = getBookingData();
+            if (!booking.name || !booking.email || !booking.phone || !booking.check_in || !booking.check_out) {
+                setResult('Lengkapi data tamu dan tanggal check-in/out.', 'warning');
                 return;
             }
 
@@ -332,6 +446,7 @@
                     price: Number(item.harga || 0),
                     quantity: Number(item.quantity || 1),
                 })),
+                booking,
             };
             if (orderId) {
                 payload.id_pemesanan = orderId;
@@ -340,17 +455,17 @@
             setResult('Membuat transaksi ke Midtrans...', 'info');
             payBtn.disabled = true;
 
-                try {
-                    const res = await fetch("{{ route('api.payments.charge') }}", {
-                        method: 'POST',
-                        credentials: 'same-origin',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': csrf,
-                        },
-                        body: JSON.stringify(payload),
-                    });
+            try {
+                const res = await fetch("{{ route('api.payments.charge') }}", {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                    },
+                    body: JSON.stringify(payload),
+                });
                 const data = await res.json();
                 if (!res.ok) {
                     const msg = data?.message || 'Gagal membuat pembayaran.';
@@ -383,7 +498,6 @@
                 }
 
                 setResult(`Transaksi berhasil dibuat.<br>${instruction}`, 'success');
-                // Attach copy handler after render
                 const copyBtn = resultBox?.querySelector('[data-copy-va]');
                 if (copyBtn) {
                     copyBtn.addEventListener('click', () => copyVA(copyBtn.getAttribute('data-copy-va'), copyBtn));
