@@ -335,7 +335,7 @@
                                 <strong>{{ $user->email }}</strong>
                             </div>
                             <div class="info-box">
-                                <span>Telepon</span>
+                                <span>Nomor Telepon</span>
                                 <strong>{{ $user->phone_number ?? '-' }}</strong>
                             </div>
                             <div class="info-box">
@@ -345,10 +345,6 @@
                             <div class="info-box">
                                 <span>Email Terverifikasi</span>
                                 <strong>{{ $user->email_verified_at ? 'Ya' : 'Belum' }}</strong>
-                            </div>
-                            <div class="info-box">
-                                <span>Nomor Telepon</span>
-                                <strong>{{ $user->phone_number ?? '-' }}</strong>
                             </div>
                             <div class="info-box">
                                 <span>Status</span>
@@ -395,7 +391,4 @@
         </div>
     </div>
 </div>
-<script>
-    
-</script>
 @endsection
