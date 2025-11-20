@@ -25,17 +25,26 @@ class LayoutsController extends Controller
     public function masuk(){
         return view('layouts.login');
     }
-    public function profile(){
+    public function profile(Request $request){
         $user = Auth::user();
+        $tab = $request->query('tab', 'profile');
         $orders = Pemesanan::with(['kamar', 'pembayaran'])
             ->where('id_user', $user?->id_user)
             ->latest()
-            ->take(3)
+            ->limit(3)
+            ->get();
+        $history = Pemesanan::with(['kamar', 'pembayaran'])
+            ->where('id_user', $user?->id_user)
+            ->latest()
+            ->skip(3)
+            ->take(10)
             ->get();
 
         return view('profile.profile', [
             'user' => $user,
             'orders' => $orders,
+            'history' => $history,
+            'tab' => $tab,
         ]);
     }
 

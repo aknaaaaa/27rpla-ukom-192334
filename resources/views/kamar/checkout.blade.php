@@ -388,6 +388,11 @@
                 if (copyBtn) {
                     copyBtn.addEventListener('click', () => copyVA(copyBtn.getAttribute('data-copy-va'), copyBtn));
                 }
+                if (method === 'qris' || method === 'gopay') {
+                    setTimeout(() => {
+                        window.location.href = "{{ route('checkout.success') }}";
+                    }, 500);
+                }
             } catch (error) {
                 setResult('Terjadi kesalahan jaringan.', 'danger');
             } finally {

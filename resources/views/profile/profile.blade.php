@@ -27,7 +27,8 @@
         display: grid;
         gap: 6px;
     }
-    .side-menu a {
+    .side-menu a,
+    .side-menu button {
         display: block;
         padding: 10px 12px;
         border-radius: 8px;
@@ -37,12 +38,19 @@
         letter-spacing: 0.3px;
         background: #fff;
         border: 1px solid transparent;
+        text-align: left;
+        width: 100%;
     }
-    .side-menu a.active {
+    .side-menu a.active,
+    .side-menu button.active {
         background: #d5e8ff;
         border-color: #b7d5ff;
     }
-    .side-menu a.logout {
+    .side-menu button {
+        border: none;
+    }
+    .side-menu a.logout,
+    .side-menu button.logout {
         color: #c0392b;
         font-weight: 700;
     }
@@ -99,7 +107,7 @@
     .info-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
+        gap: 8px;
     }
     .info-box {
         border: 1px solid #e0d4c7;
@@ -173,17 +181,38 @@
     <div class="profile-hero">
         <div class="profile-shell">
             <div class="side-menu">
-                <a href="#" class="active">Profile</a>
+                <a href="{{ route('profile.profile') }}" class="{{ ($tab ?? 'profile') === 'profile' ? 'active' : '' }}">Profile</a>
                 <a href="{{ route('kamar.index') }}">Keranjang</a>
                 <a href="{{ route('checkout') }}">Pemesanan</a>
-                <a href="#">Riwayat</a>
+                <a href="{{ route('profile.profile', ['tab' => 'history']) }}" class="{{ ($tab ?? 'profile') === 'history' ? 'active' : '' }}">Riwayat</a>
                 <form action="{{ route('logout') }}" method="POST" style="margin:0;">
                     @csrf
-                    <button type="submit" class="side-menu a logout-btn btn-link" style="text-decoration:none;">Log Out</button>
+                    <button type="submit" class="logout">Log Out</button>
                 </form>
             </div>
 
             <div class="profile-panel">
+                @if(($tab ?? 'profile') === 'history')
+                    <div class="panel-head">
+                        <div>Riwayat Pemesanan</div>
+                        <div>{{ $displayName }}</div>
+                    </div>
+                    @forelse(($history ?? []) as $old)
+                        <div class="booking-item" style="margin-bottom:10px;">
+                            <strong>{{ $old->kamar->nama_kamar ?? 'Kamar' }}</strong>
+                            <p style="font-size: 12px; color: #8a7c70;">
+                                Check-in {{ optional($old->check_in)->format('d M Y') }} ({{ $old->total_hari }} malam)
+                            </p>
+                            <p style="font-size: 13px; color: #7c6044;">
+                                Status Pembayaran: {{ strtoupper($old->pembayaran->status_pembayaran ?? 'Belum dibayar') }}
+                            </p>
+                        </div>
+                    @empty
+                        <div class="booking-item">
+                            <strong>Belum ada riwayat pemesanan.</strong>
+                        </div>
+                    @endforelse
+                @else
                 <div class="panel-head">
                     <div>❀ D'Kasuari</div>
                     <div><strong>{{ $displayName }}</strong></div>
@@ -259,8 +288,9 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                @endif
             </div>
+        </div>
         </div>
     </div>
 </div>

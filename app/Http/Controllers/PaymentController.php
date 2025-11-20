@@ -103,8 +103,13 @@ class PaymentController extends Controller
                 'name' => 'Tax & Service',
                 'price' => $tax,
                 'quantity' => 1,
-            ]);
-        }
+                ]);
+
+                session(['last_payment' => [
+                    'status' => $status === 'Telah dibayar' ? 'success' : 'pending',
+                    'order' => $orderId,
+                ]]);
+            }
         $grossAmount = $items->sum(fn ($i) => $i['price'] * $i['quantity']);
 
         // buat pemesanan minimal jika belum ada id_pemesanan namun user login
