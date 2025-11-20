@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Profil Pengguna - Pemesanan Hotel</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Aboreto&display=swap" rel="stylesheet">
@@ -75,6 +76,15 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
+      font-weight: 600;
+    }
+
+    .avatar-mini img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     /* CONTENT GRID */
@@ -108,16 +118,25 @@
     }
 
     .avatar-large {
-      width: 96px;
-      height: 96px;
+      width: 110px;
+      height: 110px;
       border-radius: 50%;
       background: var(--primary);
       color: white;
       display: grid;
       place-items: center;
-      font-size: 32px;
+      font-size: 34px;
       overflow: hidden;
       position: relative;
+      cursor: pointer;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .avatar-large:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
     }
 
     .avatar-large img {
@@ -125,6 +144,48 @@
       height: 100%;
       object-fit: cover;
       display: none;
+    }
+
+    .avatar-large.has-image img {
+      display: block;
+    }
+
+    .avatar-large.has-image #avatarInitial {
+      display: none;
+    }
+
+    .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      color: var(--white);
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    .avatar-large:hover .avatar-overlay,
+    .avatar-large.is-uploading .avatar-overlay {
+      opacity: 1;
+    }
+
+    .avatar-large.is-uploading {
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .avatar-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 8px;
     }
 
     .badge {
@@ -197,15 +258,28 @@
 
     .booking-item {
       background: #faf7f4;
-      padding: 10px;
+      padding: 12px 14px;
       border-radius: 12px;
       border: 1px solid #d9c7b9;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .booking-item strong {
       font-size: 14px;
       color: var(--primary);
+    }
+
+    .booking-empty {
+      padding: 22px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      border-radius: var(--radius-xl);
+      border: 1px dashed var(--border-soft);
+      background: rgba(171, 136, 109, 0.08);
     }
 
     .logout-btn {
@@ -240,6 +314,8 @@
     $displayName = $user->nama_user ?? $user->email;
     $initial = strtoupper(mb_substr($displayName ?? 'U', 0, 1));
     $memberSince = optional($user->created_at)->format('d M Y');
+    $avatarUrl = $user->avatar_url;
+    $hasAvatar = !empty($avatarUrl);
   @endphp
   <div class="profile-page">
     <!-- HEADER -->
@@ -247,7 +323,13 @@
       <div class="logo">D'kasuari</div>
 
       <div style="display: flex; align-items: center; gap: 10px;">
-        <div class="avatar-mini">{{ $initial }}</div>
+        <div class="avatar-mini" id="avatarMini" data-initial="{{ $initial }}">
+          @if($hasAvatar)
+            <img src="{{ $avatarUrl }}" alt="{{ $displayName }}">
+          @else
+            {{ $initial }}
+          @endif
+        </div>
         <span>{{ $displayName }}</span>
       </div>
 
@@ -261,9 +343,16 @@
       <section class="profile-card">
         <div class="profile-top">
           <div class="avatar-wrapper">
-            <div class="avatar-large">
+            <div class="avatar-large {{ $hasAvatar ? 'has-image' : '' }}" id="avatarTrigger">
+              <img id="avatarImage" @if($hasAvatar) src="{{ $avatarUrl }}" @endif alt="Foto profil">
               <span id="avatarInitial">{{ $initial }}</span>
+              <div class="avatar-overlay">
+                <span style="font-size: 22px;">&#128247;</span>
+                <span>Ubah Foto</span>
+              </div>
             </div>
+            <input type="file" id="avatarFileInput" accept="image/*" hidden>
+            <small class="avatar-note">Klik foto untuk mengganti (JPG/PNG, maks 4MB)</small>
           </div>
           <div class="headline">
             <h2>{{ $displayName }}</h2>
@@ -287,10 +376,6 @@
             <span>ID Pengguna</span>
             <strong>{{ $user->id_user }}</strong>
           </div>
-          <div class="detail-box">
-            <span>Email Terverifikasi</span>
-            <strong>{{ $user->email_verified_at ? 'Ya' : 'Belum' }}</strong>
-          </div>
         </div>
 
         <div class="stats-row">
@@ -302,10 +387,6 @@
             <span class="label">Nomor Telepon</span>
             <div class="value">{{ $user->phone_number ?? '-' }}</div>
           </div>
-          <div class="stat-card">
-            <span class="label">Status</span>
-            <div class="value">{{ $user->email_verified_at ? 'Verified' : 'Guest' }}</div>
-          </div>
         </div>
       </section>
 
@@ -314,27 +395,42 @@
         <section class="card-section">
           <h3>Pemesanan Aktif</h3>
 
-          <div class="booking-item">
-            <strong>Grand Aurora Hotel – Deluxe City View</strong>
-            <p style="font-size: 12px; color: var(--text-muted);">
-              Check-in 24 Nov 2025 · 3 malam
-            </p>
-            <p style="font-size: 13px; color: var(--primary);">
-              Rp 3.450.000 (Sudah dibayar)
-            </p>
-          </div>
-
-          <div class="booking-item">
-            <strong>Seaside Resort & Spa – Suite</strong>
-            <p style="font-size: 12px; color: var(--text-muted);">
-              Check-in 12 Des 2025 · 2 malam
-            </p>
-            <p style="font-size: 13px; color: var(--primary);">
-              Rp 4.200.000 (Bayar di hotel)
-            </p>
-          </div>
+          @forelse ($orders as $order)
+            @php
+              $checkIn = optional($order->check_in)->translatedFormat('d M Y');
+              $checkOut = optional($order->check_out)->translatedFormat('d M Y');
+              $paymentStatus = $order->pembayaran->status_pembayaran ?? 'Belum dibayar';
+              $amount = $order->pembayaran->amount_paid
+                ?? ($order->kamar && $order->total_hari
+                  ? $order->kamar->harga_permalam * $order->total_hari
+                  : null);
+            @endphp
+            <div class="booking-item">
+              <strong>{{ $order->kamar->nama_kamar ?? 'Pesanan #' . $order->booking_code }}</strong>
+              <p style="font-size: 12px; color: var(--text-muted);">
+                #{{ $order->booking_code }} &middot;
+                {{ $checkIn ?? 'Tanggal belum ditentukan' }} -
+                {{ $checkOut ?? 'Tanggal belum ditentukan' }}
+                @if($order->total_hari)
+                  &middot; {{ $order->total_hari }} malam
+                @endif
+              </p>
+              <p style="font-size: 13px; color: var(--primary);">
+                @if($amount)
+                  Rp {{ number_format($amount, 0, ',', '.') }}
+                @else
+                  Belum ada total pembayaran
+                @endif
+                ({{ ucfirst($order->status_label) }})
+              </p>
+              <p style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                {{ $paymentStatus }}
+              </p>
+            </div>
+          @empty
+            <p class="booking-empty">Belum ada pesanan.</p>
+          @endforelse
         </section>
-
         <section class="card-section">
           <h3>Pengaturan Akun</h3>
 
@@ -354,57 +450,160 @@
     document.addEventListener('DOMContentLoaded', function () {
       const logoutBtn = document.getElementById('logoutBtn');
 
-      if (!logoutBtn) {
-        return;
+      if (logoutBtn) {
+        const getCookie = (name) => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop().split(';').shift();
+          return null;
+        };
+
+        logoutBtn.addEventListener('click', async function () {
+          logoutBtn.disabled = true;
+          const token = localStorage.getItem('access_token');
+
+          // Pastikan CSRF cookie sudah tersedia supaya middleware stateful sanctum tidak menolak request
+          try {
+            await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
+          } catch (error) {
+            console.warn('Gagal mengambil CSRF cookie', error);
+          }
+
+          const xsrf = getCookie('XSRF-TOKEN');
+          try {
+            const headers = {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            };
+
+            if (token) {
+              headers['Authorization'] = 'Bearer ' + token;
+            }
+
+            if (xsrf) {
+              headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf);
+            }
+
+            await fetch('/api/auth/logout', {
+              method: 'POST',
+              headers,
+              credentials: 'include',
+            });
+          } catch (error) {
+            console.error('Logout gagal', error);
+          }
+
+          localStorage.removeItem('access_token');
+          ['sanctum_token', 'XSRF-TOKEN', 'laravel_session'].forEach((name) => {
+            document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+          });
+          window.location.href = "{{ route('layouts.register') }}";
+        });
       }
 
-      const getCookie = (name) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      const avatarTrigger = document.getElementById('avatarTrigger');
+      const avatarInput = document.getElementById('avatarFileInput');
+      const avatarImg = document.getElementById('avatarImage');
+      const avatarInitial = document.getElementById('avatarInitial');
+      const avatarMini = document.getElementById('avatarMini');
+
+      const showMessage = (message, type = 'info') => {
+        if (window.showAppToast) {
+          window.showAppToast(message, type);
+        } else {
+          alert(message);
+        }
       };
 
-      logoutBtn.addEventListener('click', async function () {
-        logoutBtn.disabled = true;
-        const token = localStorage.getItem('access_token');
+      const toggleAvatarState = (isLoading) => {
+        if (!avatarTrigger) return;
+        avatarTrigger.classList.toggle('is-uploading', Boolean(isLoading));
+      };
 
-        // Pastikan CSRF cookie sudah tersedia supaya middleware stateful sanctum tidak menolak request
-        try {
-          await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
-        } catch (error) {
-          console.warn('Gagal mengambil CSRF cookie', error);
+      const updateMiniAvatar = (url) => {
+        if (!avatarMini) return;
+        if (url) {
+          avatarMini.innerHTML = `<img src="${url}" alt="Foto profil">`;
+        } else if (avatarMini.dataset.initial) {
+          avatarMini.textContent = avatarMini.dataset.initial;
+        }
+      };
+
+      const updateAvatarDisplay = (url) => {
+        if (!avatarTrigger) return;
+        if (url) {
+          avatarTrigger.classList.add('has-image');
+          if (avatarImg) {
+            avatarImg.src = url;
+            avatarImg.style.display = 'block';
+          }
+          if (avatarInitial) {
+            avatarInitial.style.display = 'none';
+          }
+          updateMiniAvatar(url);
+        } else {
+          avatarTrigger.classList.remove('has-image');
+          if (avatarImg) {
+            avatarImg.removeAttribute('src');
+            avatarImg.style.display = 'none';
+          }
+          if (avatarInitial) {
+            avatarInitial.style.display = '';
+          }
+          updateMiniAvatar('');
+        }
+      };
+
+      const uploadAvatar = async (file) => {
+        if (!csrfToken) {
+          showMessage('Token keamanan tidak ditemukan.', 'danger');
+          return;
         }
 
-        const xsrf = getCookie('XSRF-TOKEN');
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        toggleAvatarState(true);
         try {
-          const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          };
-
-          if (token) {
-            headers['Authorization'] = 'Bearer ' + token;
-          }
-
-          if (xsrf) {
-            headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf);
-          }
-
-          await fetch('/api/auth/logout', {
+          const response = await fetch("{{ route('profile.avatar') }}", {
             method: 'POST',
-            headers,
-            credentials: 'include',
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'Accept': 'application/json',
+            },
+            body: formData,
           });
-        } catch (error) {
-          console.error('Logout gagal', error);
-        }
 
-        localStorage.removeItem('access_token');
-        ['sanctum_token', 'XSRF-TOKEN', 'laravel_session'].forEach((name) => {
-          document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-        });
-        window.location.href = "{{ route('layouts.register') }}";
+          if (!response.ok) {
+            const error = await response.json().catch(() => ({ message: 'Gagal mengunggah foto.' }));
+            showMessage(error.message || 'Gagal mengunggah foto.', 'danger');
+            return;
+          }
+
+          const data = await response.json();
+          if (data.avatar_url) {
+            updateAvatarDisplay(data.avatar_url);
+          }
+          showMessage(data.message || 'Foto profil berhasil diperbarui.', 'success');
+        } catch (error) {
+          console.error('Upload avatar gagal', error);
+          showMessage('Terjadi kesalahan saat mengunggah foto.', 'danger');
+        } finally {
+          toggleAvatarState(false);
+        }
+      };
+
+      avatarTrigger?.addEventListener('click', () => {
+        avatarInput?.click();
+      });
+
+      avatarInput?.addEventListener('change', function () {
+        if (!this.files || !this.files.length) {
+          return;
+        }
+        uploadAvatar(this.files[0]);
+        this.value = '';
       });
     });
   </script>

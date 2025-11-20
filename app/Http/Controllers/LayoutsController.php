@@ -27,9 +27,15 @@ class LayoutsController extends Controller
     }
     public function profile(){
         $user = Auth::user();
+        $orders = $user
+            ? $user->pemesanans()
+                ->orderByDesc('check_in')
+                ->get()
+            : collect();
 
         return view('profile.profile', [
             'user' => $user,
+            'orders' => $orders,
         ]);
     }
 
