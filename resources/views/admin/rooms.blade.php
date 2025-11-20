@@ -459,9 +459,6 @@
                             <div class="room-body">
                                 <div class="room-head">
                                     <h3 class="room-title">{{ strtoupper($room->nama_kamar) }}</h3>
-                                    <div class="room-count">
-                                        Status: {{ $room->status_kamar ?? 'Tersedia' }}
-                                    </div>
                                 </div>
 
                                 <div class="meta">

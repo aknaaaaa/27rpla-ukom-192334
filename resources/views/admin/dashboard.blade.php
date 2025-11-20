@@ -84,50 +84,120 @@
         .main {
             flex: 1;
             position: relative;
-            padding: 26px 34px 40px;
+            padding: 30px 38px 48px;
             overflow: hidden;
-            background: #fcfcfc;
+            background: #fdfdfd;
         }
         .main::before {
             content: '';
             position: absolute;
             inset: 0;
+            background: radial-gradient(circle at top left, rgba(0,0,0,0.08), transparent 55%);
+            opacity: 0.65;
+            pointer-events: none;
+        }
+        .main::after {
+            content: '';
+            position: absolute;
+            inset: 0;
             background-image:
-                repeating-linear-gradient(120deg, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 22px),
-                repeating-linear-gradient(60deg, rgba(0,0,0,0.035) 0, rgba(0,0,0,0.035) 1px, transparent 1px, transparent 26px);
-            opacity: 0.35;
+                linear-gradient(120deg, rgba(0,0,0,0.06) 1px, transparent 1px),
+                linear-gradient(300deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+            background-size: 340px 260px;
+            opacity: 0.4;
             pointer-events: none;
         }
         .content {
             position: relative;
             z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
         .top-line {
-            border-bottom: 1px solid #e0e0e0;
-            margin: 12px 0 22px;
+            border-bottom: 1px solid rgba(0,0,0,0.15);
+            margin-bottom: 10px;
         }
-        .cards {
+        .metric-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(6, minmax(140px, 1fr));
             gap: 18px;
-            margin-bottom: 20px;
         }
-        .card {
+        .metric-card {
             background: #fff;
-            padding: 22px;
-            min-height: 150px;
-            box-shadow: var(--card-shadow);
-            letter-spacing: 0.5px;
-            border-radius: 5px;
+            border: 1px solid rgba(0,0,0,0.25);
+            padding: 20px 24px;
+            border-radius: 10px;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 14px 26px rgba(0,0,0,0.08);
         }
-        .card__title {
+        .metric-card.span-6 { grid-column: span 6; min-height: 190px; }
+        .metric-card.span-4 { grid-column: span 4; }
+        .metric-card.span-3 { grid-column: span 3; }
+        .metric-card.span-2 { grid-column: span 2; }
+        .metric-card.span-1 { grid-column: span 1; }
+        .metric-card.card-dark {
+            background: #101010;
+            color: #fff;
+        }
+        .metric-card.card-gray {
+            background: #dcdcdc;
+        }
+        .metric-card .title {
             font-size: 12px;
-            margin: 0 0 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin: 0 0 8px;
         }
-        .card__value {
+        .metric-card .value {
             font-size: 44px;
+            font-weight: 400;
             margin: 0;
-            line-height: 1.1;
+        }
+        .metric-card .icon {
+            font-size: 42px;
+            align-self: flex-end;
+            opacity: 0.7;
+            display: inline-flex;
+        }
+        .metric-card .icon i {
+            font-size: inherit;
+        }
+        .metric-card .card-bottom {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .metric-card.span-6 .value {
+            font-size: 52px;
+        }
+        @media (max-width: 1024px) {
+            .metric-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .metric-card.span-6,
+            .metric-card.span-4,
+            .metric-card.span-3,
+            .metric-card.span-2,
+            .metric-card.span-1 {
+                grid-column: span 2;
+            }
+        }
+        @media (max-width: 600px) {
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+            .metric-card.span-6,
+            .metric-card.span-4,
+            .metric-card.span-3,
+            .metric-card.span-2,
+            .metric-card.span-1 {
+                grid-column: span 1;
+            }
         }
         .hamburger {
             position: fixed;
@@ -215,6 +285,8 @@
             'occupied_rooms' => 136,
             'available_rooms' => 0,
             'maintenance_rooms' => 0,
+            'total_users' => 0,
+            'total_rooms' => 0,
             'total_revenue' => 'Rp 0',
         ];
     @endphp
@@ -227,22 +299,47 @@
             <div class="content">
                 <div class="top-line"></div>
 
-                <div class="cards">
-                    <div class="card">
-                        <p class="card__title">Total Pesanan</p>
-                        <p class="card__value">{{ $metrics['total_orders'] }}</p>
+                <div class="metric-grid">
+                    <div class="metric-card span-6">
+                        <p class="title">Total Pendapatan</p>
+                        <p class="value">{{ $metrics['total_revenue'] }}</p>
                     </div>
-                    <div class="card">
-                        <p class="card__title">Jumlah Kamar Terisi</p>
-                        <p class="card__value">{{ $metrics['occupied_rooms'] }}</p>
+
+                    <div class="metric-card span-4">
+                        <p class="title">Total Pesanan</p>
+                        <div class="card-bottom">
+                            <p class="value">{{ $metrics['total_orders'] }}</p>
+                            <span class="icon"><i class="bi bi-cart3"></i></span>
+                        </div>
                     </div>
-                    <div class="card">
-                        <p class="card__title">Jumlah Kamar Maintenance</p>
-                        <p class="card__value">{{ $metrics['maintenance_rooms'] }}</p>
+                    <div class="metric-card span-2">
+                        <p class="title">Total Akun Pengguna</p>
+                        <div class="card-bottom">
+                            <p class="value">{{ $metrics['total_users'] ?? 0 }}</p>
+                            <span class="icon"><i class="bi bi-people"></i></span>
+                        </div>
                     </div>
-                    <div class="card card--wide">
-                        <p class="card__title">Total Pendapatan</p>
-                        <p class="card__value">{{ $metrics['total_revenue'] }}</p>
+
+                    <div class="metric-card span-3 card-dark">
+                        <p class="title">Jumlah Kamar</p>
+                        <div class="card-bottom">
+                            <p class="value">{{ $metrics['total_rooms'] ?? 0 }}</p>
+                            <span class="icon"><i class="bi bi-door-closed"></i></span>
+                        </div>
+                    </div>
+                    <div class="metric-card span-2 card-gray">
+                        <p class="title">Jumlah Kamar Terisi</p>
+                        <div class="card-bottom">
+                            <p class="value">{{ $metrics['occupied_rooms'] }}</p>
+                            <span class="icon"><i class="bi bi-archive"></i></span>
+                        </div>
+                    </div>
+                    <div class="metric-card span-1 card-light">
+                        <p class="title">Jumlah Kamar Tersedia</p>
+                        <div class="card-bottom">
+                            <p class="value">{{ $metrics['available_rooms'] }}</p>
+                            <span class="icon"><i class="bi bi-box-arrow-up-right"></i></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -295,4 +392,3 @@
     </script>
 </body>
 </html>
-

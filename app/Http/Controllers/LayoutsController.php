@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kamar;
 use App\Models\Pembayaran;
 use App\Models\Pemesanan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -55,12 +56,19 @@ class LayoutsController extends Controller
         $availableRooms = Kamar::where('status_kamar', 'Tersedia')->count();
         $maintenanceRooms = Kamar::where('status_kamar', 'Maintenance')->count();
         $totalRevenue = Pembayaran::where('status_pembayaran', 'Telah dibayar')->sum('amount_paid');
+        $totalUsers = User::where(function ($query) {
+            $query->where('id_role', '!=', 1)
+                ->orWhereNull('id_role');
+        })->count();
+        $totalRooms = Kamar::count();
 
         $metrics = [
             'total_orders' => $totalOrders,
             'occupied_rooms' => $occupiedRooms,
             'available_rooms' => $availableRooms,
             'maintenance_rooms' => $maintenanceRooms,
+            'total_users' => $totalUsers,
+            'total_rooms' => $totalRooms,
             'total_revenue' => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),
         ];
 
