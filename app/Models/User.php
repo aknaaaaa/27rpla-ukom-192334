@@ -14,6 +14,11 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens,HasFactory, Notifiable;
 
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'id_role', 'id_role');
+    }
+
     protected $table = 'user';
 
     protected $primaryKey = 'id_user'; 
@@ -26,6 +31,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
     'id_role',
+    'nama_role',
     'nama_user',
     'email',
     'phone_number',

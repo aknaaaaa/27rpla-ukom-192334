@@ -1,521 +1,412 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Profil Pengguna - D'Kasuari</title>
-    <link href="https://fonts.googleapis.com/css2?family=Aboreto&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #AB886D;
-            --accent: #c9a98d;
-            --text-main: #2f2d2c;
-            --text-muted: #8d8784;
-            --white: #ffffff;
-            --sidebar-bg: #edf3ff;
-            --border: #e2d4c9;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Aboreto', sans-serif;
-            color: var(--text-main);
-            background: #dbe5ff;
-            min-height: 100vh;
-        }
-        .profile-layout {
-            display: flex;
-            min-height: 100vh;
-        }
-        .profile-sidebar {
-            width: 230px;
-            background: var(--sidebar-bg);
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-        .sidebar-logo {
-            font-family: 'Mea Culpa', cursive;
-            font-size: 30px;
-            color: var(--primary);
-        }
-        .sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .sidebar-nav button {
-            border: none;
-            border-radius: 12px;
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 14px;
-            background: rgba(255,255,255,0.8);
-            cursor: pointer;
-            transition: all .2s ease;
-            letter-spacing: .5px;
-        }
-        .sidebar-nav button.is-active {
-            background: var(--primary);
-            color: var(--white);
-        }
-        .sidebar-nav button:hover {
-            transform: translateX(4px);
-        }
-        .profile-main {
-            flex: 1;
-            padding: 32px;
-            background: linear-gradient(135deg, #fffaf5, #f7efe7);
-        }
-        .main-shell {
-            background: var(--white);
-            border-radius: 26px;
-            border: 1px solid rgba(171, 136, 109, 0.3);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-            padding: 26px;
-        }
-        .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-        }
-        .main-header h2 {
-            margin: 0;
-            font-weight: 400;
-            letter-spacing: 1px;
-        }
-        .profile-card {
-            display: grid;
-            grid-template-columns: 1fr 0.9fr;
-            gap: 24px;
-        }
-        .card-left {
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 20px;
-            background: rgba(255,255,255,0.9);
-        }
-        .card-right {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .name-row {
-            display: grid;
-            grid-template-columns: 120px 1fr;
-            gap: 20px;
-        }
-        .avatar-large {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: var(--white);
-            display: grid;
-            place-items: center;
-            font-size: 34px;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
-            border: 3px solid rgba(255,255,255,0.6);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
-        .avatar-large img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-        .avatar-large.has-image img {
-            display: block;
-        }
-        .avatar-large.has-image span {
-            display: none;
-        }
-        .avatar-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.45);
-            color: var(--white);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            letter-spacing: 0.5px;
-            opacity: 0;
-            transition: opacity .2s ease;
-            text-transform: uppercase;
-            pointer-events: none;
-        }
-        .avatar-large:hover .avatar-overlay,
-        .avatar-large.is-uploading .avatar-overlay {
-            opacity: 1;
-        }
-        .profile-meta {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            margin-top: 18px;
-        }
-        .meta-box {
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 12px;
-            background: rgba(255,255,255,0.8);
-        }
-        .meta-box span {
-            font-size: 12px;
-            color: var(--text-muted);
-            letter-spacing: 0.4px;
-        }
-        .meta-box strong {
-            display: block;
-            margin-top: 4px;
-        }
-        .bookings-card, .settings-card {
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 18px;
-            background: rgba(255,255,255,0.9);
-        }
-        .bookings-card h3,
-        .settings-card h3 {
-            margin: 0 0 12px;
-            letter-spacing: 0.8px;
-        }
-        .booking-item {
-            border: 1px solid #ddcab9;
-            border-radius: 14px;
-            padding: 12px;
-            background: #fdf5ed;
-            margin-bottom: 12px;
-        }
-        .booking-item strong {
-            display: block;
-            margin-bottom: 4px;
-        }
-        .booking-empty {
-            text-align: center;
-            border: 1px dashed var(--border);
-            border-radius: 16px;
-            padding: 18px;
-            color: var(--text-muted);
-            background: rgba(255,255,255,0.8);
-        }
-        .profile-avatar-mini {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            background: var(--primary);
-            color: var(--white);
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-        }
-        .profile-avatar-mini img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        @media (max-width: 960px) {
-            .profile-card {
-                grid-template-columns: 1fr;
-            }
-            .profile-sidebar {
-                display: none;
-            }
-            .profile-layout {
-                flex-direction: column;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Profil Pengguna - Pemesanan Hotel</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Aboreto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #AB886D;
+      --primary-soft: #f3ebe5;
+      --text-main: #333333;
+      --text-muted: #777777;
+      --white: #ffffff;
+      --border-soft: #e2d4c9;
+      --radius-xl: 20px;
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Aboreto", sans-serif;
+      background: linear-gradient(135deg, #ffffff, #f8f3ef);
+      padding: 30px 15px;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+    }
+
+    .profile-page {
+      width: 100%;
+      max-width: 1100px;
+      background: var(--white);
+      border-radius: 26px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(171, 136, 109, 0.3);
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 26px;
+      background: linear-gradient(120deg, #ffffff, #f7eee7);
+      border-bottom: 1px solid var(--border-soft);
+      gap: 16px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-family: 'Mea Culpa', cursive;
+      color: var(--primary);
+    }
+
+    .logo span {
+      font-weight: bold;
+    }
+
+    .avatar-mini {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* CONTENT GRID */
+    .profile-content {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+      padding: 22px;
+    }
+
+    /* LEFT CARD */
+    .profile-card {
+      padding: 20px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .profile-top {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .avatar-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .avatar-large {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .avatar-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 4px 10px;
+      background: rgba(171, 136, 109, 0.2);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--primary);
+    }
+
+    .profile-details {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .detail-box span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .detail-box strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    /* STATS */
+    .stats-row {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .stat-card {
+      padding: 12px;
+      border-radius: 14px;
+      background: #fbf7f3;
+      border: 1px solid #d8c8bc;
+    }
+
+    .stat-card .label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .stat-card .value {
+      font-size: 18px;
+      margin: 4px 0;
+      color: var(--primary);
+    }
+
+    /* RIGHT SECTION */
+    .card-section {
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      background: var(--white);
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 14px;
+    }
+
+    .card-section h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .booking-item {
+      background: #faf7f4;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #d9c7b9;
+      margin-bottom: 10px;
+    }
+
+    .booking-item strong {
+      font-size: 14px;
+      color: var(--primary);
+    }
+
+    .logout-btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 999px;
+      background: #c0392b;
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: .5px;
+      cursor: pointer;
+      transition: opacity .2s ease;
+      font-family: aboreto;
+    }
+
+    .logout-btn[disabled] {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .profile-content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    @php
-        $displayName = $user->nama_user ?? $user->email;
-        $initial = strtoupper(mb_substr($displayName ?? 'U', 0, 1));
-        $memberSince = optional($user->created_at)->translatedFormat('d M Y');
-        $avatarUrl = $user->avatar_url;
-        $hasAvatar = !empty($avatarUrl);
-    @endphp
+  @php
+    $displayName = $user->nama_user ?? $user->email;
+    $initial = strtoupper(mb_substr($displayName ?? 'U', 0, 1));
+    $memberSince = optional($user->created_at)->format('d M Y');
+  @endphp
+  <div class="profile-page">
+    <!-- HEADER -->
+    <header class="profile-header">
+      <div class="logo">D'kasuari</div>
 
-    <div class="profile-layout">
-        <aside class="profile-sidebar">
-            <div class="sidebar-logo">D'Kasuari</div>
-            <div class="profile-avatar-mini" id="avatarMini" data-initial="{{ $initial }}">
-                @if($hasAvatar)
-                    <img src="{{ $avatarUrl }}" alt="{{ $displayName }}">
-                @else
-                    {{ $initial }}
-                @endif
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="avatar-mini">{{ $initial }}</div>
+        <span>{{ $displayName }}</span>
+      </div>
+
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="profile-content">
+      
+      <!-- LEFT -->
+      <section class="profile-card">
+        <div class="profile-top">
+          <div class="avatar-wrapper">
+            <div class="avatar-large">
+              <span id="avatarInitial">{{ $initial }}</span>
             </div>
-            <nav class="sidebar-nav">
-                <button class="is-active" type="button">PROFILE</button>
-                <button type="button">KERANJANG</button>
-                <button type="button">PEMESANAN</button>
-                <button type="button">RIWAYAT</button>
-                <button type="button" id="logoutBtn">LOG OUT</button>
-            </nav>
-        </aside>
+          </div>
+          <div class="headline">
+            <h2>{{ $displayName }}</h2>
+            <p style="font-size: 13px; color: var(--text-muted);">
+              Member sejak {{ $memberSince ?? '-' }}
+            </p>
+            <div class="badge">Member Aktif</div>
+          </div>
+        </div>
 
-        <section class="profile-main">
-            <div class="main-shell">
-                <div class="main-header">
-                    <div>
-                        <span style="font-size:14px;color:var(--text-muted);letter-spacing:1px;">&#9670; D'KASUARI</span>
-                        <h2>{{ $displayName }}</h2>
-                    </div>
-                    <div style="font-size:24px;letter-spacing:1px;">{{ strtoupper($displayName) }}</div>
-                </div>
+        <div class="profile-details">
+          <div class="detail-box">
+            <span>Email</span>
+            <strong>{{ $user->email }}</strong>
+          </div>
+          <div class="detail-box">
+            <span>Telepon</span>
+            <strong>{{ $user->phone_number ?? '-' }}</strong>
+          </div>
+          <div class="detail-box">
+            <span>ID Pengguna</span>
+            <strong>{{ $user->id_user }}</strong>
+          </div>
+          <div class="detail-box">
+            <span>Email Terverifikasi</span>
+            <strong>{{ $user->email_verified_at ? 'Ya' : 'Belum' }}</strong>
+          </div>
+        </div>
 
-                <div class="profile-card">
-                    <div class="card-left">
-                        <div class="name-row">
-                            <div class="avatar-large {{ $hasAvatar ? 'has-image' : '' }}" id="avatarTrigger">
-                                <img id="avatarImage" @if($hasAvatar) src="{{ $avatarUrl }}" @endif alt="Foto profil">
-                                <span id="avatarInitial">{{ $initial }}</span>
-                                <div class="avatar-overlay">
-                                    <span style="font-size: 22px;">&#128247;</span>
-                                    <span>Ubah Foto</span>
-                                </div>
-                            </div>
-                            <input type="file" id="avatarFileInput" accept="image/*" hidden>
-                            <div>
-                                <h3 style="margin:0;font-size:20px;">{{ $displayName }}</h3>
-                                <div style="font-size:12px;color:var(--text-muted);">Member sejak {{ $memberSince ?? '-' }}</div>
-                                <div style="margin-top:8px;padding:6px 12px;background:rgba(171,136,109,0.15);border-radius:20px;font-size:12px;display:inline-block;">MEMBER AKTIF</div>
-                            </div>
-                        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="label">Token Aktif</span>
+            <div class="value">{{ $user->tokens()->count() }}</div>
+          </div>
+          <div class="stat-card">
+            <span class="label">Nomor Telepon</span>
+            <div class="value">{{ $user->phone_number ?? '-' }}</div>
+          </div>
+          <div class="stat-card">
+            <span class="label">Status</span>
+            <div class="value">{{ $user->email_verified_at ? 'Verified' : 'Guest' }}</div>
+          </div>
+        </div>
+      </section>
 
-                        <div class="profile-meta">
-                            <div class="meta-box">
-                                <span>Email</span>
-                                <strong>{{ $user->email }}</strong>
-                            </div>
-                            <div class="meta-box">
-                                <span>Nomor Telepon</span>
-                                <strong>{{ $user->phone_number ?? '-' }}</strong>
-                            </div>
-                            <div class="meta-box">
-                                <span>ID Pengguna</span>
-                                <strong>{{ $user->id_user }}</strong>
-                            </div>
-                            <div class="meta-box">
-                                <span>Email Terverifikasi</span>
-                                <strong>{{ $user->email_verified_at ? 'Ya' : 'Belum' }}</strong>
-                            </div>
-                            <div class="meta-box">
-                                <span>Status</span>
-                                <strong>{{ ($user->id_role ?? 2) == 1 ? 'Admin' : 'User' }}</strong>
-                            </div>
-                        </div>
-                    </div>
+      <!-- RIGHT -->
+      <div>
+        <section class="card-section">
+          <h3>Pemesanan Aktif</h3>
 
-                    <div class="card-right">
-                        <div class="bookings-card">
-                            <h3>PEMESANAN AKTIF</h3>
-                            @forelse ($orders as $order)
-                                @php
-                                    $checkIn = optional($order->check_in)->translatedFormat('d M Y');
-                                    $nights = $order->total_hari ? $order->total_hari . ' malam' : '-';
-                                    $paymentStatus = $order->pembayaran->status_pembayaran ?? 'Belum dibayar';
-                                    $amount = $order->pembayaran->amount_paid
-                                        ?? ($order->kamar && $order->total_hari
-                                            ? $order->kamar->harga_permalam * $order->total_hari
-                                            : null);
-                                @endphp
-                                <div class="booking-item">
-                                    <strong>{{ $order->kamar->nama_kamar ?? 'Pesanan #' . $order->booking_code }}</strong>
-                                    <p style="font-size:12px;color:var(--text-muted);">
-                                        Check-in {{ $checkIn ?? 'Belum ditentukan' }} | {{ $nights }}
-                                    </p>
-                                    <p style="font-size:13px;color:var(--primary);">
-                                        @if($amount)
-                                            Rp {{ number_format($amount, 0, ',', '.') }}
-                                        @else
-                                            Rp0
-                                        @endif
-                                        ({{ $paymentStatus }})
-                                    </p>
-                                </div>
-                            @empty
-                                <div class="booking-empty">Belum ada pemesanan aktif.</div>
-                            @endforelse
-                        </div>
+          <div class="booking-item">
+            <strong>Grand Aurora Hotel – Deluxe City View</strong>
+            <p style="font-size: 12px; color: var(--text-muted);">
+              Check-in 24 Nov 2025 · 3 malam
+            </p>
+            <p style="font-size: 13px; color: var(--primary);">
+              Rp 3.450.000 (Sudah dibayar)
+            </p>
+          </div>
 
-                        <div class="settings-card">
-                            <h3>PENGATURAN AKUN</h3>
-                            <p style="font-size:12px;color:var(--text-muted);line-height:1.6;">
-                                - Notifikasi Promo: Aktif<br>
-                                - Check-in Cepat: Aktif<br>
-                                - Mode Tenang: Nonaktif
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <div class="booking-item">
+            <strong>Seaside Resort & Spa – Suite</strong>
+            <p style="font-size: 12px; color: var(--text-muted);">
+              Check-in 12 Des 2025 · 2 malam
+            </p>
+            <p style="font-size: 13px; color: var(--primary);">
+              Rp 4.200.000 (Bayar di hotel)
+            </p>
+          </div>
         </section>
-    </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const logoutBtn = document.getElementById('logoutBtn');
+        <section class="card-section">
+          <h3>Pengaturan Akun</h3>
 
-            if (logoutBtn) {
-                const getCookie = (name) => {
-                    const value = `; ${document.cookie}`;
-                    const parts = value.split(`; ${name}=`);
-                    if (parts.length === 2) return parts.pop().split(';').shift();
-                    return null;
-                };
+          <p style="font-size: 12px; color: var(--text-muted);">
+            - Notifikasi Promo: Aktif <br>
+            - Check-in Cepat: Aktif <br>
+            - Mode Tenang: Nonaktif
+          </p>
+        </section>
+      </div>
 
-                logoutBtn.addEventListener('click', async function () {
-                    logoutBtn.disabled = true;
-                    const token = localStorage.getItem('access_token');
+    </main>
 
-                    try {
-                        await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
-                    } catch (error) {
-                        console.warn('Gagal mengambil CSRF cookie', error);
-                    }
+  </div>
 
-                    const xsrf = getCookie('XSRF-TOKEN');
-                    try {
-                        const headers = {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                        };
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const logoutBtn = document.getElementById('logoutBtn');
 
-                        if (token) {
-                            headers['Authorization'] = 'Bearer ' + token;
-                        }
+      if (!logoutBtn) {
+        return;
+      }
 
-                        if (xsrf) {
-                            headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf);
-                        }
+      const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+      };
 
-                        await fetch('/api/auth/logout', {
-                            method: 'POST',
-                            headers,
-                            credentials: 'include',
-                        });
-                    } catch (error) {
-                        console.error('Logout gagal', error);
-                    }
+      logoutBtn.addEventListener('click', async function () {
+        logoutBtn.disabled = true;
+        const token = localStorage.getItem('access_token');
 
-                    localStorage.removeItem('access_token');
-                    ['sanctum_token', 'XSRF-TOKEN', 'laravel_session'].forEach((name) => {
-                        document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-                    });
-                    window.location.href = "{{ route('layouts.register') }}";
-                });
-            }
+        // Pastikan CSRF cookie sudah tersedia supaya middleware stateful sanctum tidak menolak request
+        try {
+          await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
+        } catch (error) {
+          console.warn('Gagal mengambil CSRF cookie', error);
+        }
 
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            const avatarTrigger = document.getElementById('avatarTrigger');
-            const avatarInput = document.getElementById('avatarFileInput');
-            const avatarImg = document.getElementById('avatarImage');
-            const avatarInitial = document.getElementById('avatarInitial');
-            const avatarMini = document.getElementById('avatarMini');
+        const xsrf = getCookie('XSRF-TOKEN');
+        try {
+          const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          };
 
-            const showMessage = (message, type = 'info') => {
-                if (window.showAppToast) {
-                    window.showAppToast(message, type);
-                } else {
-                    alert(message);
-                }
-            };
+          if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+          }
 
-            const toggleAvatarState = (isLoading) => {
-                avatarTrigger?.classList.toggle('is-uploading', Boolean(isLoading));
-            };
+          if (xsrf) {
+            headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf);
+          }
 
-            const updateMiniAvatar = (url) => {
-                if (!avatarMini) return;
-                if (url) {
-                    avatarMini.innerHTML = `<img src="${url}" alt="Foto profil">`;
-                } else if (avatarMini.dataset.initial) {
-                    avatarMini.textContent = avatarMini.dataset.initial;
-                }
-            };
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers,
+            credentials: 'include',
+          });
+        } catch (error) {
+          console.error('Logout gagal', error);
+        }
 
-            const updateAvatarDisplay = (url) => {
-                if (!avatarTrigger) return;
-                if (url) {
-                    avatarTrigger.classList.add('has-image');
-                    if (avatarImg) {
-                        avatarImg.src = url;
-                        avatarImg.style.display = 'block';
-                    }
-                    if (avatarInitial) {
-                        avatarInitial.style.display = 'none';
-                    }
-                    updateMiniAvatar(url);
-                } else {
-                    avatarTrigger.classList.remove('has-image');
-                    if (avatarImg) {
-                        avatarImg.removeAttribute('src');
-                        avatarImg.style.display = 'none';
-                    }
-                    if (avatarInitial) {
-                        avatarInitial.style.display = '';
-                    }
-                    updateMiniAvatar('');
-                }
-            };
-
-            const uploadAvatar = async (file) => {
-                if (!csrfToken) {
-                    showMessage('Token keamanan tidak ditemukan.', 'danger');
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('avatar', file);
-
-                toggleAvatarState(true);
-                try {
-                    const response = await fetch("{{ route('profile.avatar') }}", {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json',
-                        },
-                        body: formData,
-                    });
-
-                    if (!response.ok) {
-                        const error = await response.json().catch(() => ({ message: 'Gagal mengunggah foto.' }));
-                        showMessage(error.message || 'Gagal mengunggah foto.', 'danger');
-                        return;
-                    }
-
-                    const data = await response.json();
-                    if (data.avatar_url) {
-                        updateAvatarDisplay(data.avatar_url);
-                    }
-                    showMessage(data.message || 'Foto profil berhasil diperbarui.', 'success');
-                } catch (error) {
-                    console.error('Upload avatar gagal', error);
-                    showMessage('Terjadi kesalahan saat mengunggah foto.', 'danger');
-                } finally {
-                    toggleAvatarState(false);
-                }
-            };
-
-            avatarTrigger?.addEventListener('click', () => avatarInput?.click());
-
-            avatarInput?.addEventListener('change', function () {
-                if (!this.files || !this.files.length) return;
-                uploadAvatar(this.files[0]);
-                this.value = '';
-            });
+        localStorage.removeItem('access_token');
+        ['sanctum_token', 'XSRF-TOKEN', 'laravel_session'].forEach((name) => {
+          document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
         });
-    </script>
+        window.location.href = "{{ route('layouts.register') }}";
+      });
+    });
+  </script>
 </body>
 </html>

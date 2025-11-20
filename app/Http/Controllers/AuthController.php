@@ -67,7 +67,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $user = Auth::user();
+        $user = Auth::user()->load('role');
         $request->session()->regenerate(); // start session untuk guard web
 
         // Cek apakah Passport sudah dikonfigurasi dan HasApiTokens digunakan

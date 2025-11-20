@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pembayaran;
+use App\Models\Pemesanan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Midtrans\Config;
@@ -57,7 +59,7 @@ class PaymentController extends Controller
             'items.*.name' => 'required|string|max:150',
             'items.*.price' => 'required|numeric|min:1',
             'items.*.quantity' => 'required|integer|min:1',
-            'items.*.id' => 'nullable|string|max:50',
+            'items.*.id' => 'nullable',
             'id_pemesanan' => 'nullable|exists:pemesanans,id_pemesanan',
             'customer.first_name' => 'nullable|string|max:80',
             'customer.email' => 'nullable|email',
@@ -80,6 +82,7 @@ class PaymentController extends Controller
 
         $orderId = 'HOTEL-' . Str::uuid();
         $amount = (int) $request->amount;
+        $pemesananId = $request->id_pemesanan;
 
         $items = collect($request->input('items', []))
             ->values()
@@ -100,9 +103,37 @@ class PaymentController extends Controller
                 'name' => 'Tax & Service',
                 'price' => $tax,
                 'quantity' => 1,
-            ]);
-        }
+                ]);
+
+                session(['last_payment' => [
+                    'status' => $status === 'Telah dibayar' ? 'success' : 'pending',
+                    'order' => $orderId,
+                ]]);
+            }
         $grossAmount = $items->sum(fn ($i) => $i['price'] * $i['quantity']);
+
+        // buat pemesanan minimal jika belum ada id_pemesanan namun user login
+        if (!$pemesananId && Auth::check()) {
+            $firstItem = $items->first();
+            $firstItemId = $firstItem['id'] ?? null;
+            if (!$firstItemId) {
+                return response()->json([
+                    'message' => 'Validasi gagal',
+                    'errors' => ['items' => ['ID kamar tidak ditemukan pada item.']],
+                ], 422);
+            }
+
+            $pemesanan = Pemesanan::create([
+                'id_user' => Auth::id(),
+                'id_kamar' => $firstItemId,
+                'booking_code' => 'BOOK-' . Str::upper(Str::random(6)),
+                'check_in' => Carbon::today(),
+                'check_out' => Carbon::today()->addDay(),
+                'total_hari' => 1,
+            ]);
+            $pemesananId = $pemesanan->id_pemesanan;
+            $orderId = 'PMS-' . $pemesananId . '-' . Str::upper(Str::random(6));
+        }
 
         $baseParams = [
             'transaction_details' => [
@@ -151,20 +182,24 @@ class PaymentController extends Controller
             $response = CoreApi::charge($params);
 
             // Simpan ke tabel pembayarans jika id_pemesanan disertakan
-            if ($request->filled('id_pemesanan')) {
-                $status = match ($response->transaction_status ?? 'pending') {
-                    'capture', 'settlement' => 'Telah dibayar',
-                    'cancel', 'deny', 'expire' => 'Dibatalkan',
+            if ($pemesananId) {
+                $statusRaw = $response->transaction_status ?? 'pending';
+                $fraud = $response->fraud_status ?? null;
+                $status = match ($statusRaw) {
+                    'capture', 'settlement', 'success' => $fraud === 'challenge' ? 'Belum dibayar' : 'Telah dibayar',
+                    'cancel', 'deny', 'expire', 'refund', 'chargeback', 'partial_refund' => 'Dibatalkan',
                     default => 'Belum dibayar',
                 };
 
-                Pembayaran::create([
-                    'id_pemesanan' => $request->id_pemesanan,
-                    'payment_method' => strtoupper($request->payment_method),
-                    'payment_date' => Carbon::today(),
-                    'amount_paid' => $grossAmount,
-                    'status_pembayaran' => $status,
-                ]);
+                Pembayaran::updateOrCreate(
+                    ['id_pemesanan' => $pemesananId],
+                    [
+                        'payment_method' => strtoupper($request->payment_method),
+                        'payment_date' => Carbon::today(),
+                        'amount_paid' => $grossAmount,
+                        'status_pembayaran' => $status,
+                    ]
+                );
             }
 
             return response()->json($response);
@@ -178,5 +213,49 @@ class PaymentController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function notify(Request $request)
+    {
+        $payload = $request->all();
+        $orderId = $payload['order_id'] ?? null;
+        $statusCode = $payload['status_code'] ?? '';
+        $grossAmount = $payload['gross_amount'] ?? '';
+        $signature = $payload['signature_key'] ?? '';
+
+        $serverKey = config('midtrans.server_key');
+        $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        if (!$orderId || !$signature || $signature !== $expectedSignature) {
+            return response()->json(['message' => 'Invalid signature'], 403);
+        }
+
+        $statusRaw = $payload['transaction_status'] ?? 'pending';
+        $fraud = $payload['fraud_status'] ?? null;
+        $status = match ($statusRaw) {
+            'capture', 'settlement', 'success' => $fraud === 'challenge' ? 'Belum dibayar' : 'Telah dibayar',
+            'cancel', 'deny', 'expire', 'refund', 'chargeback', 'partial_refund' => 'Dibatalkan',
+            default => 'Belum dibayar',
+        };
+
+        // coba temukan id_pemesanan dari order_id yang disematkan
+        $pemesananId = null;
+        if (str_starts_with($orderId, 'PMS-')) {
+            $parts = explode('-', $orderId);
+            $pemesananId = $parts[1] ?? null;
+        }
+
+        if ($pemesananId) {
+            Pembayaran::updateOrCreate(
+                ['id_pemesanan' => $pemesananId],
+                [
+                    'payment_method' => strtoupper($payload['payment_type'] ?? 'UNKNOWN'),
+                    'payment_date' => Carbon::today(),
+                    'amount_paid' => (float) $grossAmount,
+                    'status_pembayaran' => $status,
+                ]
+            );
+        }
+
+        return response()->json(['message' => 'ok']);
     }
 }
