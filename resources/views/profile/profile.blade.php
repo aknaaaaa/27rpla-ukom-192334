@@ -96,6 +96,94 @@
         font-weight: 700;
         letter-spacing: 1px;
     }
+    .avatar-mini {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-weight: 600;
+    }
+     .avatar-mini img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+     .avatar-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }.avatar-large {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+     .avatar-large:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+    }
+    .avatar-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .avatar-large.has-image img {
+      display: block;
+    }
+    .avatar-large.has-image #avatarInitial {
+      display: none;
+    }
+    .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      color: var(--white);
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    .avatar-large:hover .avatar-overlay,
+    .avatar-large.is-uploading .avatar-overlay {
+      opacity: 1;
+    }
+
+    .avatar-large.is-uploading {
+      opacity: 0.8;
+      pointer-events: none;
+    }
+    .avatar-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
     .label-badge {
         display: inline-block;
         padding: 4px 10px;
@@ -175,6 +263,9 @@
     $displayName = $user->nama_user ?? $user->email;
     $initial = strtoupper(mb_substr($displayName ?? 'U', 0, 1));
     $memberSince = optional($user->created_at)->format('d M Y');
+    $avatarUrl = $user->avatar_url;
+    $hasAvatar = !empty($avatarUrl);
+
 @endphp
 
 <div class="container" style="margin-top: 30px;">
@@ -221,7 +312,17 @@
                 <div class="card-shell">
                     <div class="card-left">
                         <div class="name-line">
-                            <div class="circle">{{ $initial }}</div>
+                            <div class="avatar-wrapper">
+                                <div class="avatar-large {{ $hasAvatar ? 'has-image' : '' }}" id="avatarTrigger">
+                                    <img id="avatarImage" @if($hasAvatar) src="{{ $avatarUrl }}" @endif alt="Foto profil">
+                                    <span id="avatarInitial">{{ $initial }}</span>
+                                    <div class="avatar-overlay">
+                                        <span style="font-size: 22px;">&#128247;</span>
+                                        <span>Ubah Foto</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="avatarFileInput" accept="image/*" hidden>
+                            </div>
                             <div>
                                 <div style="font-size: 18px; letter-spacing: 0.6px;">{{ $displayName }}</div>
                                 <div class="label-badge">Member aktif</div>
@@ -294,4 +395,7 @@
         </div>
     </div>
 </div>
+<script>
+    
+</script>
 @endsection
