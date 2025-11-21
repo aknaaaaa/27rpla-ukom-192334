@@ -3,6 +3,7 @@
     $statusLower = strtolower($kamar->status_kamar);
     $isReserved = $statusLower === 'telah di reservasi';
     $isMaintenance = $statusLower === 'maintenance';
+    $isBlocked = $isReserved || $isMaintenance;
 
     $imageStyle = '';
     if ($isReserved) {
@@ -21,12 +22,14 @@
                 <img src="{{ $imageUrl }}"
                     class="img-fluid rounded-start room-card-img h-100"
                     alt="{{ $kamar->nama_kamar }}"
+                    onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';"
                     style="{{ $imageStyle }}">
             </div>
         </div>
         <div class="col-md-8">
             <div class="card-body">
                 <h5 class="card-title text-uppercase fw-bold">{{ $kamar->nama_kamar }}</h5>
+                <p class="card-text small mb-1">Kategori: {{ $kamar->kategori ?? 'Standar' }}</p>
                 <p class="card-text small mb-1">Ukuran: {{ $kamar->ukuran_kamar ?? 'Tidak dicantumkan' }}</p>
                 <p class="card-text small mb-1">Status: {{ $kamar->status_kamar }}</p>
                 <p class="card-text mb-2 fw-semibold text-dark">
@@ -45,16 +48,18 @@
                             data-url="{{ route('kamar.show', $kamar->id_kamar) }}">
                         Detail
                     </button>
-                    <a href="{{ route('kamar.show', $kamar->id_kamar) }}"
-                       class="btn btn-outline-primary btn-sm"
-                       data-requires-auth="true"
-                       data-action="add-to-cart"
-                       data-id="{{ $kamar->id_kamar }}"
-                       data-price="{{ $kamar->harga_permalam }}"
-                       data-nama="{{ $kamar->nama_kamar }}"
-                       data-gambar="{{ $imageUrl }}">
-                        Keranjang
-                    </a>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm"
+                            data-requires-auth="true"
+                            data-action="{{ $isBlocked ? '' : 'add-to-cart' }}"
+                            data-id="{{ $kamar->id_kamar }}"
+                            data-price="{{ $kamar->harga_permalam }}"
+                            data-nama="{{ $kamar->nama_kamar }}"
+                            data-status="{{ $kamar->status_kamar }}"
+                            data-gambar="{{ $imageUrl }}"
+                            {{ $isBlocked ? 'disabled' : '' }}>
+                        {{ $isBlocked ? 'Tidak Tersedia' : 'Keranjang' }}
+                    </button>
                 </div>
             </div>
         </div>

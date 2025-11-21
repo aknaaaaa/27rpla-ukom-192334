@@ -235,7 +235,7 @@
               $image = $room->gambar ?: asset('images/discover%20(1).jpg');
             @endphp
             <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-              <img src="{{ $image }}" class="d-block mx-auto discover-img" alt="{{ $room->nama_kamar }}">
+              <img src="{{ $image }}" class="d-block mx-auto discover-img" alt="{{ $room->nama_kamar }}" onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';">
             </div>
           @endforeach
         @else

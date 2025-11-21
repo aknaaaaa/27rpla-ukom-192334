@@ -39,17 +39,46 @@
 <script>
     (function() {
         const fmt = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num || 0);
+        const getBookingDates = () => {
+            try {
+                return JSON.parse(localStorage.getItem('booking_dates') || '{}');
+            } catch (e) {
+                return {};
+            }
+        };
+        const getNights = () => {
+            const { check_in, check_out } = getBookingDates();
+            if (!check_in || !check_out) return 1;
+            const start = new Date(check_in);
+            const end = new Date(check_out);
+            const diffMs = end.getTime() - start.getTime();
+            const nights = Math.round(diffMs / (1000 * 60 * 60 * 24));
+            return nights > 0 ? nights : 1;
+        };
 
         const renderCart = () => {
             const items = JSON.parse(localStorage.getItem('room_cart') || '[]');
             const container = document.getElementById('cartItemsContainer');
             const badge = document.getElementById('cartCountBadge');
             const totalEl = document.getElementById('cartTotal');
+            const dateSummary = document.getElementById('cartDateSummary');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            let hasBlocked = false;
 
             if (!container || !badge || !totalEl) return;
 
             badge.textContent = items.length;
             container.innerHTML = '';
+
+            const nights = getNights();
+            if (dateSummary) {
+                const { check_in, check_out } = getBookingDates();
+                if (check_in && check_out) {
+                    dateSummary.textContent = `${check_in} s/d ${check_out} (${nights} malam)`;
+                } else {
+                    dateSummary.textContent = 'Pilih tanggal & kamar';
+                }
+            }
 
             if (!items.length) {
                 container.innerHTML = '<span class="text-muted">Belum ada kamar di keranjang.</span>';
@@ -61,14 +90,18 @@
             items.forEach((item) => {
                 const qty = Number(item.quantity || 1);
                 const price = Number(item.harga || 0);
-                total += price * qty;
-                const div = document.createElement('div');
-                div.className = 'cart-item d-flex align-items-center gap-2';
-                div.innerHTML = `
-                    <img src="${item.gambar || '{{ asset('images/default.jpg') }}'}" alt="${item.nama || 'Kamar'}">
+                const statusText = (item.status || 'Tersedia').toLowerCase();
+                const isBlocked = statusText !== 'tersedia' && statusText !== 'available';
+                if (isBlocked) hasBlocked = true;
+                total += price * qty * (isBlocked ? 0 : nights);
+                    const div = document.createElement('div');
+                    div.className = 'cart-item d-flex align-items-center gap-2';
+                    div.innerHTML = `
+                    <img src="${item.gambar || '{{ asset('images/default.jpg') }}'}" alt="${item.nama || 'Kamar'}" onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';">
                     <div class="flex-grow-1">
                         <div class="fw-semibold">${item.nama || 'Kamar'}</div>
-                        <div class="text-muted small">${fmt(price)} x ${qty}</div>
+                        <div class="text-muted small">${fmt(price)} x ${qty} x ${nights} malam</div>
+                        ${isBlocked ? '<div class="text-danger small fw-semibold">Tidak tersedia (maintenance / reservasi)</div>' : ''}
                     </div>
                     <button class="btn btn-link text-danger p-0 small" data-remove="${item.id}">Hapus</button>
                 `;
@@ -76,6 +109,10 @@
             });
 
             totalEl.textContent = fmt(total);
+            if (checkoutBtn) {
+                checkoutBtn.disabled = hasBlocked;
+                checkoutBtn.title = hasBlocked ? 'Hapus kamar yang tidak tersedia dulu.' : '';
+            }
 
             container.querySelectorAll('[data-remove]').forEach((btn) => {
                 btn.addEventListener('click', () => {
@@ -95,8 +132,9 @@
         window.addEventListener('DOMContentLoaded', () => {
             renderCart();
             window.addEventListener('cart:updated', renderCart);
+            window.addEventListener('booking:updated', renderCart);
             window.addEventListener('storage', (e) => {
-                if (e.key === 'room_cart') renderCart();
+                if (e.key === 'room_cart' || e.key === 'booking_dates') renderCart();
             });
 
             const viewBtn = document.getElementById('viewCartBtn');

@@ -454,7 +454,9 @@
                     @forelse($rooms as $room)
                         <div class="room-card">
                             <div>
-                                <img src="{{ $room->gambar ?? asset('images/discover%20(1).jpg') }}" alt="{{ $room->nama_kamar }}">
+                                <img src="{{ $room->gambar ?? asset('images/discover%20(1).jpg') }}"
+                                     alt="{{ $room->nama_kamar }}"
+                                     onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';">
                             </div>
                             <div class="room-body">
                                 <div class="room-head">
@@ -465,13 +467,12 @@
                                 </div>
 
                                 <div class="meta">
-                                    <div class="meta-block">
-                                        <h5>Kategori</h5>
-                                        <div class="divider"></div>
-                                        <div class="meta-item"><i class="bi bi-person-standing"></i> 1 Orang</div>
-                                        <div class="meta-item"><i class="bi bi-square"></i> {{ $room->ukuran_kamar ?? '-' }}</div>
-                                        <div class="meta-item"><i class="bi bi-door-closed"></i> Single</div>
-                                    </div>
+                                <div class="meta-block">
+                                    <h5>Kategori</h5>
+                                    <div class="divider"></div>
+                                    <div class="meta-item"><i class="bi bi-tags"></i> {{ $room->kategori ?? 'Standar' }}</div>
+                                    <div class="meta-item"><i class="bi bi-square"></i> {{ $room->ukuran_kamar ?? '-' }}</div>
+                                </div>
                                     <div class="meta-block">
                                         <h5>Fasilitas</h5>
                                         <div class="divider"></div>
@@ -494,6 +495,7 @@
                                             type="button"
                                             data-action="{{ route('admin.rooms.update', $room->id_kamar) }}"
                                             data-nama="{{ $room->nama_kamar }}"
+                                            data-kategori="{{ $room->kategori }}"
                                             data-harga="{{ $room->harga_permalam }}"
                                             data-ukuran="{{ $room->ukuran_kamar }}"
                                             data-status="{{ $room->status_kamar }}"
@@ -544,6 +546,18 @@
                         <input id="roomNameInput" type="text" name="nama_kamar" value="{{ old('nama_kamar') }}" required>
                     </div>
                     <div class="field">
+                        <label>Kategori</label>
+                        <select id="roomKategoriSelect" name="kategori" required>
+                            @php
+                                $categories = ['Standar', 'Superior', 'Deluxe', 'Suite', 'Family', 'Executive'];
+                                $oldKategori = old('kategori');
+                            @endphp
+                            @foreach ($categories as $cat)
+                                <option value="{{ $cat }}" {{ $oldKategori === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field">
                         <label>Harga per malam</label>
                         <input id="roomHargaInput" type="number" name="harga_permalam" min="0" step="1000" value="{{ old('harga_permalam') }}" required>
                     </div>
@@ -582,6 +596,7 @@
         const titleEl = document.getElementById('roomModalTitle');
         const submitBtn = document.getElementById('roomModalSubmit');
         const nameInput = document.getElementById('roomNameInput');
+        const kategoriSelect = document.getElementById('roomKategoriSelect');
         const hargaInput = document.getElementById('roomHargaInput');
         const ukuranInput = document.getElementById('roomUkuranInput');
         const statusSelect = document.getElementById('roomStatusSelect');
@@ -601,6 +616,7 @@
 
         function resetForm() {
             nameInput.value = "{{ old('nama_kamar') }}";
+            kategoriSelect.value = "{{ $oldKategori ?? 'Standar' }}";
             hargaInput.value = "{{ old('harga_permalam') }}";
             ukuranInput.value = "{{ old('ukuran_kamar') }}";
             statusSelect.value = "{{ old('status_kamar') ?? 'Tersedia' }}";
@@ -611,6 +627,7 @@
         function openEditModal(button){
             const action = button.getAttribute('data-action');
             const nama = button.getAttribute('data-nama') || '';
+            const kategori = button.getAttribute('data-kategori') || 'Standar';
             const harga = button.getAttribute('data-harga') || '';
             const ukuran = button.getAttribute('data-ukuran') || '';
             const status = button.getAttribute('data-status') || 'Tersedia';
@@ -623,6 +640,7 @@
             submitBtn.textContent = 'Update kamar';
 
             nameInput.value = nama;
+            kategoriSelect.value = kategori;
             hargaInput.value = harga;
             ukuranInput.value = ukuran;
             statusSelect.value = status;

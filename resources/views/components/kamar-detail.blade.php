@@ -8,7 +8,7 @@
         </div>
         <div class="row">
           <div class="col-md-5">
-            <img id="modalGambarKamar" src="{{ asset('images/default.jpg') }}" class="img-fluid rounded" alt="Kamar">
+            <img id="modalGambarKamar" src="{{ asset('images/default.jpg') }}" class="img-fluid rounded" alt="Kamar" onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';">
           </div>
           <div class="col-md-7">
             <p class="fw-bold mb-1" id="modalHargaKamar">Rp 0 / Malam</p>

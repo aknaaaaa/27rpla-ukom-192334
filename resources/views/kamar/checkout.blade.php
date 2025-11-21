@@ -232,9 +232,14 @@
                 <div class="summary-card">
                     <div class="summary-header">Ringkasan Pemesanan Anda</div>
                     <div id="summaryItems"></div>
+                    <div id="summaryAddons"></div>
                     <div class="summary-item" id="dateSummary">
                         <div>Check-in: <strong id="summaryCheckIn">-</strong></div>
                         <div>Check-out: <strong id="summaryCheckOut">-</strong></div>
+                    </div>
+                    <div class="summary-item d-flex justify-content-between align-items-center">
+                        <span>Durasi Menginap</span>
+                        <strong id="summaryNights">1 malam</strong>
                     </div>
                     <div class="summary-item d-flex justify-content-between align-items-center">
                         <span>Pajak & Service (10%)</span>
@@ -244,6 +249,7 @@
                         <span>Total</span>
                         <span id="summaryTotal">Rp0</span>
                     </div>
+                    <div id="summaryAlert" class="alert alert-warning mt-2 py-2 px-3 small d-none"></div>
                 </div>
             </div>
 
@@ -304,6 +310,50 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row mt-3 g-3">
+                <div class="col-12">
+                    <div class="pill-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Tambahan Fasilitas</h6>
+                            <small class="text-muted">Opsional, akan menambah total</small>
+                        </div>
+                        <div class="addon-list">
+                            <div class="addon-item d-flex justify-content-between align-items-center py-2 border-bottom" data-addon-id="EXTRA_BED" data-addon-price="150000" data-addon-per-night="1">
+                                <div>
+                                    <strong>Extra Bed</strong>
+                                    <div class="text-muted small">Per malam</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">Rp150.000</span>
+                                    <input type="number" min="0" value="0" step="1" class="form-control form-control-sm" style="width:90px;" data-addon-qty>
+                                </div>
+                            </div>
+                            <div class="addon-item d-flex justify-content-between align-items-center py-2 border-bottom" data-addon-id="BREAKFAST" data-addon-price="50000" data-addon-per-night="1">
+                                <div>
+                                    <strong>Sarapan</strong>
+                                    <div class="text-muted small">Per malam / orang</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">Rp50.000</span>
+                                    <input type="number" min="0" value="0" step="1" class="form-control form-control-sm" style="width:90px;" data-addon-qty>
+                                </div>
+                            </div>
+                            <div class="addon-item d-flex justify-content-between align-items-center py-2" data-addon-id="LATE_CHECKOUT" data-addon-price="75000" data-addon-per-night="0">
+                                <div>
+                                    <strong>Late Checkout</strong>
+                                    <div class="text-muted small">Sekali bayar</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">Rp75.000</span>
+                                    <input type="number" min="0" value="0" step="1" class="form-control form-control-sm" style="width:90px;" data-addon-qty>
+                                </div>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2" style="font-size: 12px;">Tambahan akan otomatis dihitung di ringkasan & tagihan.</small>
+                    </div>
+                </div>
+            </div>
             <div id="paymentResult" class="mt-3 small"></div>
         </div>
     </div>
@@ -322,6 +372,9 @@
         const summaryTax = document.getElementById('summaryTax');
         const summaryCheckIn = document.getElementById('summaryCheckIn');
         const summaryCheckOut = document.getElementById('summaryCheckOut');
+        const summaryNights = document.getElementById('summaryNights');
+        const summaryAddons = document.getElementById('summaryAddons');
+        const summaryAlert = document.getElementById('summaryAlert');
         const payBtn = document.getElementById('payBtn');
         const resultBox = document.getElementById('paymentResult');
         const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -335,19 +388,102 @@
         const checkInInput = document.getElementById('checkInInput');
         const checkOutInput = document.getElementById('checkOutInput');
         const otherGuestSwitch = document.getElementById('otherGuestSwitch');
+        const addonNodes = Array.from(document.querySelectorAll('[data-addon-id]'));
 
-        const updateDates = () => {
+        const toInputDate = (dateObj) => dateObj.toISOString().split('T')[0];
+        const addDays = (dateObj, days) => {
+            const clone = new Date(dateObj);
+            clone.setDate(clone.getDate() + days);
+            return clone;
+        };
+
+        const getSavedBookingDates = () => {
+            try {
+                return JSON.parse(localStorage.getItem('booking_dates') || '{}');
+            } catch (err) {
+                return {};
+            }
+        };
+
+        const saveBookingDates = (payload) => {
+            localStorage.setItem('booking_dates', JSON.stringify(payload));
+            window.dispatchEvent(new CustomEvent('booking:updated', { detail: payload }));
+        };
+
+        const computeNights = () => {
+            if (!checkInInput?.value || !checkOutInput?.value) return 1;
+            const start = new Date(checkInInput.value);
+            const end = new Date(checkOutInput.value);
+            const diffMs = end.getTime() - start.getTime();
+            const nights = Math.round(diffMs / (1000 * 60 * 60 * 24));
+            return nights > 0 ? nights : 1;
+        };
+
+        const getSelectedAddons = () => {
+            return addonNodes.map((node) => {
+                const id = node.getAttribute('data-addon-id');
+                const price = Number(node.getAttribute('data-addon-price') || 0);
+                const perNight = node.getAttribute('data-addon-per-night') === '1';
+                const qtyInput = node.querySelector('[data-addon-qty]');
+                const qtyRaw = Number(qtyInput?.value || 0);
+                const qty = Math.max(0, Math.round(qtyRaw));
+                const name = node.querySelector('strong')?.textContent?.trim() || id;
+                return { id, name, price, qty, perNight };
+            }).filter((item) => item.qty > 0 && item.price > 0);
+        };
+
+        const isBlockedStatus = (status) => {
+            const normalized = (status || 'Tersedia').toLowerCase();
+            return normalized !== 'tersedia' && normalized !== 'available';
+        };
+
+        const ensureValidDates = () => {
+            if (!checkInInput || !checkOutInput) return;
+            if (!checkInInput.value) {
+                const today = new Date();
+                checkInInput.value = toInputDate(today);
+            }
+            if (!checkOutInput.value || checkOutInput.value <= checkInInput.value) {
+                checkOutInput.value = toInputDate(addDays(new Date(checkInInput.value), 1));
+            }
+        };
+
+        const hydrateDatesFromStorage = () => {
+            if (!checkInInput || !checkOutInput) return;
+            const saved = getSavedBookingDates();
+            const today = new Date();
+            checkInInput.value = saved.check_in || toInputDate(today);
+            checkOutInput.value = saved.check_out || toInputDate(addDays(today, 1));
+            ensureValidDates();
+        };
+
+        const updateDates = (persist = false) => {
+            ensureValidDates();
             if (summaryCheckIn) summaryCheckIn.textContent = checkInInput?.value || '-';
             if (summaryCheckOut) summaryCheckOut.textContent = checkOutInput?.value || '-';
+            if (persist) {
+                saveBookingDates({
+                    check_in: checkInInput?.value || '',
+                    check_out: checkOutInput?.value || '',
+                });
+            }
+            renderSummary();
         };
-        checkInInput?.addEventListener('change', updateDates);
-        checkOutInput?.addEventListener('change', updateDates);
+
+        checkInInput?.addEventListener('change', () => updateDates(true));
+        checkOutInput?.addEventListener('change', () => updateDates(true));
 
         const renderSummary = () => {
             const items = JSON.parse(localStorage.getItem('room_cart') || '[]');
             if (!summaryItems) return;
 
             summaryItems.innerHTML = '';
+            if (summaryAddons) summaryAddons.innerHTML = '';
+            if (summaryAlert) {
+                summaryAlert.classList.add('d-none');
+                summaryAlert.textContent = '';
+            }
+
             if (!items.length) {
                 summaryItems.innerHTML = `<div class="alert alert-warning py-2 px-3 small">Keranjang masih kosong. Tambah kamar dahulu.</div>`;
                 summaryTotal.textContent = fmt(0);
@@ -356,21 +492,57 @@
                 return;
             }
 
+            const nights = computeNights();
+            if (summaryNights) {
+                summaryNights.textContent = `${nights} malam`;
+            }
+
             let subtotal = 0;
+            let hasBlocked = false;
+
             items.forEach((item) => {
                 const qty = Number(item.quantity || 1);
                 const price = Number(item.harga || 0);
-                subtotal += price * qty;
+                const isBlocked = isBlockedStatus(item.status);
+                if (isBlocked) hasBlocked = true;
+
+                const itemTotal = price * qty * nights;
+                if (!isBlocked) {
+                    subtotal += itemTotal;
+                }
 
                 const div = document.createElement('div');
                 div.className = 'summary-item';
                 div.innerHTML = `
                     <strong>${item.nama || 'Kamar'}</strong>
-                    <div style="font-size:12px;color:#7a6b5f;">${qty} x ${fmt(price)}</div>
-                    <div style="text-align:right;font-weight:700;">${fmt(price * qty)}</div>
+                    <div style="font-size:12px;color:#7a6b5f;">
+                        ${qty} x ${fmt(price)} x ${nights} malam
+                        ${isBlocked ? '<span class="text-danger fw-semibold ms-1">Tidak tersedia</span>' : ''}
+                    </div>
+                    <div style="text-align:right;font-weight:700;">${fmt(isBlocked ? 0 : itemTotal)}</div>
                 `;
                 summaryItems.appendChild(div);
             });
+
+            const addons = getSelectedAddons();
+            let addonSubtotal = 0;
+            addons.forEach((addon) => {
+                const addonTotal = addon.price * addon.qty * (addon.perNight ? nights : 1);
+                addonSubtotal += addonTotal;
+
+                if (summaryAddons) {
+                    const div = document.createElement('div');
+                    div.className = 'summary-item';
+                    div.innerHTML = `
+                        <strong>${addon.name}</strong>
+                        <div style="font-size:12px;color:#7a6b5f;">${addon.qty} x ${fmt(addon.price)} ${addon.perNight ? 'per malam' : ''}</div>
+                        <div style="text-align:right;font-weight:700;">${fmt(addonTotal)}</div>
+                    `;
+                    summaryAddons.appendChild(div);
+                }
+            });
+
+            subtotal += addonSubtotal;
 
             const tax = Math.round(subtotal * 0.10);
             const total = subtotal + tax;
@@ -378,16 +550,26 @@
             summaryTotal.textContent = fmt(total);
 
             if (payBtn) {
-                payBtn.disabled = false;
+                payBtn.disabled = hasBlocked;
                 payBtn.setAttribute('data-total', total.toString());
+            }
+            if (hasBlocked && summaryAlert) {
+                summaryAlert.textContent = 'Ada kamar yang sedang maintenance / sudah direservasi. Hapus kamar tersebut sebelum checkout.';
+                summaryAlert.classList.remove('d-none');
             }
         };
 
         window.addEventListener('DOMContentLoaded', () => {
+            hydrateDatesFromStorage();
             renderSummary();
             updateDates();
         });
         window.addEventListener('cart:updated', renderSummary);
+        addonNodes.forEach((node) => {
+            const qtyInput = node.querySelector('[data-addon-qty]');
+            qtyInput?.addEventListener('input', renderSummary);
+            qtyInput?.addEventListener('change', renderSummary);
+        });
 
         const setResult = (html, variant = 'info') => {
             if (!resultBox) return;
@@ -479,6 +661,12 @@
                 return;
             }
 
+            const unavailable = items.filter((item) => isBlockedStatus(item.status));
+            if (unavailable.length) {
+                setResult('Ada kamar yang sedang maintenance / sudah direservasi. Hapus dulu sebelum checkout.', 'warning');
+                return;
+            }
+
             const booking = getBookingData();
             if (!booking.name || !booking.email || !booking.phone || !booking.check_in || !booking.check_out) {
                 setResult('Lengkapi data tamu dan tanggal check-in/out.', 'warning');
@@ -497,6 +685,8 @@
                 return;
             }
 
+            const nights = computeNights();
+            const addons = getSelectedAddons();
             const payload = {
                 payment_method: method,
                 amount: total,
@@ -504,10 +694,17 @@
                     id: item.id ?? item.kamar_id ?? item.room_id,
                     name: item.nama || 'Kamar',
                     price: Number(item.harga || 0),
-                    quantity: Number(item.quantity || 1),
+                    quantity: Number(item.quantity || 1) * nights,
                 })),
                 booking,
             };
+            const addonItems = addons.map((addon, idx) => ({
+                id: `ADDON-${idx + 1}-${addon.id}`,
+                name: addon.name,
+                price: Number(addon.price || 0),
+                quantity: addon.qty * (addon.perNight ? nights : 1),
+            }));
+            payload.items.push(...addonItems);
             if (orderId) {
                 payload.id_pemesanan = orderId;
             }

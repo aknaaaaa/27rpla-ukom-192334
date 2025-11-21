@@ -25,7 +25,17 @@
             notify();
         };
 
+        const isAvailable = (status) => {
+            if (!status) return true;
+            const s = String(status).toLowerCase();
+            return s === 'tersedia' || s === 'available';
+        };
+
         const addToCart = (payload) => {
+            if (!isAvailable(payload.status)) {
+                window.showAppToast?.('Kamar ini sedang tidak tersedia.', 'warning');
+                return;
+            }
             const items = getCart();
             const exists = items.find((item) => item.id === payload.id);
             if (exists) {
@@ -55,6 +65,7 @@
                         id: Number(btn.getAttribute('data-id')),
                         nama: btn.getAttribute('data-nama') || 'Kamar',
                         harga: parsePrice(btn.getAttribute('data-price') || 0),
+                        status: btn.getAttribute('data-status') || 'Tersedia',
                         quantity: 1,
                         gambar: btn.getAttribute('data-gambar') || undefined,
                     };

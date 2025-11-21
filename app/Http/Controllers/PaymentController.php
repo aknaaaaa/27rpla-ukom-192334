@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pembayaran;
 use App\Models\Pemesanan;
+use App\Models\Kamar;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -155,6 +156,23 @@ class PaymentController extends Controller
             ]);
         }
         $grossAmount = $items->sum(fn ($i) => $i['price'] * $i['quantity']);
+
+        $roomIds = $items
+            ->pluck('id')
+            ->filter(fn ($id) => is_numeric($id))
+            ->values();
+        if ($roomIds->isNotEmpty()) {
+            $blockedRooms = Kamar::whereIn('id_kamar', $roomIds)
+                ->whereIn('status_kamar', ['Maintenance', 'Telah di reservasi'])
+                ->pluck('nama_kamar', 'id_kamar');
+
+            if ($blockedRooms->isNotEmpty()) {
+                return response()->json([
+                    'message' => 'Beberapa kamar sedang tidak tersedia.',
+                    'unavailable' => $blockedRooms,
+                ], 422);
+            }
+        }
 
         // buat pemesanan minimal jika belum ada id_pemesanan namun user login
         if (!$pemesananId && Auth::check()) {

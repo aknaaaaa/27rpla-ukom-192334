@@ -39,7 +39,7 @@
                 <i class="bi {{ $item['icon'] }} menu__icon"></i> {{ $item['label'] }}
             </a>
         @endforeach
-        <a href="{{ route('logout.get') }}" class="menu__item">
+        <a href="{{ route('logout.get') }}" class="menu__item" onclick="localStorage.removeItem('room_cart');localStorage.removeItem('booking_dates');localStorage.removeItem('access_token');">
             <i class="bi bi-box-arrow-right menu__icon"></i> Keluar
         </a>
     </nav>

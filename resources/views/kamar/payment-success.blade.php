@@ -52,6 +52,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // kosongkan keranjang & tanggal setelah berhasil
+        localStorage.removeItem('room_cart');
+        localStorage.removeItem('booking_dates');
+
         let seconds = 5;
         const label = document.getElementById('countdown');
         const interval = setInterval(() => {
