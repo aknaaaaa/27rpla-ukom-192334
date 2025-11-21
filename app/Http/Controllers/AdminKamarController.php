@@ -12,7 +12,7 @@ class AdminKamarController extends Controller
     {
         $rooms = Kamar::latest()->get();
 
-        return view('admin.rooms', [
+        return view('admin.rooms.index', [
             'rooms' => $rooms,
         ]);
     }
@@ -20,7 +20,7 @@ class AdminKamarController extends Controller
     public function edit($id)
     {
         // Edit sekarang dilakukan via modal di halaman daftar kamar
-        return redirect()->route('admin.rooms')->with('edit_id', $id);
+        return redirect()->route('admin.rooms.index')->with('edit_id', $id);
     }
 
     public function store(Request $request)
@@ -50,7 +50,7 @@ class AdminKamarController extends Controller
             'gambar' => $imageUrl,
         ]);
 
-        return redirect()->route('admin.rooms')->with('ok', 'Kamar baru berhasil dibuat.');
+        return redirect()->route('admin.rooms.index')->with('ok', 'Kamar baru berhasil dibuat.');
     }
 
     public function update(Request $request, $id)
@@ -85,7 +85,7 @@ class AdminKamarController extends Controller
             'gambar' => $imageUrl,
         ]);
 
-        return redirect()->route('admin.rooms')->with('ok', 'Kamar berhasil diperbarui.');
+        return redirect()->route('admin.rooms.index')->with('ok', 'Kamar berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -93,6 +93,6 @@ class AdminKamarController extends Controller
         $room = Kamar::findOrFail($id);
         $room->delete();
 
-        return redirect()->route('admin.rooms')->with('ok', 'Kamar berhasil dihapus.');
+        return redirect()->route('admin.rooms.index')->with('ok', 'Kamar berhasil dihapus.');
     }
 }
