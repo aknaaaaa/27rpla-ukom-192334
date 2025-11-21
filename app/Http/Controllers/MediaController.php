@@ -20,14 +20,14 @@ class MediaController extends Controller
             'image' => ['required','image','max:4096','mimes:jpg,jpeg,png,webp'],
         ]);
 
-        $upload = Cloudinary::upload(
+        $upload = Cloudinary::uploadApi()->upload(
             $request->file('image')->getRealPath(),
             ['folder' => env('CLOUDINARY_UPLOAD_FOLDER')]
         );
 
         $item = [
-            'public_id' => $upload->getPublicId(),
-            'url'       => $upload->getSecurePath(),
+            'public_id' => $upload['public_id'] ?? null,
+            'url'       => $upload['secure_url'] ?? null,
         ];
 
         // simpan ke DB sesuai kebutuhan; demo pakai session

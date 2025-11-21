@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Kamar extends Model
 {
-    use HasFactory;
-
+    protected $table = 'kamars';
     protected $primaryKey = 'id_kamar';
+
     protected $fillable = [
         'nama_kamar',
         'harga_permalam',
@@ -19,9 +18,7 @@ class Kamar extends Model
         'status_kamar',
     ];
 
-    public function pemesanans()
-    {
-        return $this->hasMany(Pemesanan::class, 'id_kamar', 'id_kamar');
-    }
+    protected $casts = [
+        'harga_permalam' => 'float',
+    ];
 }
-

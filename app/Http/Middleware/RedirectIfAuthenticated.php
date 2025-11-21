@@ -14,8 +14,8 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                // Sudah login -> langsung ke halaman utama
-                return redirect()->route('layouts.register');
+                
+                return redirect()->route('profile.profile');
             }
         }
 

@@ -72,7 +72,6 @@
         <div class="page-loader__spinner" role="status" aria-label="Loading"></div>
     </div>
     <div id="appToastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
-    @include('layouts.navigation')
     <main class="py-4">
         @yield('content')
     </main>

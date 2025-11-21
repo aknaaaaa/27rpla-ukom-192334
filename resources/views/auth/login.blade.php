@@ -149,9 +149,17 @@
 
             // B. Lakukan Login POST ke Web Route (menggunakan 'web' middleware)
             const response = await axios.post('{{ route('auth.api') }}', { email, password }); 
+
+            if(response.data?.access_token){
+                const token = response.data.access_token;
+                localStorage.setItem('access_token', token);
+                const encoded = encodeURIComponent(token);
+                document.cookie = `sanctum_token=${encoded}; path=/; SameSite=Lax`;
+            }
             
-            // C. Jika berhasil, alihkan pengguna
-            location.href = '/'; 
+            // C. Jika berhasil, alihkan pengguna sesuai role
+            const redirectTo = response.data?.redirect_to || '/';
+            location.href = redirectTo; 
 
         } catch (error) {
             // D. Tangani error (misalnya, email/password salah atau validasi)
@@ -221,7 +229,7 @@
             <input class="input" type="password" name="password" placeholder="********" required>
         </div>
 
-        <button class="btn" type="submit" id="loginBtn">Login</button>
+        <button class="btn" type="submit" id="loginBtn">MASUK</button>
 
         <p class="muted">
             Belum punya akun?
