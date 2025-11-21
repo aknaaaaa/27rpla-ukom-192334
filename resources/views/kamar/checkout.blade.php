@@ -326,6 +326,8 @@
         const resultBox = document.getElementById('paymentResult');
         const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         const orderId = document.getElementById('orderIdHidden')?.value?.trim();
+        const statusBaseUrl = "{{ url('/api/payments/status') }}";
+        let statusTimer = null;
 
         const guestName = document.getElementById('guestName');
         const guestEmail = document.getElementById('guestEmail');
@@ -412,6 +414,64 @@
             other_guest: !!otherGuestSwitch?.checked,
         });
 
+        const stopStatusPolling = () => {
+            if (statusTimer) {
+                clearInterval(statusTimer);
+                statusTimer = null;
+            }
+        };
+
+        const startStatusPolling = (midtransOrderId) => {
+            if (!midtransOrderId || !statusBaseUrl) return;
+
+            stopStatusPolling();
+            let attempts = 0;
+            const maxAttempts = 60; // ~3 menit
+
+            statusTimer = setInterval(async () => {
+                attempts += 1;
+                try {
+                    const res = await fetch(`${statusBaseUrl}/${encodeURIComponent(midtransOrderId)}`, {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json',
+                        },
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        throw new Error(data?.message || 'Gagal cek status pembayaran.');
+                    }
+
+                    const txStatus = (data.transaction_status || '').toLowerCase();
+                    const normalizedStatus = (data.status_pembayaran || '').toLowerCase();
+                    const paidStatuses = ['capture', 'settlement', 'success'];
+                    const canceledStatuses = ['cancel', 'deny', 'expire', 'refund', 'chargeback', 'partial_refund'];
+
+                    if (normalizedStatus === 'telah dibayar' || paidStatuses.includes(txStatus)) {
+                        stopStatusPolling();
+                        window.location.href = "{{ route('checkout.success') }}";
+                        return;
+                    }
+
+                    if (normalizedStatus === 'dibatalkan' || canceledStatuses.includes(txStatus)) {
+                        stopStatusPolling();
+                        setResult('Pembayaran dibatalkan/ditolak oleh Midtrans.', 'danger');
+                        return;
+                    }
+
+                    if (attempts >= maxAttempts) {
+                        stopStatusPolling();
+                        setResult('Belum ada konfirmasi pembayaran. Silakan cek riwayat atau coba lagi.', 'warning');
+                    }
+                } catch (err) {
+                    if (attempts % 4 === 0) {
+                        setResult('Gagal mengecek status pembayaran. Pastikan koneksi internet.', 'warning');
+                    }
+                }
+            }, 3000);
+        };
+
         payBtn?.addEventListener('click', async () => {
             const items = JSON.parse(localStorage.getItem('room_cart') || '[]');
             if (!items.length) {
@@ -497,16 +557,14 @@
                     instruction = 'Transaksi dibuat. Detail:<br><pre class="mb-0 small bg-light p-2 border rounded">' + JSON.stringify(data, null, 2) + '</pre>';
                 }
 
-                setResult(`Transaksi berhasil dibuat.<br>${instruction}`, 'success');
+                const txStatus = data.transaction_status || '';
+                const orderFromResponse = data.order_id || data.app_order_id || data.orderId;
+                setResult(`Transaksi berhasil dibuat.<br>${instruction}<div class="mt-1">Status awal: <strong>${txStatus || 'pending'}</strong>. Menunggu konfirmasi pembayaran...</div>`, 'success');
                 const copyBtn = resultBox?.querySelector('[data-copy-va]');
                 if (copyBtn) {
                     copyBtn.addEventListener('click', () => copyVA(copyBtn.getAttribute('data-copy-va'), copyBtn));
                 }
-                if (method === 'qris' || method === 'gopay') {
-                    setTimeout(() => {
-                        window.location.href = "{{ route('checkout.success') }}";
-                    }, 500);
-                }
+                startStatusPolling(orderFromResponse);
             } catch (error) {
                 setResult('Terjadi kesalahan jaringan.', 'danger');
             } finally {

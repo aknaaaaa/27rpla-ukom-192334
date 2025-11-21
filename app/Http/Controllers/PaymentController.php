@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\CoreApi;
+use Midtrans\Transaction;
 
 class PaymentController extends Controller
 {
@@ -29,6 +30,53 @@ class PaymentController extends Controller
         if (!isset(Config::$curlOptions[CURLOPT_HTTPHEADER])) {
             Config::$curlOptions[CURLOPT_HTTPHEADER] = [];
         }
+    }
+
+    private function mapPaymentStatus(string $statusRaw, ?string $fraudStatus = null): string
+    {
+        return match ($statusRaw) {
+            'capture', 'settlement', 'success' => $fraudStatus === 'challenge' ? 'Belum dibayar' : 'Telah dibayar',
+            'cancel', 'deny', 'expire', 'refund', 'chargeback', 'partial_refund' => 'Dibatalkan',
+            default => 'Belum dibayar',
+        };
+    }
+
+    private function extractPemesananIdFromOrder(?string $orderId): ?string
+    {
+        if (!$orderId || !str_starts_with($orderId, 'PMS-')) {
+            return null;
+        }
+
+        $parts = explode('-', $orderId);
+        return $parts[1] ?? null;
+    }
+
+    private function storePaymentIfAny(?string $pemesananId, string $method, float $amount, string $status): void
+    {
+        if (!$pemesananId) {
+            return;
+        }
+
+        Pembayaran::updateOrCreate(
+            ['id_pemesanan' => $pemesananId],
+            [
+                'payment_method' => strtoupper($method),
+                'payment_date' => Carbon::today(),
+                'amount_paid' => $amount,
+                'status_pembayaran' => $status,
+            ]
+        );
+    }
+
+    private function rememberLastPayment(string $orderId, ?string $pemesananId, string $statusRaw, string $statusNormalized): void
+    {
+        session([
+            'last_payment' => [
+                'status' => $statusNormalized === 'Telah dibayar' ? 'success' : $statusRaw,
+                'order' => $orderId,
+                'id_pemesanan' => $pemesananId,
+            ]
+        ]);
     }
 
     public function createCharge(Request $request)
@@ -182,41 +230,27 @@ class PaymentController extends Controller
                 ]);
                 break;
             default:
-                return response()->json([
-                    'message' => 'Metode belum didukung.',
-                ], 422);
+            return response()->json([
+                'message' => 'Metode belum didukung.',
+            ], 422);
         }
 
         try {
             $response = CoreApi::charge($params);
 
+            $statusRaw = $response->transaction_status ?? 'pending';
+            $fraud = $response->fraud_status ?? null;
+            $status = $this->mapPaymentStatus($statusRaw, $fraud);
+
             // Simpan ke tabel pembayarans jika id_pemesanan disertakan
-            if ($pemesananId) {
-                $statusRaw = $response->transaction_status ?? 'pending';
-                $fraud = $response->fraud_status ?? null;
-                $status = match ($statusRaw) {
-                    'capture', 'settlement', 'success' => $fraud === 'challenge' ? 'Belum dibayar' : 'Telah dibayar',
-                    'cancel', 'deny', 'expire', 'refund', 'chargeback', 'partial_refund' => 'Dibatalkan',
-                    default => 'Belum dibayar',
-                };
+            $this->storePaymentIfAny($pemesananId, $request->payment_method, $grossAmount, $status);
 
-                Pembayaran::updateOrCreate(
-                    ['id_pemesanan' => $pemesananId],
-                    [
-                        'payment_method' => strtoupper($request->payment_method),
-                        'payment_date' => Carbon::today(),
-                        'amount_paid' => $grossAmount,
-                        'status_pembayaran' => $status,
-                    ]
-                );
+            $this->rememberLastPayment($orderId, $pemesananId, $statusRaw, $status);
 
-                session([
-                    'last_payment' => [
-                        'status' => $status === 'Telah dibayar' ? 'success' : 'pending',
-                        'order' => $orderId,
-                    ]
-                ]);
-            }
+            // sisipkan url redirect agar front-end tahu tujuan success
+            $response->app_order_id = $orderId;
+            $response->id_pemesanan = $pemesananId;
+            $response->redirect_url = route('checkout.success');
 
             return response()->json($response);
         } catch (\Exception $e) {
@@ -247,31 +281,61 @@ class PaymentController extends Controller
 
         $statusRaw = $payload['transaction_status'] ?? 'pending';
         $fraud = $payload['fraud_status'] ?? null;
-        $status = match ($statusRaw) {
-            'capture', 'settlement', 'success' => $fraud === 'challenge' ? 'Belum dibayar' : 'Telah dibayar',
-            'cancel', 'deny', 'expire', 'refund', 'chargeback', 'partial_refund' => 'Dibatalkan',
-            default => 'Belum dibayar',
-        };
+        $status = $this->mapPaymentStatus($statusRaw, $fraud);
 
         // coba temukan id_pemesanan dari order_id yang disematkan
-        $pemesananId = null;
-        if (str_starts_with($orderId, 'PMS-')) {
-            $parts = explode('-', $orderId);
-            $pemesananId = $parts[1] ?? null;
-        }
+        $pemesananId = $this->extractPemesananIdFromOrder($orderId);
 
-        if ($pemesananId) {
-            Pembayaran::updateOrCreate(
-                ['id_pemesanan' => $pemesananId],
-                [
-                    'payment_method' => strtoupper($payload['payment_type'] ?? 'UNKNOWN'),
-                    'payment_date' => Carbon::today(),
-                    'amount_paid' => (float) $grossAmount,
-                    'status_pembayaran' => $status,
-                ]
-            );
-        }
+        $this->storePaymentIfAny(
+            $pemesananId,
+            $payload['payment_type'] ?? 'UNKNOWN',
+            (float) $grossAmount,
+            $status
+        );
 
         return response()->json(['message' => 'ok']);
+    }
+
+    public function status(string $orderId)
+    {
+        if (!$orderId) {
+            return response()->json(['message' => 'Order ID tidak ditemukan'], 422);
+        }
+
+        try {
+            $midtransStatus = Transaction::status($orderId);
+            $statusRaw = $midtransStatus->transaction_status ?? 'pending';
+            $fraud = $midtransStatus->fraud_status ?? null;
+            $status = $this->mapPaymentStatus($statusRaw, $fraud);
+
+            $pemesananId = $this->extractPemesananIdFromOrder($orderId);
+            $amount = (float) ($midtransStatus->gross_amount ?? 0);
+
+            $this->storePaymentIfAny(
+                $pemesananId,
+                $midtransStatus->payment_type ?? 'UNKNOWN',
+                $amount,
+                $status
+            );
+
+            $this->rememberLastPayment($orderId, $pemesananId, $statusRaw, $status);
+
+            return response()->json([
+                'order_id' => $orderId,
+                'transaction_status' => $statusRaw,
+                'fraud_status' => $fraud,
+                'status_pembayaran' => $status,
+                'id_pemesanan' => $pemesananId,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Midtrans status check failed', [
+                'message' => $e->getMessage(),
+                'order_id' => $orderId,
+            ]);
+
+            return response()->json([
+                'message' => 'Gagal mengambil status pembayaran',
+            ], 500);
+        }
     }
 }

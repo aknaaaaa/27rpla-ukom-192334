@@ -31,8 +31,9 @@ Route::middleware('sanctum.session')->group(function () {
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
     Route::get('/checkout', [LayoutsController::class, 'checkout'])->name('checkout');
     Route::get('/checkout/success', function () {
-        abort_if(session('last_payment.status') !== 'success', 403);
-        return view('kamar.payment-success');
+        $payment = session()->pull('last_payment');
+        abort_if(!$payment, 403);
+        return view('kamar.payment-success', ['payment' => $payment]);
     })->name('checkout.success');
     Route::post('/payments/charge', [PaymentController::class, 'charge'])->name('payments.charge');
 });
