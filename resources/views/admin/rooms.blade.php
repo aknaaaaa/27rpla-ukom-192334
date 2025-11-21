@@ -452,9 +452,32 @@
 
                 <div class="rooms">
                     @forelse($rooms as $room)
+                        @php
+                            $gambar = $room->gambar;
+                            $imageSrc = asset('images/discover%20(1).jpg');
+                            if ($gambar) {
+                                if (preg_match('#^https?://#i', $gambar)) {
+                                    $imageSrc = $gambar;
+                                } else {
+                                    $clean = ltrim($gambar, '/');
+                                    if (str_starts_with($clean, 'storage/')) {
+                                        $clean = substr($clean, 8);
+                                    }
+                                    // prioritas: storage/public
+                                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($clean)) {
+                                        $imageSrc = \Illuminate\Support\Facades\Storage::url($clean);
+                                    // cek direktori public langsung
+                                    } elseif (file_exists(public_path($clean))) {
+                                        $imageSrc = asset($clean);
+                                    } else {
+                                        $imageSrc = asset('images/discover%20(1).jpg');
+                                    }
+                                }
+                            }
+                        @endphp
                         <div class="room-card">
                             <div>
-                                <img src="{{ $room->gambar ?? asset('images/discover%20(1).jpg') }}" alt="{{ $room->nama_kamar }}">
+                                <img src="{{ $imageSrc }}" alt="{{ $room->nama_kamar }}">
                             </div>
                             <div class="room-body">
                                 <div class="room-head">
@@ -712,4 +735,3 @@
     </form>
 </body>
 </html>
-

@@ -192,11 +192,6 @@
                         <span>Jl. Kasuari RT 03 RW 18</span>
                     </div>
                 </div>
-                <div class="text-uppercase" style="font-size: 11px; letter-spacing: 1px;">
-                    <a href="#" class="me-3 text-decoration-none text-dark">My Order</a>
-                    <a href="#" class="me-3 text-decoration-none text-dark">Cart</a>
-                    <a href="#" class="text-decoration-none text-dark">My Account</a>
-                </div>
             </div>
 
             <div class="booking-shell mt-4">
@@ -326,6 +321,7 @@
         const resultBox = document.getElementById('paymentResult');
         const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         const orderId = document.getElementById('orderIdHidden')?.value?.trim();
+        const statusBaseUrl = "{{ url('/api/payments/status') }}/";
 
         const guestName = document.getElementById('guestName');
         const guestEmail = document.getElementById('guestEmail');
@@ -393,13 +389,15 @@
             resultBox.innerHTML = html;
         };
 
-        const copyVA = async (text, buttonEl) => {
+        const copyVA = async (text, buttonEl, afterCopy = null) => {
             try {
                 await navigator.clipboard.writeText(text);
                 buttonEl.textContent = 'Disalin';
                 setTimeout(() => { buttonEl.textContent = 'Copy'; }, 1200);
+                if (afterCopy) afterCopy();
             } catch (err) {
                 setResult('Gagal menyalin VA. Salin manual: ' + text, 'warning');
+                if (afterCopy) afterCopy();
             }
         };
 
@@ -411,6 +409,57 @@
             check_out: checkOutInput?.value || '',
             other_guest: !!otherGuestSwitch?.checked,
         });
+
+        const pollPaymentStatus = (orderRef, methodLabel = '') => {
+            if (!orderRef) return;
+            let attempt = 0;
+
+            const check = async () => {
+                attempt += 1;
+                try {
+                    const res = await fetch(statusBaseUrl + encodeURIComponent(orderRef), {
+                        credentials: 'same-origin',
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data?.message || 'Gagal cek status');
+
+                    const raw = (data.status || '').toLowerCase();
+                    const nice = (data.nice_status || '').toLowerCase();
+                    const isPaid = ['capture', 'settlement', 'success'].includes(raw) || nice === 'telah dibayar';
+                    const isFailed = ['cancel', 'deny', 'expire'].includes(raw) || nice === 'dibatalkan';
+
+                    if (isPaid) {
+                        setResult('Pembayaran dikonfirmasi. Mengarahkan ke halaman sukses...', 'success');
+                        setTimeout(() => {
+                            window.location.href = "{{ route('checkout.success') }}";
+                        }, 600);
+                        return;
+                    }
+
+                    if (isFailed) {
+                        setResult('Transaksi dibatalkan atau kedaluwarsa. Silakan buat transaksi baru.', 'danger');
+                        return;
+                    }
+
+                    if (attempt < 12) {
+                        const label = methodLabel || raw || 'VA';
+                        setResult(`Menunggu pembayaran ${label.toUpperCase()} dikonfirmasi...`, 'info');
+                        setTimeout(check, 2500);
+                    } else {
+                        setResult(`Status terakhir: ${nice || raw || 'pending'}. Silakan cek lagi beberapa saat.`, 'warning');
+                    }
+                } catch (err) {
+                    if (attempt < 5) {
+                        setTimeout(check, 3000);
+                    } else {
+                        setResult('Gagal mengecek status pembayaran. Coba refresh halaman.', 'danger');
+                    }
+                }
+            };
+
+            check();
+        };
 
         payBtn?.addEventListener('click', async () => {
             const items = JSON.parse(localStorage.getItem('room_cart') || '[]');
@@ -473,6 +522,7 @@
                     return;
                 }
 
+                const orderRef = data.order_id || orderId || payload.id_pemesanan || '';
                 let instruction = '';
                 if (data.va_numbers?.length) {
                     const va = data.va_numbers[0];
@@ -497,15 +547,17 @@
                     instruction = 'Transaksi dibuat. Detail:<br><pre class="mb-0 small bg-light p-2 border rounded">' + JSON.stringify(data, null, 2) + '</pre>';
                 }
 
-                setResult(`Transaksi berhasil dibuat.<br>${instruction}`, 'success');
+                const waitingMsg = method === 'bca' || method === 'bni'
+                    ? '<div class="mt-2">Salin VA dulu; pengecekan status akan otomatis dimulai setelah tombol copy ditekan.</div>'
+                    : '<div class="mt-2">Menunggu konfirmasi pembayaran...</div>';
+                setResult(`Transaksi berhasil dibuat.<br>${instruction}${waitingMsg}`, 'success');
                 const copyBtn = resultBox?.querySelector('[data-copy-va]');
                 if (copyBtn) {
-                    copyBtn.addEventListener('click', () => copyVA(copyBtn.getAttribute('data-copy-va'), copyBtn));
-                }
-                if (method === 'qris' || method === 'gopay') {
-                    setTimeout(() => {
-                        window.location.href = "{{ route('checkout.success') }}";
-                    }, 500);
+                    copyBtn.addEventListener('click', () => copyVA(copyBtn.getAttribute('data-copy-va'), copyBtn, () => {
+                        pollPaymentStatus(orderRef, method);
+                    }));
+                } else {
+                    pollPaymentStatus(orderRef, method);
                 }
             } catch (error) {
                 setResult('Terjadi kesalahan jaringan.', 'danger');

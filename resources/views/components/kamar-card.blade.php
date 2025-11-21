@@ -3,6 +3,7 @@
     $statusLower = strtolower($kamar->status_kamar);
     $isReserved = $statusLower === 'telah di reservasi';
     $isMaintenance = $statusLower === 'maintenance';
+    $isUnavailable = $isReserved || $isMaintenance;
 
     $imageStyle = '';
     if ($isReserved) {
@@ -45,16 +46,22 @@
                             data-url="{{ route('kamar.show', $kamar->id_kamar) }}">
                         Detail
                     </button>
-                    <a href="{{ route('kamar.show', $kamar->id_kamar) }}"
-                       class="btn btn-outline-primary btn-sm"
-                       data-requires-auth="true"
-                       data-action="add-to-cart"
-                       data-id="{{ $kamar->id_kamar }}"
-                       data-price="{{ $kamar->harga_permalam }}"
-                       data-nama="{{ $kamar->nama_kamar }}"
-                       data-gambar="{{ $imageUrl }}">
-                        Keranjang
-                    </a>
+                    @if($isUnavailable)
+                        <button class="btn btn-outline-secondary btn-sm" disabled title="Tidak tersedia untuk dipesan">
+                            Keranjang
+                        </button>
+                    @else
+                        <a href="{{ route('kamar.show', $kamar->id_kamar) }}"
+                           class="btn btn-outline-primary btn-sm"
+                           data-requires-auth="true"
+                           data-action="add-to-cart"
+                           data-id="{{ $kamar->id_kamar }}"
+                           data-price="{{ $kamar->harga_permalam }}"
+                           data-nama="{{ $kamar->nama_kamar }}"
+                           data-gambar="{{ $imageUrl }}">
+                            Keranjang
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>

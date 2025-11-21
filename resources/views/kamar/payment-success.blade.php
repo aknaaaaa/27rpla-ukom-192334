@@ -41,27 +41,29 @@
 <div class="container">
     <div class="success-shell">
         <div class="success-card">
-            <div class="success-icon">✓</div>
+            <div class="success-icon">&#10003;</div>
             <h2 class="fw-bold">Pembayaran Berhasil</h2>
             <p class="text-muted mb-3">Terima kasih telah melakukan pembayaran. Detail pemesanan bisa Anda lihat di halaman riwayat.</p>
-            <a href="{{ route('profile.profile') }}" class="btn btn-primary mt-2">Lihat Riwayat Sekarang</a>
-            <div class="count-text">Anda akan dialihkan dalam <span id="countdown">5</span> detik...</div>
+            <a href="{{ route('profile.profile', ['tab' => 'history']) }}" class="btn btn-primary mt-2">Lihat Riwayat Sekarang</a>
+            <div class="count-text">Mengalihkan ke riwayat pemesanan...</div>
         </div>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        let seconds = 5;
-        const label = document.getElementById('countdown');
-        const interval = setInterval(() => {
-            seconds -= 1;
-            if (label) label.textContent = seconds;
-            if (seconds <= 0) {
-                clearInterval(interval);
-                window.location.href = "{{ route('profile.profile') }}";
-            }
-        }, 1000);
+        @auth
+        const target = "{{ route('profile.profile', ['tab' => 'history']) }}";
+        setTimeout(() => {
+            window.location.href = target;
+        }, 5000);
+        @else
+        // jika session login habis, arahkan ke login agar tidak diam di halaman kosong
+        const loginUrl = "{{ route('layouts.login') }}";
+        setTimeout(() => {
+            window.location.href = loginUrl;
+        }, 5000);
+        @endauth
     });
-</script>
+    </script>
 @endsection

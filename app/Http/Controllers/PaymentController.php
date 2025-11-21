@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\CoreApi;
+use Midtrans\Transaction;
 
 class PaymentController extends Controller
 {
@@ -98,6 +99,7 @@ class PaymentController extends Controller
 
         $subtotal = $items->sum(fn ($i) => $i['price'] * $i['quantity']);
         $tax = max(0, $amount - $subtotal);
+        $status = 'Belum dibayar'; // nilai default agar tidak undefined sebelum dipakai
         if ($tax > 0) {
             $items->push([
                 'id' => 'TAX',
@@ -278,5 +280,62 @@ class PaymentController extends Controller
         }
 
         return response()->json(['message' => 'ok']);
+    }
+
+    public function status(string $orderId)
+    {
+        try {
+            $response = Transaction::status($orderId);
+            $statusRaw = $response->transaction_status ?? 'pending';
+            $fraud = $response->fraud_status ?? null;
+            $status = match ($statusRaw) {
+                'capture', 'settlement', 'success' => $fraud === 'challenge' ? 'Belum dibayar' : 'Telah dibayar',
+                'cancel', 'deny', 'expire', 'refund', 'chargeback', 'partial_refund' => 'Dibatalkan',
+                default => 'Belum dibayar',
+            };
+
+            $pemesananId = null;
+            if (str_starts_with($orderId, 'PMS-')) {
+                $parts = explode('-', $orderId);
+                $pemesananId = $parts[1] ?? null;
+            }
+
+            if ($pemesananId) {
+                Pembayaran::updateOrCreate(
+                    ['id_pemesanan' => $pemesananId],
+                    [
+                        'payment_method' => strtoupper($response->payment_type ?? 'UNKNOWN'),
+                        'payment_date' => Carbon::today(),
+                        'amount_paid' => (float) ($response->gross_amount ?? 0),
+                        'status_pembayaran' => $status,
+                    ]
+                );
+            }
+
+            if ($status === 'Telah dibayar') {
+                session([
+                    'last_payment' => [
+                        'status' => 'success',
+                        'order' => $orderId,
+                    ],
+                ]);
+            }
+
+            return response()->json([
+                'order_id' => $orderId,
+                'status' => $statusRaw,
+                'nice_status' => $status,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Midtrans status check failed', [
+                'message' => $e->getMessage(),
+                'order_id' => $orderId,
+            ]);
+
+            return response()->json([
+                'message' => 'Gagal mengambil status pembayaran',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
