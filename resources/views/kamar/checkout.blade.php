@@ -192,11 +192,6 @@
                         <span>Jl. Kasuari RT 03 RW 18</span>
                     </div>
                 </div>
-                <div class="text-uppercase" style="font-size: 11px; letter-spacing: 1px;">
-                    <a href="#" class="me-3 text-decoration-none text-dark">My Order</a>
-                    <a href="#" class="me-3 text-decoration-none text-dark">Cart</a>
-                    <a href="#" class="text-decoration-none text-dark">My Account</a>
-                </div>
             </div>
 
             <div class="booking-shell mt-4">
