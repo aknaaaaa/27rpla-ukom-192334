@@ -11,31 +11,21 @@ return new class extends Migration
      */
 public function up(): void
 {
-    Schema::create('pemesanan', function (Blueprint $table) {
+    Schema::create('cart', function (Blueprint $table) {
         $table->id();
         $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-        $table->string('kode_pesanan')->unique();
-        $table->date('tanggal_pemesanan');
         $table->date('tanggal_checkin');
         $table->date('tanggal_checkout');
-        $table->string('status')->default('Menunggu');
-
-        // Jika memesan untuk orang lain
-        $table->string('nama_penginap')->nullable();
-        $table->string('email_penginap')->nullable();
-        $table->string('telepon_penginap')->nullable();
-
-        $table->integer('total_harga')->default(0);
-
         $table->timestamps();
     });
 }
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('pemesanans');
+        Schema::dropIfExists('keranjang');
     }
 };
