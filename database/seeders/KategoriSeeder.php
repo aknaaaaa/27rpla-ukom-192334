@@ -9,35 +9,34 @@ class KategoriSeeder extends Seeder
 {
 public function run()
 {
-    $kategori = [
-        ['name' => 'Tipe Kasur'],
-        ['name' => 'Tipe Kapasitas'],
-        ['name' => 'Tipe Kamar'],
-    ];
+$kategori = [
+    ['nama_kategori' => 'Tipe Kasur'],
+    ['nama_kategori' => 'Tipe Kapasitas'],
+    ['nama_kategori' => 'Tipe Kamar'],
+];
 
-    DB::table('categories')->insert($kategori);
+DB::table('kategori')->insert($kategori);
 
-    // Ambil ID setelah insert
-    $kasurId     = DB::table('categories')->where('name', 'Tipe Kasur')->first()->id;
-    $kapasitasId = DB::table('categories')->where('name', 'Tipe Kapasitas')->first()->id;
-    $kamarId     = DB::table('categories')->where('name', 'Tipe Kamar')->first()->id;
+// Ambil ID kategori
+$kasurId     = DB::table('kategori')->where('nama_kategori', 'Tipe Kasur')->first()->id_kategori;
+$kapasitasId = DB::table('kategori')->where('nama_kategori', 'Tipe Kapasitas')->first()->id_kategori;
+$kamarId     = DB::table('kategori')->where('nama_kategori', 'Tipe Kamar')->first()->id_kategori;
 
-    // Insert isi kategori
-    DB::table('category_items')->insert([
-        ['category_id' => $kasurId, 'name' => 'Single'],
-        ['category_id' => $kasurId, 'name' => 'Double'],
-        ['category_id' => $kasurId, 'name' => 'Twin'],
-        ['category_id' => $kasurId, 'name' => 'King'],
-        ['category_id' => $kasurId, 'name' => 'Suite'],
-        ['category_id' => $kasurId, 'name' => 'Superior'],
+// Insert item
+DB::table('kategori_items')->insert([
+    ['id_kategori' => $kasurId, 'name' => 'Single'],
+    ['id_kategori' => $kasurId, 'name' => 'Double'],
+    ['id_kategori' => $kasurId, 'name' => 'Twin'],
+    ['id_kategori' => $kasurId, 'name' => 'King'],
+    ['id_kategori' => $kasurId, 'name' => 'Suite'],
+    ['id_kategori' => $kasurId, 'name' => 'Superior'],
 
-        ['category_id' => $kapasitasId, 'name' => '1 Orang'],
-        ['category_id' => $kapasitasId, 'name' => '2 Orang'],
-        ['category_id' => $kapasitasId, 'name' => '4 Orang'],
+    ['id_kategori' => $kapasitasId, 'name' => '1 Orang'],
+    ['id_kategori' => $kapasitasId, 'name' => '2 Orang'],
+    ['id_kategori' => $kapasitasId, 'name' => '4 Orang'],
 
-        ['category_id' => $kamarId, 'name' => 'Family Room'],
-        ['category_id' => $kamarId, 'name' => 'Ruang Terhubung'],
-    ]);
-}
-}
+    ['id_kategori' => $kamarId, 'name' => 'Family Room'],
+    ['id_kategori' => $kamarId, 'name' => 'Ruang Terhubung'],
+]);
+}}
 

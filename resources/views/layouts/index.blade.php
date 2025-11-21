@@ -187,6 +187,12 @@
   color: #fff;
   text-align: center;
   box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+.sekilas-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
 }
 .sekilas-card img {
   width: 100%;
@@ -270,7 +276,17 @@
           @php
             $image = $room->gambar ?: asset('images/discover%20(1).jpg');
           @endphp
-          <div class="sekilas-card">
+          <div class="sekilas-card" 
+               style="cursor: pointer;"
+               data-bs-toggle="modal"
+               data-bs-target="#kamarDetailModal"
+               data-nama="{{ $room->nama_kamar }}"
+               data-deskripsi="{{ $room->deskripsi ?? 'Deskripsi kamar masih kosong.' }}"
+               data-gambar="{{ $image }}"
+               data-harga="Rp{{ number_format($room->harga_permalam, 0, ',', '.') }} / Malam"
+               data-ukuran="{{ $room->ukuran_kamar ?? 'Tidak dicantumkan' }}"
+               data-status="{{ $room->status_kamar }}"
+               data-url="{{ route('kamar.show', $room->id_kamar) }}">
             <img src="{{ $image }}" alt="{{ $room->nama_kamar }}">
             <h5>{{ $room->nama_kamar }}</h5>
           </div>

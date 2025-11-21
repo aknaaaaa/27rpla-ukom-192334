@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CategoryItem;
 
-class Category extends Model
+class Kategori extends Model
 {
-    protected $table = 'categories'; // jika tabelnya categories
-
+    protected $table = 'kategori';
+    protected $primaryKey = 'id_kategori';
 
     public function items()
     {
-        return $this->hasMany(CategoryItem::class);
+        return $this->hasMany(CategoryItem::class, 'category_id');
     }
 }
-

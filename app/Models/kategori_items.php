@@ -7,12 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class CategoryItem extends Model
 {
-    protected $fillable = ['category_id', 'name'];
+    use HasFactory;
+
+    protected $table = 'category_items'; // sesuaikan nama tabelnya
+    protected $primaryKey = 'id_category_item'; // kalau pakai PK ini
+
+    protected $fillable = [
+        'category_id',
+        'name'
+    ];
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Kategori::class, 'category_id');
     }
 }
-
-

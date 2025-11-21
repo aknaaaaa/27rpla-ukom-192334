@@ -36,16 +36,21 @@ async function cekProfil(){
 
     if(res.ok){
       const data = await res.json().catch(() => ({}));
+      console.log('Auth Check Response:', data); // Debug
+      
       const roleId = Number(data?.user?.id_role ?? 0);
+      console.log('User Role ID:', roleId); // Debug
+      
       const target = roleId === 1
         ? "{{ route('admin.dashboard') }}"
         : "{{ route('profile.profile') }}";
 
+      console.log('Redirecting to:', target); // Debug
       window.location.href = target;
       return;
     }
   }catch(e){
-    console.error(e);
+    console.error('Error in cekProfil:', e);
   }
 
   localStorage.removeItem('access_token');

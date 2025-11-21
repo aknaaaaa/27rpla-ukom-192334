@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Kamar - D'Kasuari</title>
-
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <style>
         :root {
             --text-main: #2c2c2c;
@@ -50,7 +47,7 @@
             color: var(--muted);
             text-transform: uppercase;
         }
-        .menu { margin-top: 40px; display: grid; gap: 18px; }
+        .menu { margin-top: 40px; display: grid, gap: 18px; }
         .menu__item {
             display: flex;
             align-items: center;
@@ -151,7 +148,6 @@
             color: white;
             transition: 0.3s ease; /* biar halus */
         }
-
         .tutup-btn:hover {
             background: #777; /* warna saat hover */
             cursor: pointer;
@@ -261,7 +257,6 @@
             font-family: 'Aboreto', sans-serif;
             text-decoration: none;
             display: inline-flex;
-            /* align-items: center; */
             justify-content: center;
         }
         /* Confirm modal */
@@ -432,7 +427,6 @@
     <button class="hamburger" id="sidebarToggle" aria-label="Toggle menu"><i class="bi bi-list"></i></button>
     <div class="dashboard-shell">
         @include('admin.partials.sidebar', ['active' => 'rooms'])
-
         <main class="main">
             <div class="content">
                 <div class="top-line"></div>
@@ -445,11 +439,9 @@
                         </ul>
                     </div>
                 @endif
-
                 <div style="text-align:right; margin-bottom:12px;">
                     <button class="btn-new" type="button" onclick="openModal()">Buat kamar baru</button>
                 </div>
-
                 <div class="rooms">
                     @forelse($rooms as $room)
                         <div class="room-card">
@@ -465,14 +457,13 @@
                                         Status: {{ $room->status_kamar ?? 'Tersedia' }}
                                     </div>
                                 </div>
-
                                 <div class="meta">
-                                <div class="meta-block">
-                                    <h5>Kategori</h5>
-                                    <div class="divider"></div>
-                                    <div class="meta-item"><i class="bi bi-tags"></i> {{ $room->kategori ?? 'Standar' }}</div>
-                                    <div class="meta-item"><i class="bi bi-square"></i> {{ $room->ukuran_kamar ?? '-' }}</div>
-                                </div>
+                                    <div class="meta-block">
+                                        <h5>Kategori</h5>
+                                        <div class="divider"></div>
+                                        <div class="meta-item"><i class="bi bi-tags"></i> {{ $room->kategori ?? 'Standar' }}</div>
+                                        <div class="meta-item"><i class="bi bi-square"></i> {{ $room->ukuran_kamar ?? '-' }}</div>
+                                    </div>
                                     <div class="meta-block">
                                         <h5>Fasilitas</h5>
                                         <div class="divider"></div>
@@ -482,14 +473,12 @@
                                         <div class="meta-item"><p>DESKRIPSI:</p>{{ $room->deskripsi ?? 'Tidak bisa refund & reschedule' }}</div>
                                     </div>
                                 </div>
-
                                 <div class="status-price">
                                     <div class="status-badges">
                                         <span class="badge-muted">{{ $room->status_kamar }}</span>
                                     </div>
                                     <div class="price">RP{{ number_format($room->harga_permalam, 0, ',', '.') }} / MALAM</div>
                                 </div>
-
                                 <div class="actions">
                                     <button class="btn-pill"
                                             type="button"
@@ -535,7 +524,6 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h4 id="roomModalTitle" style="margin:0; letter-spacing:1px;">Buat kamar baru</h4>
                 <button type="button" class="btn-new tutup-btn" onclick="closeModal()">Tutup</button>
-
             </div>
             <form id="roomModalForm" method="POST" action="{{ route('admin.rooms.store') }}" enctype="multipart/form-data">
                 @csrf
@@ -546,14 +534,29 @@
                         <input id="roomNameInput" type="text" name="nama_kamar" value="{{ old('nama_kamar') }}" required>
                     </div>
                     <div class="field">
-                        <label>Kategori</label>
-                        <select id="roomKategoriSelect" name="kategori" required>
-                            @php
-                                $categories = ['Standar', 'Superior', 'Deluxe', 'Suite', 'Family', 'Executive'];
-                                $oldKategori = old('kategori');
-                            @endphp
-                            @foreach ($categories as $cat)
-                                <option value="{{ $cat }}" {{ $oldKategori === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                        <label>Mattress Type</label>
+                        <select id="roomMattressSelect" name="mattress_type" required>
+                            <option value="">Pilih Mattress Type</option>
+                            @foreach (['Single','Double','Twin','King','Suite','Superior'] as $type)
+                                <option value="{{ $type }}" {{ old('mattress_type') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Room Capacity</label>
+                        <select id="roomCapacitySelect" name="room_capacity" required>
+                            <option value="">Pilih Room Capacity</option>
+                            @foreach (['1 Orang','2 Orang','4 Orang'] as $capacity)
+                                <option value="{{ $capacity }}" {{ old('room_capacity') == $capacity ? 'selected' : '' }}>{{ $capacity }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Room Type</label>
+                        <select id="roomTypeSelect" name="room_type" required>
+                            <option value="">Pilih Room Type</option>
+                            @foreach (['Family Room','Ruang Terhubung'] as $type)
+                                <option value="{{ $type }}" {{ old('room_type') == $type ? 'selected' : '' }}>{{ $type }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -561,32 +564,30 @@
                         <label>Harga per malam</label>
                         <input id="roomHargaInput" type="number" name="harga_permalam" min="0" step="1000" value="{{ old('harga_permalam') }}" required>
                     </div>
-                    <div class="field">
+                    <div class="field"></div>
                         <label>Ukuran kamar</label>
                         <input id="roomUkuranInput" type="text" name="ukuran_kamar" value="{{ old('ukuran_kamar') }}" placeholder="contoh: 10 m2">
                     </div>
-                        <div class="field">
-                            <label>Stok / Jumlah Kamar</label>
-                            <input id="roomStokInput" type="number" name="stok_kamar" min="0" value="{{ old('stok_kamar') }}" required>
-                        </div>
                     <div class="field">
-                    <label>Status</label>
-                    <select id="roomStatusSelect" name="status_kamar">
-                        <option value="Tersedia">Tersedia</option>
-                        <option value="Telah di reservasi">Telah di reservasi</option>
-                        <option value="Maintenance">Maintenance</option>
-                    </select>
+                        <label>Stok / Jumlah Kamar</label>
+                        <input id="roomStokInput" type="number" name="stok_kamar" min="0" value="{{ old('stok_kamar') }}" required>
+                    </div>
+                    <div class="field">
+                        <label>Status</label>
+                        <select id="roomStatusSelect" name="status_kamar">
+                            <option value="Tersedia">Tersedia</option>
+                            <option value="Telah di reservasi">Telah di reservasi</option>
+                            <option value="Maintenance">Maintenance</option>
+                        </select>
+                    </div>
                 </div>
-
-                    </div>
-                    <div class="field" style="grid-column: 1 / -1;">
-                        <label>Deskripsi</label>
-                        <textarea id="roomDeskripsiInput" name="deskripsi" placeholder="Detail singkat kamar">{{ old('deskripsi') }}</textarea>
-                    </div>
-                    <div class="field">
-                        <label>Gambar <small style="color:#777;">(kosongkan saat edit jika tidak diganti)</small></label>
-                        <input id="roomImageInput" type="file" name="image" accept="image/*" required>
-                    </div>
+                <div class="field" style="grid-column: 1 / -1;">
+                    <label>Deskripsi</label>
+                    <textarea id="roomDeskripsiInput" name="deskripsi" placeholder="Detail singkat kamar">{{ old('deskripsi') }}</textarea>
+                </div>
+                <div class="field">
+                    <label>Gambar <small style="color:#777;">(kosongkan saat edit jika tidak diganti)</small></label>
+                    <input id="roomImageInput" type="file" name="image" accept="image/*" required>
                 </div>
                 <div class="actions-inline" style="margin-top:12px;">
                     <button id="roomModalSubmit" type="submit" class="btn-new">Simpan kamar</button>
@@ -594,145 +595,150 @@
             </form>
         </div>
     </div>
-
     <script>
-        
-        const roomModal = document.getElementById('roomModal');
-        const roomForm = document.getElementById('roomModalForm');
-        const methodInput = document.getElementById('roomModalMethod');
-        const titleEl = document.getElementById('roomModalTitle');
-        const submitBtn = document.getElementById('roomModalSubmit');
-        const nameInput = document.getElementById('roomNameInput');
-        const kategoriSelect = document.getElementById('roomKategoriSelect');
-        const hargaInput = document.getElementById('roomHargaInput');
-        const ukuranInput = document.getElementById('roomUkuranInput');
-        const statusSelect = document.getElementById('roomStatusSelect');
-        const deskripsiInput = document.getElementById('roomDeskripsiInput');
-        const imageInput = document.getElementById('roomImageInput');
+        document.addEventListener('DOMContentLoaded', function () {
+            // Modal logic
+            const roomModal = document.getElementById('roomModal');
+            const roomForm = document.getElementById('roomModalForm');
+            const methodInput = document.getElementById('roomModalMethod');
+            const titleEl = document.getElementById('roomModalTitle');
+            const submitBtn = document.getElementById('roomModalSubmit');
+            const nameInput = document.getElementById('roomNameInput');
+            // If you have more dropdowns, get them here:
+            const kategoriSelect = document.getElementById('roomKategoriSelect');
+            const hargaInput = document.getElementById('roomHargaInput');
+            const ukuranInput = document.getElementById('roomUkuranInput');
+            const statusSelect = document.getElementById('roomStatusSelect');
+            const deskripsiInput = document.getElementById('roomDeskripsiInput');
+            const imageInput = document.getElementById('roomImageInput');
 
-        function openModal(){
-            resetForm();
-            titleEl.textContent = 'Buat kamar baru';
-            submitBtn.textContent = 'Simpan kamar';
-            methodInput.value = '';
-            roomForm.action = "{{ route('admin.rooms.store') }}";
-            imageInput.required = true;
-            roomModal.classList.add('is-open');
-        }
-        function closeModal(){ roomModal.classList.remove('is-open'); }
+            window.openModal = function() {
+                resetForm();
+                titleEl.textContent = 'Buat kamar baru';
+                submitBtn.textContent = 'Simpan kamar';
+                methodInput.value = '';
+                roomForm.action = "{{ route('admin.rooms.store') }}";
+                imageInput.required = true;
+                roomModal.classList.add('is-open');
+            };
+            window.closeModal = function() {
+                roomModal.classList.remove('is-open');
+            };
+            function resetForm() {
+                nameInput.value = "{{ old('nama_kamar') }}";
+                if (kategoriSelect) kategoriSelect.value = "{{ $oldKategori ?? 'Standar' }}";
+                hargaInput.value = "{{ old('harga_permalam') }}";
+                ukuranInput.value = "{{ old('ukuran_kamar') }}";
+                statusSelect.value = "{{ old('status_kamar') ?? 'Tersedia' }}";
+                deskripsiInput.value = `{{ old('deskripsi') }}`;
+                imageInput.value = '';
+            }
+            window.openEditModal = function(button) {
+                roomForm.action = button.getAttribute('data-action');
+                methodInput.value = 'PUT';
+                titleEl.textContent = 'Edit kamar';
+                submitBtn.textContent = 'Update kamar';
+                nameInput.value = button.getAttribute('data-nama') || '';
+                if (kategoriSelect) kategoriSelect.value = button.getAttribute('data-kategori');
+                hargaInput.value = button.getAttribute('data-harga') || '';
+                ukuranInput.value = button.getAttribute('data-ukuran') || '';
+                statusSelect.value = button.getAttribute('data-status') || 'Tersedia';
+                deskripsiInput.value = button.getAttribute('data-deskripsi') || '';
+                imageInput.required = false;
+                roomModal.classList.add('is-open');
+            };
 
-        function resetForm() {
-            nameInput.value = "{{ old('nama_kamar') }}";
-            kategoriSelect.value = "{{ $oldKategori ?? 'Standar' }}";
-            hargaInput.value = "{{ old('harga_permalam') }}";
-            ukuranInput.value = "{{ old('ukuran_kamar') }}";
-            statusSelect.value = "{{ old('status_kamar') ?? 'Tersedia' }}";
-            deskripsiInput.value = `{{ old('deskripsi') }}`;
-            imageInput.value = '';
-        }
+            // Flash auto-hide
+            document.addEventListener('DOMContentLoaded', function () {
+                const flashStack = document.getElementById('flashStack');
+                if (flashStack) setTimeout(() => flashStack.remove(), 4200);
+            });
 
-        function openEditModal(button){
-            const action = button.getAttribute('data-action');
-            const nama = button.getAttribute('data-nama') || '';
-            const kategori = button.getAttribute('data-kategori') || 'Standar';
-            const harga = button.getAttribute('data-harga') || '';
-            const ukuran = button.getAttribute('data-ukuran') || '';
-            const status = button.getAttribute('data-status') || 'Tersedia';
-            const deskripsi = button.getAttribute('data-deskripsi') || '';
-            const img = button.getAttribute('data-img') || '';
+            // Page loader
+            document.addEventListener('DOMContentLoaded', function () {
+                const loader = document.getElementById('pageLoader');
+                if (!loader) return;
+                const showLoader = () => loader.classList.add('is-visible');
+                document.querySelectorAll('a[href]').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (!href || href === '#' || href.startsWith('javascript:')) return;
+                    link.addEventListener('click', function () {
+                        if (this.target === '_blank' || this.href === window.location.href) return;
+                        showLoader();
+                    });
+                });
+                window.addEventListener('beforeunload', showLoader);
+            });
 
-            roomForm.action = action;
-            methodInput.value = 'PUT';
-            titleEl.textContent = 'Edit kamar';
-            submitBtn.textContent = 'Update kamar';
+            // Delete confirmation
+            document.addEventListener('DOMContentLoaded', function () {
+                const modal = document.getElementById('confirmDeleteModal');
+                const confirmBtn = document.getElementById('confirmDeleteBtn');
+                const deleteForm = document.getElementById('deleteRoomForm');
+                let selectedId = null;
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        selectedId = this.dataset.roomId;
+                        modal.classList.add('is-open');
+                    });
+                });
+                modal?.addEventListener('click', function (e) {
+                    if (e.target === modal) modal.classList.remove('is-open');
+                });
+                confirmBtn?.addEventListener('click', function () {
+                    if (!selectedId || !deleteForm) return;
+                    const template = "{{ route('admin.rooms.destroy', ['id' => ':id']) }}";
+                    deleteForm.action = template.replace(':id', selectedId);
+                    deleteForm.submit();
+                });
+            });
 
-            nameInput.value = nama;
-            kategoriSelect.value = kategori;
-            hargaInput.value = harga;
-            ukuranInput.value = ukuran;
-            statusSelect.value = status;
-            deskripsiInput.value = deskripsi;
+            // Sidebar toggle
+            document.addEventListener('DOMContentLoaded', function () {
+                const toggle = document.getElementById('sidebarToggle');
+                const sidebar = document.querySelector('.sidebar');
+                toggle?.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    sidebar?.classList.toggle('is-open');
+                });
+                document.addEventListener('click', function (e) {
+                    if (window.innerWidth > 960) return;
+                    if (!sidebar?.classList.contains('is-open')) return;
+                    if (!sidebar.contains(e.target) && e.target !== toggle) {
+                        sidebar.classList.remove('is-open');
+                    }
+                });
+            });
 
-            imageInput.required = false;
-
-            roomModal.classList.add('is-open');
-        }
+            // Optional: AJAX submit for "Tambah Kamar Baru" to reload rooms without full page reload
+            const roomForm = document.getElementById('roomModalForm');
+            roomForm.addEventListener('submit', function(e) {
+                // Remove this block if you want normal form submit (page reload)
+                e.preventDefault();
+                const formData = new FormData(roomForm);
+                fetch(roomForm.action, {
+                    method: roomForm.method,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload(); // reload to show new room
+                    } else {
+                        response.text().then(text => alert('Gagal menambah kamar: ' + text));
+                    }
+                })
+                .catch(() => alert('Terjadi kesalahan saat menambah kamar.'));
+            });
+        });
 
         @if($errors->any())
-            // auto open modal when validation fails so user sees errors and data
-            openModal();
+            window.addEventListener('DOMContentLoaded', function() {
+                openModal();
+            });
         @endif
-
-        // Auto-hide flash success
-        document.addEventListener('DOMContentLoaded', function () {
-            const flashStack = document.getElementById('flashStack');
-            if (!flashStack) return;
-            setTimeout(() => flashStack.remove(), 4200);
-        });
-
-        // Loader saat pindah halaman dari admin rooms
-        document.addEventListener('DOMContentLoaded', function () {
-            const loader = document.getElementById('pageLoader');
-            if (!loader) return;
-
-            const showLoader = () => loader.classList.add('is-visible');
-
-            document.querySelectorAll('a[href]').forEach((link) => {
-                const href = link.getAttribute('href');
-                if (!href || href === '#' || href.startsWith('javascript:')) return;
-
-                link.addEventListener('click', function () {
-                    if (this.target === '_blank' || this.href === window.location.href) return;
-                    showLoader();
-                });
-            });
-
-            window.addEventListener('beforeunload', showLoader);
-        });
-
-        // Handle delete confirmation
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('confirmDeleteModal');
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            const deleteForm = document.getElementById('deleteRoomForm');
-            let selectedId = null;
-
-            document.querySelectorAll('.btn-delete').forEach((btn) => {
-                btn.addEventListener('click', function () {
-                    selectedId = this.dataset.roomId;
-                    modal.classList.add('is-open');
-                });
-            });
-
-            modal?.addEventListener('click', function (e) {
-                if (e.target === modal) {
-                    modal.classList.remove('is-open');
-                }
-            });
-
-            confirmBtn?.addEventListener('click', function () {
-                if (!selectedId || !deleteForm) return;
-                const template = "{{ route('admin.rooms.destroy', ['id' => ':id']) }}";
-                deleteForm.action = template.replace(':id', selectedId);
-                deleteForm.submit();
-            });
-        });
-        // Sidebar toggle on mobile
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggle = document.getElementById('sidebarToggle');
-            const sidebar = document.querySelector('.sidebar');
-            toggle?.addEventListener('click', function (e) {
-                e.stopPropagation();
-                sidebar?.classList.toggle('is-open');
-            });
-            document.addEventListener('click', function (e) {
-                if (window.innerWidth > 960) return;
-                if (!sidebar?.classList.contains('is-open')) return;
-                if (!sidebar.contains(e.target) && e.target !== toggle) {
-                    sidebar.classList.remove('is-open');
-                }
-            });
-        });
     </script>
     <form id="deleteRoomForm" method="POST" style="display:none;">
         @csrf

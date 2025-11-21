@@ -138,6 +138,69 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // Konfigurasi Axios
+    axios.defaults.withCredentials = true;
+
+    // Fungsi Register menggunakan Axios (AJAX)
+    async function doRegister(nama_user, phone_number, email, password, password_confirmation) {
+        try {
+            // Dapatkan CSRF Cookie
+            await axios.get('/sanctum/csrf-cookie');
+
+            // Lakukan Register POST
+            const response = await axios.post('{{ route('auth.register') }}', { 
+                nama_user, 
+                phone_number, 
+                email, 
+                password, 
+                password_confirmation 
+            }); 
+
+            if(response.status === 201) {
+                // Tampilkan pesan sukses dan arahkan ke login
+                alert(response.data.message);
+                location.href = '{{ route('layouts.login') }}';
+            }
+            
+        } catch (error) {
+            // Tangani error
+            console.error("Register Gagal:", error.response);
+            
+            if(error.response?.status === 422) {
+                // Error validasi
+                const errors = error.response.data.errors;
+                let errorMsg = 'Validasi gagal:\n';
+                for(let field in errors) {
+                    errorMsg += `- ${field}: ${errors[field].join(', ')}\n`;
+                }
+                alert(errorMsg);
+            } else {
+                alert(error.response?.data?.message || "Terjadi kesalahan saat registrasi.");
+            }
+        }
+    }
+
+    // Tambahkan Event Listener setelah DOM dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        const registerForm = document.getElementById('registerForm');
+        
+        // Mencegah submit form secara tradisional
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            const nama_user = registerForm.elements.nama_user.value;
+            const phone_number = registerForm.elements.phone_number.value;
+            const email = registerForm.elements.email.value;
+            const password = registerForm.elements.password.value;
+            const password_confirmation = registerForm.elements.password_confirmation.value;
+            
+            doRegister(nama_user, phone_number, email, password, password_confirmation);
+        });
+    });
+</script>
+
 <a class="back" href="{{ route('layouts.index') }}">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -146,29 +209,13 @@
 </a>
 
 <main class="page">
-    <form class="card" method="POST" action="{{route('register')}}">
-        @csrf
+    <form class="card" id="registerForm" method="POST" action="{{ route('auth.register') }}">
+
 
         <h2 class="title">DAFTAR</h2>
         <div class="divider"></div>
 
-        {{-- 💡 KODE UNTUK MENAMPILKAN PESAN SUKSES --}}
-    @if(Session::has('success_message'))
-        <div class="alert alert-success" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
-            {{ Session::get('success_message') }}
-        </div>
-    @endif
-    
-    {{-- Kode untuk menampilkan pesan error validasi --}}
-    @if ($errors->any())
-        <div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        <div id="alertMessage"></div>
 
         <div class="field">
             <label class="label">NAMA LENGKAP</label>
@@ -193,12 +240,9 @@
         <div class="field">
             <label class="label">KONFIRMASI PASSWORD</label>
             <input class="input" type="password" name="password_confirmation" placeholder="********" required>
-            @error('password_confirmation')
-            <p style="color: red; font-size: 0.9em;">{{ $message }}</p>
-        @enderror
         </div>
 
-        <button class="btn" type="submit">Daftar</button>
+        <button class="btn" type="submit" id="registerBtn">DAFTAR</button>
 
         <p class="muted">
             Sudah punya akun?

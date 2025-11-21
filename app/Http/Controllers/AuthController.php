@@ -12,11 +12,15 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
+    // Tampilkan halaman register
+    public function showRegister()
+    {
+        return view('layouts.register');
+    }
+
+    // Handle proses registrasi
     public function register(Request $request) 
     {
-        return view('auth.register');
-    
-    // Gabungkan data request dengan nilai default
         // 1. Validasi Data
         $userData = Validator::make($request->all(), [
             'nama_user' => 'required|string|max:100', 
@@ -26,7 +30,11 @@ class AuthController extends Controller
         ]);
 
         if ($userData->fails()) {
-            return redirect()->back()->withErrors($userData)->withInput();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $userData->errors()
+            ], 422);
         }
 
         $defaultRoleId = 2;
@@ -36,15 +44,24 @@ class AuthController extends Controller
             'nama_user' => $request->nama_user,
             'email' => $request->email,
             'phone_number' => $request->phone_number,
-            'password' => Hash::make($request->password), // Wajib di-hash
+            'password' => Hash::make($request->password),
         ]);
 
-        // 4. Berikan Respons Sukses
-        return redirect()->back()->with('success_message', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
+        // Berikan Respons Sukses
+        return response()->json([
+            'success' => true,
+            'message' => 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.'
+        ], 201);
     }
+    // Tampilkan halaman login
+    public function showLogin()
+    {
+        return view('layouts.login');
+    }
+
+    // Handle proses login
     public function login(Request $request) 
     {
-        return view('auth.login');
         $userData = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required'
@@ -69,17 +86,17 @@ class AuthController extends Controller
         }
 
         $user = Auth::user()->load('role');
-        $request->session()->regenerate(); // start session untuk guard web
+        $request->session()->regenerate();
 
-        // Cek apakah Passport sudah dikonfigurasi dan HasApiTokens digunakan
+        // Cek apakah Sanctum sudah dikonfigurasi
         if (!method_exists($user, 'createToken')) {
-             return response()->json([
+            return response()->json([
                 'success' => false,
-                'message' => 'Passport/Sanctum belum dikonfigurasi pada model User.'
+                'message' => 'Sanctum belum dikonfigurasi pada model User.'
             ], 500);
         }
 
-        // Generate Token menggunakan Passport
+        // Generate Token menggunakan Sanctum
         $tokenResult = $user->createToken('authToken');
         $accessToken = $tokenResult->plainTextToken;
 
@@ -144,22 +161,21 @@ class AuthController extends Controller
 
         return redirect()->route('layouts.login')->with('ok', 'Berhasil logout.');
     }
+
     public function user(Request $request)
-{
-    // Dengan Sanctum, user yang sudah login bisa langsung diambil dari request
-    $user = $request->user(); // sama dengan Auth::user() saat pakai auth:sanctum
+    {
+        // Dengan Sanctum, user yang sudah login bisa langsung diambil dari request
+        $user = $request->user(); // sama dengan Auth::user() saat pakai auth:sanctum
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Detail profil pengguna',
-        'data' => [
-            'id_user'     => $user->id_user,
-            'nama_user'   => $user->nama_user,
-            'email'       => $user->email,
-            'phone_number'=> $user->phone_number,
-            // tambahin field lain kalau ada
-        ]
-    ], 200);
-}
-
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail profil pengguna',
+            'data' => [
+                'id_user'     => $user->id_user,
+                'nama_user'   => $user->nama_user,
+                'email'       => $user->email,
+                'phone_number'=> $user->phone_number,
+            ]
+        ], 200);
+    }
 }

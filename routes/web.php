@@ -10,32 +10,23 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\KategoriController;
 
-Route::resource('/admin/fasilitas', FasilitasController::class);
-Route::resource('/admin/kategori', KategoriController::class);
+// ==================== PUBLIC ROUTES ====================
 Route::get('/', [LayoutsController::class, 'index'])->name('layouts.index');
 Route::get('/kamar', [KamarController::class, 'index'])->name('kamar.index');
 Route::get('/kamar/{id}', [KamarController::class, 'show'])->name('kamar.show');
-Route::get('/admin/dashboard', [LayoutsController::class, 'adminDashboard'])->name('admin.dashboard');
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/rooms', [AdminKamarController::class, 'index'])->name('rooms.index');
-    Route::post('/rooms', [AdminKamarController::class, 'store'])->name('rooms.store');
-    Route::get('/rooms/{id}/edit', [AdminKamarController::class, 'edit'])->name('rooms.edit');
-    Route::put('/rooms/{id}', [AdminKamarController::class, 'update'])->name('rooms.update');
-    Route::delete('/rooms/{id}', [AdminKamarController::class, 'destroy'])->name('rooms.destroy');
-});
-
-Route::get('/admin/orders', [\App\Http\Controllers\AdminPemesananController::class, 'index'])->name('admin.orders');
-Route::get('/admin/customers', [AdminPelangganController::class, 'index'])->name('admin.pelanggan');
-Route::get('/admin/customers/{id}', [AdminPelangganController::class, 'show'])->name('admin.pelanggan.show');
-
-
-
+// ==================== AUTH ROUTES ====================
 Route::middleware('guest')->group(function () {
-    Route::get('/register', [LayoutsController::class, 'daftar'])->name('layouts.register');
-    Route::get('/login', [LayoutsController::class, 'masuk'])->name('layouts.login');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('layouts.register');
+    Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
+    
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('layouts.login');
+    Route::post('/login', [AuthController::class, 'login'])->name('auth.api');
 });
 
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('sanctum.session');
+
+// ==================== CUSTOMER ROUTES ====================
 Route::middleware('sanctum.session')->group(function () {
     Route::get('/profile', [LayoutsController::class, 'profile'])->name('profile.profile');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
@@ -48,5 +39,25 @@ Route::middleware('sanctum.session')->group(function () {
     Route::post('/payments/charge', [PaymentController::class, 'charge'])->name('payments.charge');
 });
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get');
+// ==================== ADMIN ROUTES ====================
+Route::middleware(['sanctum.session', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [LayoutsController::class, 'adminDashboard'])->name('dashboard');
+    
+    // Kamar Management
+    Route::get('/rooms', [AdminKamarController::class, 'index'])->name('rooms.index');
+    Route::post('/rooms', [AdminKamarController::class, 'store'])->name('rooms.store');
+    Route::get('/rooms/{id}/edit', [AdminKamarController::class, 'edit'])->name('rooms.edit');
+    Route::put('/rooms/{id}', [AdminKamarController::class, 'update'])->name('rooms.update');
+    Route::delete('/rooms/{id}', [AdminKamarController::class, 'destroy'])->name('rooms.destroy');
+    
+    // Orders
+    Route::get('/orders', [\App\Http\Controllers\AdminPemesananController::class, 'index'])->name('orders');
+    
+    // Customers
+    Route::get('/customers', [AdminPelangganController::class, 'index'])->name('pelanggan');
+    Route::get('/customers/{id}', [AdminPelangganController::class, 'show'])->name('pelanggan.show');
+    
+    // Fasilitas & Kategori
+    Route::resource('/fasilitas', FasilitasController::class);
+    Route::resource('/kategori', KategoriController::class);
+});
