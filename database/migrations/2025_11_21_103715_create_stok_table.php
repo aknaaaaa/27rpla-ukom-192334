@@ -11,13 +11,20 @@ return new class extends Migration
      */
 public function up(): void
 {
-    Schema::create('kamar_ketersediaan', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('kamar_id')->constrained('kamar')->cascadeOnDelete();
-        $table->date('tanggal');
-        $table->integer('jumlah_dipesan')->default(0);
-        $table->timestamps();
-    });
+Schema::create('kamar_ketersediaan', function (Blueprint $table) {
+    $table->id();
+
+    $table->unsignedBigInteger('kamar_id');
+    $table->foreign('kamar_id')
+          ->references('id_kamar')
+          ->on('kamars')
+          ->cascadeOnDelete();
+
+    $table->date('tanggal');
+    $table->integer('jumlah_dipesan')->default(0);
+    $table->timestamps();
+});
+
 }
 
     /**

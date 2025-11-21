@@ -11,20 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fasilitas', function (Blueprint $table) {
-            $table->id('id_fasilitas');
-            $table->foreignId('id_kategori')
-                  ->constrained('kategoris', 'id_kategori')
-                  ->cascadeOnDelete();
-            $table->foreignId('id_kamar')
-                  ->nullable()
-                  ->constrained('kamars', 'id_kamar')
-                  ->cascadeOnDelete();
-            $table->string('nama_fasilitas', 100);
-            $table->decimal('nilai_fasilitas', 12, 2)->nullable();
-            $table->text('deskripsi')->nullable();
-            $table->timestamps();
-        });
+Schema::create('facilities', function (Blueprint $table) {
+    $table->id();
+    $table->string('name'); // WiFi, AC, Breakfast, TV
+    $table->timestamps();
+});
+
     }
 
     /**
@@ -32,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fasilitas');
+        Schema::dropIfExists('facilites');
     }
 };

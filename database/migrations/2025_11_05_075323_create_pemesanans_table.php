@@ -11,24 +11,31 @@ return new class extends Migration
      */
 public function up(): void
 {
-    Schema::create('pemesanan', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-        $table->string('kode_pesanan')->unique();
-        $table->date('tanggal_pemesanan');
-        $table->date('tanggal_checkin');
-        $table->date('tanggal_checkout');
-        $table->string('status')->default('Menunggu');
+Schema::create('pemesanans', function (Blueprint $table) {
+    $table->id(); // PK = id
 
-        // Jika memesan untuk orang lain
-        $table->string('nama_penginap')->nullable();
-        $table->string('email_penginap')->nullable();
-        $table->string('telepon_penginap')->nullable();
+    $table->unsignedBigInteger('id_user');
+    $table->foreign('id_user')
+          ->references('id_user')
+          ->on('user')
+          ->cascadeOnDelete();
 
-        $table->integer('total_harga')->default(0);
+    $table->string('kode_pesanan')->unique();
+    $table->date('tanggal_pemesanan');
+    $table->date('tanggal_checkin');
+    $table->date('tanggal_checkout');
+    $table->string('status')->default('Menunggu');
 
-        $table->timestamps();
-    });
+    $table->string('nama_penginap')->nullable();
+    $table->string('email_penginap')->nullable();
+    $table->string('telepon_penginap')->nullable();
+
+    $table->unsignedBigInteger('total_harga')->default(0);
+
+    $table->timestamps();
+});
+
+
 }
 
     /**

@@ -11,19 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-Schema::create('pembayarans', function (Blueprint $table) {
-    $table->id('id_pembayaran');
-
-    $table->foreignId('id_pemesanan')
-          ->constrained('pemesanans', 'id') // changed!
-          ->cascadeOnDelete();
-
-    $table->decimal('total', 12, 2);
-    $table->timestamps();
-});
-
-
-
+        Schema::create('nama_tabel', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -31,6 +22,6 @@ Schema::create('pembayarans', function (Blueprint $table) {
      */
     public function down(): void
     {
-        Schema::dropIfExists('pembayarans');
+        Schema::dropIfExists('nama_tabel');
     }
 };

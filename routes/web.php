@@ -7,7 +7,11 @@ use App\Http\Controllers\AdminKamarController;
 use App\Http\Controllers\AdminPelangganController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\FasilitasController;
+use App\Http\Controllers\KategoriController;
 
+Route::resource('/admin/fasilitas', FasilitasController::class);
+Route::resource('/admin/kategori', KategoriController::class);
 Route::get('/', [LayoutsController::class, 'index'])->name('layouts.index');
 Route::get('/kamar', [KamarController::class, 'index'])->name('kamar.index');
 Route::get('/kamar/{id}', [KamarController::class, 'show'])->name('kamar.show');
@@ -20,6 +24,8 @@ Route::delete('/admin/rooms/{id}', [AdminKamarController::class, 'destroy'])->na
 Route::get('/admin/orders', [\App\Http\Controllers\AdminPemesananController::class, 'index'])->name('admin.orders');
 Route::get('/admin/customers', [AdminPelangganController::class, 'index'])->name('admin.pelanggan');
 Route::get('/admin/customers/{id}', [AdminPelangganController::class, 'show'])->name('admin.pelanggan.show');
+
+
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [LayoutsController::class, 'daftar'])->name('layouts.register');

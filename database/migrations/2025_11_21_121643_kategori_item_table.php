@@ -11,18 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-Schema::create('pembayarans', function (Blueprint $table) {
-    $table->id('id_pembayaran');
-
-    $table->foreignId('id_pemesanan')
-          ->constrained('pemesanans', 'id') // changed!
+Schema::create('category_items', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('category_id')
+          ->constrained('categories')
           ->cascadeOnDelete();
 
-    $table->decimal('total', 12, 2);
+    $table->string('name'); // contoh: Single, Double, Twin...
     $table->timestamps();
 });
-
-
 
     }
 
@@ -31,6 +28,6 @@ Schema::create('pembayarans', function (Blueprint $table) {
      */
     public function down(): void
     {
-        Schema::dropIfExists('pembayarans');
+        Schema::dropIfExists('category_items');
     }
 };

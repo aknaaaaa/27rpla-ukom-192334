@@ -445,6 +445,11 @@
                         </ul>
                     </div>
                 @endif
+            <div style="text-align:right; margin-bottom:12px;">
+    <button class="btn-new" type="button" onclick="openKategoriModal()">
+        Buat kategori kamar
+    </button>
+</div>
 
                 <div style="text-align:right; margin-bottom:12px;">
                     <button class="btn-new" type="button" onclick="openModal()">Buat kamar baru</button>
@@ -576,6 +581,12 @@
     </div>
 
     <script>
+        function openKategoriModal() {
+    document.getElementById("modalKategori").style.display = "block";
+}
+function closeKategoriModal() {
+    document.getElementById("modalKategori").style.display = "none";
+}
         const roomModal = document.getElementById('roomModal');
         const roomForm = document.getElementById('roomModalForm');
         const methodInput = document.getElementById('roomModalMethod');

@@ -11,14 +11,31 @@ return new class extends Migration
      */
 public function up(): void
 {
-    Schema::create('cart_items', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('cart_id')->constrained('cart')->cascadeOnDelete();
-        $table->foreignId('kamar_id')->constrained('kamar')->cascadeOnDelete();
-        $table->integer('jumlah_kamar')->default(1);
-        $table->integer('harga_saat_ini'); // harga per malam saat dimasukkan
-        $table->timestamps();
-    });
+Schema::create('cart_items', function (Blueprint $table) {
+    $table->id();
+
+    // Kolom FK harus dibuat terlebih dahulu
+    $table->unsignedBigInteger('user_id');
+    $table->unsignedBigInteger('kamar_id');
+
+    // FK user → user.id_user
+    $table->foreign('user_id')
+          ->references('id_user')
+          ->on('user')
+          ->cascadeOnDelete();
+
+    // FK kamar → kamars.id_kamar
+    $table->foreign('kamar_id')
+          ->references('id_kamar')
+          ->on('kamars')
+          ->cascadeOnDelete();
+
+    $table->integer('jumlah_kamar')->default(1);
+    $table->integer('harga_saat_ini'); 
+    $table->timestamps();
+});
+
+
 }
 
 
