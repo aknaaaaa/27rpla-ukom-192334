@@ -402,7 +402,7 @@
         const orderId = document.getElementById('orderIdHidden')?.value?.trim();
         const statusBaseUrl = "{{ url('/api/payments/status') }}";
         let statusTimer = null;
-        const vaSelect = document.getElementById('vaSelect');
+        const LAST_PAYMENT_KEY = 'last_payment_state';
 
         const guestName = document.getElementById('guestName');
         const guestEmail = document.getElementById('guestEmail');
@@ -599,6 +599,7 @@
             hydrateDatesFromStorage();
             renderSummary();
             updateDates();
+            restorePaymentState();
         });
         window.addEventListener('cart:updated', renderSummary);
         addonNodes.forEach((node) => {
@@ -636,6 +637,59 @@
             other_guest: !!otherGuestSwitch?.checked,
         });
 
+        const persistPaymentState = (payload) => {
+            try {
+                localStorage.setItem(LAST_PAYMENT_KEY, JSON.stringify(payload));
+            } catch (e) {}
+        };
+
+        const clearPaymentState = () => {
+            localStorage.removeItem(LAST_PAYMENT_KEY);
+        };
+
+        const renderInstruction = (state) => {
+            let instruction = '';
+            if (state.vaNumber) {
+                instruction = `
+                    <div class="d-flex align-items-center gap-2">
+                        <div>
+                            <strong>Virtual Account ${state.bank || ''}:</strong>
+                            <div>${state.vaNumber}</div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-va="${state.vaNumber}">Copy</button>
+                    </div>
+                `;
+            } else if (state.qrUrl) {
+                instruction = `
+                    <div class="text-center">
+                        <strong>Scan QRIS</strong>
+                        <div class="mt-2">
+                            <img src="${state.qrUrl}" alt="QRIS" class="border rounded" style="max-width:220px;">
+                        </div>
+                    </div>
+                `;
+            } else if (state.linkUrl) {
+                instruction = `<a href="${state.linkUrl}" target="_blank" rel="noreferrer">Buka tautan pembayaran</a>`;
+            }
+
+            if (instruction) {
+                setResult(`Transaksi dibuat.<br>${instruction}<div class="mt-1">Status awal: <strong>${state.statusText ?? 'pending'}</strong>. Menunggu konfirmasi pembayaran...</div>`, 'success');
+                const copyBtn = resultBox?.querySelector('[data-copy-va]');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', () => copyVA(copyBtn.getAttribute('data-copy-va'), copyBtn));
+                }
+            }
+        };
+
+        const restorePaymentState = () => {
+            try {
+                const saved = JSON.parse(localStorage.getItem(LAST_PAYMENT_KEY) || '{}');
+                if (!saved.orderId) return;
+                renderInstruction(saved);
+                startStatusPolling(saved.orderId);
+            } catch (e) {}
+        };
+
         const stopStatusPolling = () => {
             if (statusTimer) {
                 clearInterval(statusTimer);
@@ -672,12 +726,14 @@
 
                     if (normalizedStatus === 'telah dibayar' || paidStatuses.includes(txStatus)) {
                         stopStatusPolling();
+                        localStorage.removeItem('last_payment_state');
                         window.location.href = "{{ route('checkout.success') }}";
                         return;
                     }
 
                     if (normalizedStatus === 'dibatalkan' || canceledStatuses.includes(txStatus)) {
                         stopStatusPolling();
+                        localStorage.removeItem('last_payment_state');
                         setResult('Pembayaran dibatalkan/ditolak oleh Midtrans.', 'danger');
                         return;
                     }
@@ -771,6 +827,7 @@
                 }
 
                 let instruction = '';
+                let saveState = { orderId: data.order_id || data.app_order_id || data.orderId, method, statusText: data.transaction_status || 'pending' };
                 if (data.va_numbers?.length) {
                     const va = data.va_numbers[0];
                     const vaNum = va.va_number;
@@ -784,24 +841,35 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-va="${vaNum}">Copy</button>
                         </div>
                     `;
+                    saveState.vaNumber = vaNum;
+                    saveState.bank = bank;
+                } else if (data.qr_string) {
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(data.qr_string)}`;
+                    instruction = `
+                        <div class="text-center">
+                            <strong>Scan QRIS</strong>
+                            <div class="mt-2">
+                                <img src="${qrUrl}" alt="QRIS" class="border rounded" style="max-width:220px;">
+                            </div>
+                            <div class="small text-muted mt-1">Atau gunakan string:<br><code style="word-break: break-all;">${data.qr_string}</code></div>
+                        </div>
+                    `;
+                    saveState.qrString = data.qr_string;
+                    saveState.qrUrl = qrUrl;
                 } else if (data.actions?.length) {
                     const goAction = data.actions.find((a) => a.name === 'deeplink-redirect') || data.actions.find((a) => a.url) || data.actions[0];
                     const label = method === 'gopay' ? 'Buka GoPay' : 'Buka tautan pembayaran';
-                    instruction = `${label}: <a href="${goAction.url}" target="_blank" rel="noreferrer">${goAction.url}</a>`;
-                } else if (data.qr_string) {
-                    instruction = `QRIS string:<br><code style="word-break: break-all;">${data.qr_string}</code>`;
+                    const url = goAction.url;
+                    instruction = `${label}: <a href="${url}" target="_blank" rel="noreferrer">${url}</a>`;
+                    saveState.linkUrl = url;
                 } else {
                     instruction = 'Transaksi dibuat. Detail:<br><pre class="mb-0 small bg-light p-2 border rounded">' + JSON.stringify(data, null, 2) + '</pre>';
                 }
 
                 const txStatus = data.transaction_status || '';
-                const orderFromResponse = data.order_id || data.app_order_id || data.orderId;
-                setResult(`Transaksi berhasil dibuat.<br>${instruction}<div class="mt-1">Status awal: <strong>${txStatus || 'pending'}</strong>. Menunggu konfirmasi pembayaran...</div>`, 'success');
-                const copyBtn = resultBox?.querySelector('[data-copy-va]');
-                if (copyBtn) {
-                    copyBtn.addEventListener('click', () => copyVA(copyBtn.getAttribute('data-copy-va'), copyBtn));
-                }
-                startStatusPolling(orderFromResponse);
+                renderInstruction({ ...saveState, statusText: txStatus || 'pending' });
+                persistPaymentState(saveState);
+                startStatusPolling(saveState.orderId);
             } catch (error) {
                 setResult('Terjadi kesalahan jaringan.', 'danger');
             } finally {
