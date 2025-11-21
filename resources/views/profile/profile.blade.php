@@ -26,12 +26,12 @@
     .back svg{ width:16px; height:16px }
     .profile-hero { border-radius: 6px; background: #f7fbff; padding: 15px 20px; }
     .profile-shell { display: grid; grid-template-columns: 240px 1fr; gap: 16px; align-items: start; }
-    .side-menu { background: #f5f6f8; border: 1px solid #d5d9e1; border-radius: 12px; padding: 12px; display: grid; gap: 6px; }
+    .side-menu { position: sticky; top: 88px; background: #f5f6f8; border: 1px solid #d5d9e1; border-radius: 12px; padding: 12px; display: grid; gap: 6px; }
     .side-menu a, .side-menu button { display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none; color: #444; font-weight: 600; letter-spacing: 0.3px; background: #fff; border: 1px solid transparent; text-align: left; width: 100%; }
     .side-menu a.active, .side-menu button.active { background: #d5e8ff; border-color: #b7d5ff; }
     .side-menu button { border: none; }
     .side-menu a.logout, .side-menu button.logout { color: #c0392b; font-weight: 700; }
-    .profile-panel { background: #faf7f4; border: 1px solid #e7d9ce; border-radius: 14px; padding: 18px; }
+    .profile-panel { background: #faf7f4; border: 1px solid #e7d9ce; border-radius: 14px; padding: 18px; max-height: calc(100vh - 110px); overflow-y: auto; }
     .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; color: #7a6a5a; }
     .card-shell { background: linear-gradient(90deg, #fffaf5, #f5ece3); border: 1px solid #decfbe; border-radius: 16px; padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .card-left { display: grid; gap: 10px; }
@@ -52,7 +52,7 @@
     .booking-item strong { color: #7c6044; }
     .settings { border: 1px solid #e0d4c7; border-radius: 12px; padding: 12px; background: #fff; }
     .logout-btn { padding: 10px 18px; border: none; border-radius: 999px; background: #c0392b; color: #fff; font-weight: 600; letter-spacing: .5px; cursor: pointer; font-family: aboreto; }
-    @media (max-width: 960px) { .profile-shell { grid-template-columns: 1fr; } .card-shell { grid-template-columns: 1fr; } .info-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 960px) { .profile-shell { grid-template-columns: 1fr; } .side-menu { position: static; } .profile-panel { max-height: none; overflow: visible; } .card-shell { grid-template-columns: 1fr; } .info-grid { grid-template-columns: repeat(2,1fr); } }
     @media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
 </style>
 
@@ -146,16 +146,12 @@
                                     <strong>{{ $user->email }}</strong>
                                 </div>
                                 <div class="info-box">
-                                    <span>Nomor Telepon</span>
+                                    <span>No. Telp</span>
                                     <strong>{{ $user->phone_number ?? '-' }}</strong>
                                 </div>
                                 <div class="info-box">
                                     <span>ID Pengguna</span>
                                     <strong>{{ $user->id_user }}</strong>
-                                </div>
-                                <div class="info-box">
-                                    <span>Email Terverifikasi</span>
-                                    <strong>{{ $user->email_verified_at ? 'Ya' : 'Belum' }}</strong>
                                 </div>
                                 <div class="info-box">
                                     <span>Status</span>
