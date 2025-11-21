@@ -73,12 +73,11 @@
 
 <div class="container" style="margin-top: 30px;">
     <div class="profile-hero">
-        <div class="profile-shell">
-            <div class="side-menu">
-                <a href="{{ route('profile.profile') }}" class="{{ ($tab ?? 'profile') === 'profile' ? 'active' : '' }}">Profile</a>
-                <a href="{{ route('profile.profile', ['tab' => 'cart']) }}" class="{{ ($tab ?? 'profile') === 'cart' ? 'active' : '' }}">Keranjang</a>
-                <a href="{{ route('profile.profile', ['tab' => 'orders']) }}" class="{{ ($tab ?? 'profile') === 'orders' ? 'active' : '' }}">Pemesanan</a>
-                <a href="{{ route('profile.profile', ['tab' => 'history']) }}" class="{{ ($tab ?? 'profile') === 'history' ? 'active' : '' }}">Riwayat</a>
+            <div class="profile-shell">
+                <div class="side-menu">
+                    <a href="{{ route('profile.profile') }}" class="{{ ($tab ?? 'profile') === 'profile' ? 'active' : '' }}">Profile</a>
+                    <a href="{{ route('profile.profile', ['tab' => 'cart']) }}" class="{{ ($tab ?? 'profile') === 'cart' ? 'active' : '' }}">Keranjang</a>
+                    <a href="{{ route('profile.profile', ['tab' => 'history']) }}" class="{{ ($tab ?? 'profile') === 'history' ? 'active' : '' }}">Riwayat</a>
                 <form action="{{ route('logout') }}" method="POST" style="margin:0;">
                     @csrf
                     <button type="submit" class="logout" onclick="localStorage.removeItem('room_cart');localStorage.removeItem('booking_dates');localStorage.removeItem('access_token');">Log Out</button>
@@ -115,31 +114,6 @@
                     <div class="booking-item">
                         <button class="btn btn-dark w-100" onclick="window.location.href='{{ route('checkout') }}'">Lanjut ke Checkout</button>
                     </div>
-                @elseif(($tab ?? 'profile') === 'orders')
-                    <div class="panel-head">
-                        <div>Semua Pemesanan</div>
-                        <div>{{ $displayName }}</div>
-                    </div>
-                    @forelse(($allOrders ?? []) as $order)
-                        <div class="booking-item">
-                            <strong>{{ $order->kamar->nama_kamar ?? 'Kamar' }}</strong>
-                            <p style="font-size: 12px; color: #8a7c70;">
-                                Check-in {{ optional($order->check_in)->format('d M Y') }} | {{ $order->total_hari }} malam
-                            </p>
-                            @php
-                                $bayar = $order->pembayaran->amount_paid ?? 0;
-                                $statusBayar = $order->pembayaran->status_pembayaran ?? 'Belum dibayar';
-                            @endphp
-                            <p style="font-size: 13px; color: #7c6044;">
-                                Rp{{ number_format($bayar, 0, ',', '.') }} ({{ $statusBayar }})
-                            </p>
-                        </div>
-                    @empty
-                        <div class="booking-item">
-                            <strong>Belum ada pemesanan.</strong>
-                            <p style="font-size: 12px; color: #8a7c70;">Pesan kamar untuk melihat data pemesanan.</p>
-                        </div>
-                    @endforelse
                 @else
                     <div class="panel-head">
                         <div>D'Kasuari</div>

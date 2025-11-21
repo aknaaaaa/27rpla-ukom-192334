@@ -39,16 +39,11 @@ class LayoutsController extends Controller
             ->skip(3)
             ->take(10)
             ->get();
-        $allOrders = Pemesanan::with(['kamar', 'pembayaran'])
-            ->where('id_user', $user?->id_user)
-            ->latest()
-            ->get();
 
         return view('profile.profile', [
             'user' => $user,
             'orders' => $orders,
             'history' => $history,
-            'allOrders' => $allOrders,
             'tab' => $tab,
         ]);
     }
