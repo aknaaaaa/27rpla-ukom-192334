@@ -108,20 +108,22 @@
     .pill-card h5 {
         letter-spacing: 0.7px;
     }
-    .method-list {
-        border-top: 1px solid #2d2d2d;
-        padding-top: 16px;
-        margin-top: 18px;
+    .method-groups { display: grid; gap: 12px; }
+    .method-group {
+        border: 1px solid #d5d5d5;
+        border-radius: 12px;
+        padding: 14px;
+        background: #fefefe;
     }
-    .method-item {
-        cursor: pointer;
+    .group-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #d9d9d9;
+        gap: 12px;
     }
-    .method-item:last-child { border-bottom: none; }
+    .group-title { font-weight: 700; letter-spacing: 0.4px; }
+    .group-desc { font-size: 12px; color: #6a6a6a; margin-top: 2px; }
+    .group-body { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
     .method-logo {
         width: 72px;
         height: 36px;
@@ -135,6 +137,16 @@
         color: #888;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+    }
+    .method-chip {
+        background: #f1f7ff;
+        color: #1f5fbf;
+        border: 1px solid #cfe0ff;
+        border-radius: 30px;
+        padding: 4px 10px;
+        font-size: 11px;
+        letter-spacing: 0.4px;
+        font-weight: 600;
     }
     .pay-btn {
         background: #272727;
@@ -248,65 +260,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 g-4">
-                <div class="col-12">
-                    <div class="pill-card">
-                        <input type="hidden" id="orderIdHidden" value="{{ session('checkout_order.id_pemesanan') ?? request('order_id') }}">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="mb-0">Pilih Metode Pembayaran</h6>
-                            <small class="mini-label">BCA | BNI | GOPAY | QRIS</small>
-                        </div>
-
-                        <div class="method-list">
-                            <div class="method-item">
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ asset('images/bca.jpeg') }}" alt="BCA" height="48" width="72" class="rounded border">
-                                    <div>
-                                        <strong>BCA Virtual Account</strong>
-                                        <div class="text-muted" style="font-size: 12px;">Transfer via ATM / m-banking</div>
-                                    </div>
-                                </div>
-                                <input type="radio" name="pay_method" value="bca" checked>
-                            </div>
-                            <div class="method-item">
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ asset('images/bni.jpeg') }}" alt="BNI" height="48" width="72" class="rounded border">
-                                    <div>
-                                        <strong>BNI Virtual Account</strong>
-                                        <div class="text-muted" style="font-size: 12px;">Transfer via ATM / m-banking</div>
-                                    </div>
-                                </div>
-                                <input type="radio" name="pay_method" value="bni">
-                            </div>
-                            <div class="method-item">
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ asset('images/gopay.jpeg') }}" alt="GoPay" height="48" width="72" class="rounded border">
-                                    <div>
-                                        <strong>GoPay</strong>
-                                        <div class="text-muted" style="font-size: 12px;">Scan QR / buka GoPay</div>
-                                    </div>
-                                </div>
-                                <input type="radio" name="pay_method" value="gopay">
-                            </div>
-                            <div class="method-item">
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ asset('images/qris.jpeg') }}" alt="QRIS" height="48" width="72" class="rounded border">
-                                    <div>
-                                        <strong>QRIS</strong>
-                                        <div class="text-muted" style="font-size: 12px;">Scan QRIS dari saldo apa saja</div>
-                                    </div>
-                                </div>
-                                <input type="radio" name="pay_method" value="qris">
-                            </div>
-                        </div>
-
-                        <button id="payBtn" class="w-100 pay-btn mt-3" type="button">Bayar Sekarang</button>
-                        <small class="text-muted d-block mt-2" style="font-size: 12px;">Jumlah pembayaran mengikuti ringkasan pesanan di kanan.</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-3 g-3">
+            <div class="row mt-4 g-3">
                 <div class="col-12">
                     <div class="pill-card">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -349,6 +303,78 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row mt-3 g-4">
+                <div class="col-12">
+                    <div class="pill-card">
+                        <input type="hidden" id="orderIdHidden" value="{{ session('checkout_order.id_pemesanan') ?? request('order_id') }}">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">Pilih Metode Pembayaran</h6>
+                            <small class="mini-label">BCA | BNI | GOPAY | QRIS</small>
+                        </div>
+
+                        <div class="method-groups">
+                            <label class="method-group">
+                                <div class="group-head">
+                                    <div>
+                                        <div class="mini-label">Virtual Account</div>
+                                        <div class="group-title">Transfer bank otomatis</div>
+                                        <div class="group-desc">BCA / BNI VA, verifikasi instan</div>
+                                    </div>
+                                    <input type="radio" name="pay_group" id="payVa" value="va" checked>
+                                </div>
+                                <div class="group-body">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="{{ asset('images/bca.jpeg') }}" alt="BCA" height="36" width="60" class="rounded border">
+                                        <img src="{{ asset('images/bni.jpeg') }}" alt="BNI" height="36" width="60" class="rounded border">
+                                    </div>
+                                    <select id="vaSelect" class="form-select form-select-sm" style="max-width: 210px;">
+                                        <option value="bca">BCA Virtual Account</option>
+                                        <option value="bni">BNI Virtual Account</option>
+                                    </select>
+                                </div>
+                            </label>
+                            <label class="method-group">
+                                <div class="group-head">
+                                    <div>
+                                        <div class="mini-label">E-Wallet</div>
+                                        <div class="group-title">Bayar lewat GoPay</div>
+                                        <div class="group-desc">Buka aplikasi GoPay untuk selesaikan pembayaran</div>
+                                    </div>
+                                    <input type="radio" name="pay_group" id="payEwallet" value="ewallet">
+                                </div>
+                                <div class="group-body">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="{{ asset('images/gopay.jpeg') }}" alt="GoPay" height="42" width="80" class="rounded border">
+                                        <div class="text-muted" style="font-size: 12px;">Scan / deeplink</div>
+                                    </div>
+                                    <span class="method-chip">GoPay</span>
+                                </div>
+                            </label>
+                            <label class="method-group">
+                                <div class="group-head">
+                                    <div>
+                                        <div class="mini-label">QRIS</div>
+                                        <div class="group-title">Semua dompet digital</div>
+                                        <div class="group-desc">Scan QRIS dari saldo apa saja</div>
+                                    </div>
+                                    <input type="radio" name="pay_group" id="payQris" value="qris">
+                                </div>
+                                <div class="group-body">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="{{ asset('images/qris.jpeg') }}" alt="QRIS" height="42" width="80" class="rounded border">
+                                        <div class="text-muted" style="font-size: 12px;">Dukungan OVO, DANA, ShopeePay, dll</div>
+                                    </div>
+                                    <span class="method-chip">QRIS</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <button id="payBtn" class="w-100 pay-btn mt-3" type="button">Bayar Sekarang</button>
+                        <small class="text-muted d-block mt-2" style="font-size: 12px;">Jumlah pembayaran mengikuti ringkasan pesanan di kanan.</small>
+                    </div>
+                </div>
+            </div>
             <div id="paymentResult" class="mt-3 small"></div>
         </div>
     </div>
@@ -376,6 +402,7 @@
         const orderId = document.getElementById('orderIdHidden')?.value?.trim();
         const statusBaseUrl = "{{ url('/api/payments/status') }}";
         let statusTimer = null;
+        const vaSelect = document.getElementById('vaSelect');
 
         const guestName = document.getElementById('guestName');
         const guestEmail = document.getElementById('guestEmail');
@@ -403,6 +430,20 @@
         const saveBookingDates = (payload) => {
             localStorage.setItem('booking_dates', JSON.stringify(payload));
             window.dispatchEvent(new CustomEvent('booking:updated', { detail: payload }));
+        };
+
+        const getSelectedPaymentMethod = () => {
+            const selectedGroup = document.querySelector('input[name="pay_group"]:checked')?.value;
+            if (selectedGroup === 'va') {
+                return vaSelect?.value || '';
+            }
+            if (selectedGroup === 'ewallet') {
+                return 'gopay';
+            }
+            if (selectedGroup === 'qris') {
+                return 'qris';
+            }
+            return '';
         };
 
         const computeNights = () => {
@@ -565,6 +606,10 @@
             qtyInput?.addEventListener('input', renderSummary);
             qtyInput?.addEventListener('change', renderSummary);
         });
+        vaSelect?.addEventListener('change', () => {
+            const vaRadio = document.getElementById('payVa');
+            if (vaRadio) vaRadio.checked = true;
+        });
 
         const setResult = (html, variant = 'info') => {
             if (!resultBox) return;
@@ -668,7 +713,7 @@
                 return;
             }
 
-            const method = document.querySelector('input[name="pay_method"]:checked')?.value;
+            const method = getSelectedPaymentMethod();
             if (!method) {
                 setResult('Pilih metode pembayaran dulu.', 'warning');
                 return;
