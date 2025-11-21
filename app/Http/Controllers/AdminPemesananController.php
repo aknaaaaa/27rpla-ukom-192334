@@ -20,6 +20,6 @@ class AdminPemesananController extends Controller
             'canceled' => $orders->filter(fn ($o) => $o->status_label === 'Canceled')->count(),
         ];
 
-        return view('admin.orders', compact('orders', 'metrics'));
+        return view('admin.orders.index', compact('orders', 'metrics'));
     }
 }

@@ -565,13 +565,19 @@
                         <label>Ukuran kamar</label>
                         <input id="roomUkuranInput" type="text" name="ukuran_kamar" value="{{ old('ukuran_kamar') }}" placeholder="contoh: 10 m2">
                     </div>
+                        <div class="field">
+                            <label>Stok / Jumlah Kamar</label>
+                            <input id="roomStokInput" type="number" name="stok_kamar" min="0" value="{{ old('stok_kamar') }}" required>
+                        </div>
                     <div class="field">
-                        <label>Status</label>
-                        <select id="roomStatusSelect" name="status_kamar">
-                            <option value="Tersedia" {{ old('status_kamar') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
-                            <option value="Telah di reservasi" {{ old('status_kamar') === 'Telah di reservasi' ? 'selected' : '' }}>Telah di reservasi</option>
-                            <option value="Maintenance" {{ old('status_kamar') === 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
-                        </select>
+                    <label>Status</label>
+                    <select id="roomStatusSelect" name="status_kamar">
+                        <option value="Tersedia">Tersedia</option>
+                        <option value="Telah di reservasi">Telah di reservasi</option>
+                        <option value="Maintenance">Maintenance</option>
+                    </select>
+                </div>
+
                     </div>
                     <div class="field" style="grid-column: 1 / -1;">
                         <label>Deskripsi</label>
@@ -590,6 +596,7 @@
     </div>
 
     <script>
+        
         const roomModal = document.getElementById('roomModal');
         const roomForm = document.getElementById('roomModalForm');
         const methodInput = document.getElementById('roomModalMethod');

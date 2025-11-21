@@ -16,11 +16,15 @@ Route::get('/', [LayoutsController::class, 'index'])->name('layouts.index');
 Route::get('/kamar', [KamarController::class, 'index'])->name('kamar.index');
 Route::get('/kamar/{id}', [KamarController::class, 'show'])->name('kamar.show');
 Route::get('/admin/dashboard', [LayoutsController::class, 'adminDashboard'])->name('admin.dashboard');
-Route::get('/admin/rooms', [AdminKamarController::class, 'index'])->name('admin.rooms');
-Route::post('/admin/rooms', [AdminKamarController::class, 'store'])->name('admin.rooms.store');
-Route::get('/admin/rooms/{id}/edit', [AdminKamarController::class, 'edit'])->name('admin.rooms.edit');
-Route::put('/admin/rooms/{id}', [AdminKamarController::class, 'update'])->name('admin.rooms.update');
-Route::delete('/admin/rooms/{id}', [AdminKamarController::class, 'destroy'])->name('admin.rooms.destroy');
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/rooms', [AdminKamarController::class, 'index'])->name('rooms.index');
+    Route::post('/rooms', [AdminKamarController::class, 'store'])->name('rooms.store');
+    Route::get('/rooms/{id}/edit', [AdminKamarController::class, 'edit'])->name('rooms.edit');
+    Route::put('/rooms/{id}', [AdminKamarController::class, 'update'])->name('rooms.update');
+    Route::delete('/rooms/{id}', [AdminKamarController::class, 'destroy'])->name('rooms.destroy');
+});
+
 Route::get('/admin/orders', [\App\Http\Controllers\AdminPemesananController::class, 'index'])->name('admin.orders');
 Route::get('/admin/customers', [AdminPelangganController::class, 'index'])->name('admin.pelanggan');
 Route::get('/admin/customers/{id}', [AdminPelangganController::class, 'show'])->name('admin.pelanggan.show');
