@@ -16,6 +16,7 @@ class Kamar extends Model
         'deskripsi',
         'gambar',
         'status_kamar',
+        'stok',
     ];
 
     protected $casts = [

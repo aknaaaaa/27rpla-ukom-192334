@@ -11,10 +11,10 @@ class KamarController extends Controller
 {
     public function index(Request $request)
     {
-            $rooms = Kamar::all();
-    $categories = Kategori::with('items')->get();
+        $kamars = Kamar::all();
+        $categories = Kategori::with('items')->get();
 
-        return view('admin.rooms.index', compact('rooms', 'categories'));
+        return view('kamar.index', compact('kamars', 'categories'));
     }
 
     public function show($id)

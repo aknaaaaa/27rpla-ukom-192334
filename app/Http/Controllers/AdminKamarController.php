@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Kamar;
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use App\Models\Kategori;
 
 class AdminKamarController extends Controller
 {
@@ -15,10 +14,7 @@ class AdminKamarController extends Controller
     {
         $rooms = Kamar::latest()->get();
 
-        // Ambil kategori beserta item-item di dalamnya
-        $categories = Kategori::with('items')->get();
-
-        return view('admin.rooms.index', compact('rooms', 'categories'));
+        return view('admin.rooms.index', compact('rooms'));
     }
 
     public function edit($id)

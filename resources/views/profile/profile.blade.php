@@ -276,10 +276,7 @@
                 <a href="{{ route('kamar.index') }}">Keranjang</a>
                 <a href="{{ route('checkout') }}">Pemesanan</a>
                 <a href="{{ route('profile.profile', ['tab' => 'history']) }}" class="{{ ($tab ?? 'profile') === 'history' ? 'active' : '' }}">Riwayat</a>
-                <form action="{{ route('logout') }}" method="POST" style="margin:0;">
-                    @csrf
-                    <button type="submit" class="logout">Log Out</button>
-                </form>
+                <button type="button" onclick="doLogoutProfile()" class="logout">Log Out</button>
             </div>
 
             <div class="profile-panel">
@@ -396,6 +393,39 @@
     </div>
 </div>
 <script>
+async function doLogoutProfile() {
+    if (!confirm('Apakah Anda yakin ingin logout?')) {
+        return;
+    }
+
+    const token = localStorage.getItem('access_token');
     
+    try {
+        const res = await fetch('{{ route('logout') }}', {
+            method: 'POST',
+            headers: {
+                'Authorization': token ? 'Bearer ' + token : '',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            credentials: 'include',
+            body: JSON.stringify({})
+        });
+
+        // Clear localStorage dan cookies
+        localStorage.removeItem('access_token');
+        document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        
+        // Redirect ke home
+        window.location.href = '{{ route('layouts.index') }}';
+    } catch (e) {
+        console.error('Logout error:', e);
+        // Force logout bahkan jika request gagal
+        localStorage.removeItem('access_token');
+        document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        window.location.href = '{{ route('layouts.index') }}';
+    }
+}
 </script>
 @endsection
