@@ -24,7 +24,7 @@ class AdminPelangganController extends Controller
             'total_admins' => $customers->where('id_role', 1)->count(),
         ];
 
-        return view('admin.pelanggan', [
+        return view('admin.pelanggan.index', [
             'customers' => $customers->filter(fn ($user) => strcasecmp($user->role_name ?? '', 'Admin') !== 0)->values(),
             'metrics' => $metrics,
         ]);

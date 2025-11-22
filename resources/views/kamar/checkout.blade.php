@@ -180,6 +180,16 @@
                                 </div>
                                 <input type="radio" name="pay_method" value="qris">
                             </div>
+                            <div class="method-item" style="background: #fff9e6; border-radius: 8px; padding: 10px;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div style="width: 72px; height: 48px; border-radius: 8px; background: #ffd700; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 10px; color: #333;">TEST</div>
+                                    <div>
+                                        <strong>🧪 Test Mode (Instant Success)</strong>
+                                        <div class="text-muted" style="font-size: 12px;">Langsung mark as paid untuk testing</div>
+                                    </div>
+                                </div>
+                                <input type="radio" name="pay_method" value="test_success">
+                            </div>
                         </div>
 
                         <button id="payBtn" class="w-100 pay-btn mt-3" type="button">Bayar Sekarang</button>
@@ -320,6 +330,15 @@
             const total = Number(payBtn.getAttribute('data-total') || 0);
             if (!total) {
                 setResult('Total pembayaran tidak valid.', 'warning');
+                return;
+            }
+
+            // Test mode - instant success
+            if (method === 'test_success') {
+                setResult('✅ Pembayaran berhasil (Test Mode)<br>Redirecting ke halaman sukses...', 'success');
+                setTimeout(() => {
+                    window.location.href = "{{ route('checkout.success') }}";
+                }, 1500);
                 return;
             }
 

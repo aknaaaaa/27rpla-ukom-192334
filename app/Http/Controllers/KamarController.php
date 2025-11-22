@@ -4,17 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Kamar;
 use Illuminate\Http\Request;
-use App\Models\Kategori;
-
 
 class KamarController extends Controller
 {
     public function index(Request $request)
     {
         $kamars = Kamar::all();
-        $categories = Kategori::with('items')->get();
 
-        return view('kamar.index', compact('kamars', 'categories'));
+        return view('kamar.index', compact('kamars'));
     }
 
     public function show($id)
