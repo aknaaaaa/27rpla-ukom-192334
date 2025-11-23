@@ -32,6 +32,7 @@
             padding: 28px 22px;
             position: relative;
             z-index: 2;
+            transition: transform 0.25s ease;
         }
         .brand { margin-bottom: 18px; }
         .brand__name {
@@ -92,6 +93,7 @@
             background: rgba(0,0,0,0.35);
             z-index: 30;
             padding: 16px;
+            font-family: 'Aboreto', sans-serif;
         }
         .modal.is-open { display: flex; }
         .form-card{
@@ -142,6 +144,17 @@
             cursor: pointer;
             letter-spacing: 0.5px;
             font-size: 13px;
+            font-family: 'Aboreto', sans-serif;
+        }
+        .tutup-btn {
+            background: #999;
+            color: white;
+            transition: 0.3s ease; /* biar halus */
+        }
+
+        .tutup-btn:hover {
+            background: #777; /* warna saat hover */
+            cursor: pointer;
         }
         .rooms {
             display: grid;
@@ -162,6 +175,11 @@
             height: 210px;
             object-fit: cover;
             border-radius: 10px;
+        }
+        .room-body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
         .room-head {
             display: flex;
@@ -224,11 +242,13 @@
         .actions {
             display: flex;
             gap: 10px;
-            margin-top: 12px;
+            margin-top: auto;
             flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: center;
         }
         .btn-pill {
-            flex: 1;
+            flex: 0 0 auto;
             min-width: 120px;
             padding: 10px 14px;
             background: #2d2b2b;
@@ -238,6 +258,157 @@
             cursor: pointer;
             letter-spacing: 0.6px;
             font-size: 13px;
+            font-family: 'Aboreto', sans-serif;
+            text-decoration: none;
+            display: inline-flex;
+            /* align-items: center; */
+            justify-content: center;
+        }
+        /* Confirm modal */
+        .confirm-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.25);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 40;
+        }
+        .confirm-backdrop.is-open { display: flex; }
+        .confirm-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 18px 20px;
+            width: min(320px, 100%);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.16);
+            text-align: center;
+            border: 1px solid #dcdcdc;
+            font-family: 'Aboreto', sans-serif;
+        }
+        .confirm-card h4 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        .confirm-divider {
+            height: 1px;
+            background: #c1c1c1;
+            margin: 10px 0 16px;
+        }
+        .confirm-btn {
+            background: #2d2b2b;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            width: 100%;
+        }
+        /* Loading overlay saat berpindah halaman */
+        .page-loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease;
+        }
+        .page-loader.is-visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 6px solid #e1e1e1;
+            border-top-color: #2c2c2c;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .flash-stack {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: grid;
+            gap: 10px;
+            z-index: 120;
+        }
+        .flash {
+            min-width: 260px;
+            max-width: 360px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #b7e4c7;
+            background: #d8f3dc;
+            color: #1b4332;
+            box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            letter-spacing: 0.4px;
+        }
+        .flash button {
+            background: transparent;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+        .hamburger {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid #cfcfcf;
+            background: #fff;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            z-index: 120;
+            box-shadow: 0 10px 16px rgba(0,0,0,0.08);
+            cursor: pointer;
+        }
+        @media (max-width: 960px) {
+            .dashboard-shell { flex-direction: column; }
+            .sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                width: 250px;
+                transform: translateX(-100%);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+                background: #fff;
+                z-index: 110;
+                padding-top: 72px;
+            }
+            .sidebar.is-open { transform: translateX(0); }
+            .sidebar .menu { grid-template-columns: 1fr; }
+            .main { padding-left: 16px; padding-right: 16px; }
+            .hamburger { display: inline-flex; }
+            .room-card { grid-template-columns: 1fr; }
+            .room-head { flex-direction: column; align-items: flex-start; }
+            .status-price { flex-direction: column; align-items: flex-start; }
+            .price { text-align: left; }
+        }
+        @media (max-width: 650px) {
+            .main { padding: 18px; }
+            .actions { width: 100%; justify-content: stretch; }
+            .btn-pill { flex: 1 1 45%; min-width: 0; }
         }
         @media (max-width: 960px) {
             .dashboard-shell { flex-direction: column; }
@@ -250,46 +421,21 @@
     </style>
 </head>
 <body>
-    <div class="dashboard-shell">
-        <aside class="sidebar">
-            <div class="brand">
-                <p class="brand__name">D'Kasuari</p>
-                <div class="brand__address">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    <span>Jl. Kasuari RT 03 RW 18</span>
-                </div>
+    @if(session('ok'))
+        <div class="flash-stack" id="flashStack">
+            <div class="flash">
+                <span>{{ session('ok') }}</span>
+                <button type="button" aria-label="Tutup notifikasi" onclick="this.closest('.flash')?.remove()">&times;</button>
             </div>
-
-            <nav class="menu">
-                <a href="{{ route('admin.dashboard') }}" class="menu__item">
-                    <i class="bi bi-grid-1x2-fill menu__icon"></i> Dashboard
-                </a>
-                <a href="{{ route('admin.rooms') }}" class="menu__item is-active">
-                    <i class="bi bi-door-open-fill menu__icon"></i> Kamar
-                </a>
-                <a href="#" class="menu__item">
-                    <i class="bi bi-box-seam menu__icon"></i> Pesanan
-                </a>
-                <a href="#" class="menu__item">
-                    <i class="bi bi-people menu__icon"></i> Pelanggan
-                </a>
-                <a href="#" class="menu__item">
-                    <i class="bi bi-credit-card-2-back menu__icon"></i> Pembayaran
-                </a>
-                <a href="#" class="menu__item">
-                    <i class="bi bi-box-arrow-right menu__icon"></i> Keluar
-                </a>
-            </nav>
-        </aside>
+        </div>
+    @endif
+    <button class="hamburger" id="sidebarToggle" aria-label="Toggle menu"><i class="bi bi-list"></i></button>
+    <div class="dashboard-shell">
+        @include('admin.partials.sidebar', ['active' => 'rooms'])
 
         <main class="main">
             <div class="content">
                 <div class="top-line"></div>
-                @if(session('ok'))
-                    <div style="background:#d8f3dc;color:#1b4332;padding:10px 12px;border-radius:8px;border:1px solid #b7e4c7;margin-bottom:12px;">
-                        {{ session('ok') }}
-                    </div>
-                @endif
                 @if ($errors->any())
                     <div style="background:#fde2e4;color:#b00020;padding:10px 12px;border-radius:8px;border:1px solid #f8d7da;margin-bottom:12px;">
                         <ul style="margin:0;padding-left:18px;">
@@ -308,9 +454,11 @@
                     @forelse($rooms as $room)
                         <div class="room-card">
                             <div>
-                                <img src="{{ $room->gambar ?? asset('images/discover%20(1).jpg') }}" alt="{{ $room->nama_kamar }}">
+                                <img src="{{ $room->gambar ?? asset('images/discover%20(1).jpg') }}"
+                                     alt="{{ $room->nama_kamar }}"
+                                     onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';">
                             </div>
-                            <div>
+                            <div class="room-body">
                                 <div class="room-head">
                                     <h3 class="room-title">{{ strtoupper($room->nama_kamar) }}</h3>
                                     <div class="room-count">
@@ -319,20 +467,19 @@
                                 </div>
 
                                 <div class="meta">
-                                    <div class="meta-block">
-                                        <h5>Kategori</h5>
-                                        <div class="divider"></div>
-                                        <div class="meta-item"><i class="bi bi-person-standing"></i> 1 Orang</div>
-                                        <div class="meta-item"><i class="bi bi-square"></i> {{ $room->ukuran_kamar ?? '-' }}</div>
-                                        <div class="meta-item"><i class="bi bi-door-closed"></i> Single</div>
-                                    </div>
+                                <div class="meta-block">
+                                    <h5>Kategori</h5>
+                                    <div class="divider"></div>
+                                    <div class="meta-item"><i class="bi bi-tags"></i> {{ $room->kategori ?? 'Standar' }}</div>
+                                    <div class="meta-item"><i class="bi bi-square"></i> {{ $room->ukuran_kamar ?? '-' }}</div>
+                                </div>
                                     <div class="meta-block">
                                         <h5>Fasilitas</h5>
                                         <div class="divider"></div>
                                         <div class="meta-item">
                                             <span class="badge-muted">Sarapan tidak tersedia</span>
                                         </div>
-                                        <div class="meta-item">{{ $room->deskripsi ?? 'Tidak bisa refund & reschedule' }}</div>
+                                        <div class="meta-item"><p>DESKRIPSI:</p>{{ $room->deskripsi ?? 'Tidak bisa refund & reschedule' }}</div>
                                     </div>
                                 </div>
 
@@ -344,8 +491,25 @@
                                 </div>
 
                                 <div class="actions">
-                                    <button class="btn-pill">Edit</button>
-                                    <button class="btn-pill">Hapus</button>
+                                    <button class="btn-pill"
+                                            type="button"
+                                            data-action="{{ route('admin.rooms.update', $room->id_kamar) }}"
+                                            data-nama="{{ $room->nama_kamar }}"
+                                            data-kategori="{{ $room->kategori }}"
+                                            data-harga="{{ $room->harga_permalam }}"
+                                            data-ukuran="{{ $room->ukuran_kamar }}"
+                                            data-status="{{ $room->status_kamar }}"
+                                            data-deskripsi="{{ e($room->deskripsi) }}"
+                                            data-img="{{ $room->gambar }}"
+                                            onclick="openEditModal(this)">
+                                        Edit
+                                    </button>
+                                    <button class="btn-pill btn-delete"
+                                        type="button"
+                                        data-room-id="{{ $room->id_kamar }}"
+                                        data-room-name="{{ $room->nama_kamar }}">
+                                        Hapus
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -356,30 +520,54 @@
             </div>
         </main>
     </div>
+    <div class="page-loader" id="pageLoader" aria-hidden="true">
+        <div class="loader-spinner" role="status" aria-label="Loading"></div>
+    </div>
+    <div class="confirm-backdrop" id="confirmDeleteModal" aria-hidden="true">
+        <div class="confirm-card">
+            <h4>YAKIN INGIN HAPUS?</h4>
+            <div class="confirm-divider"></div>
+            <button class="confirm-btn" id="confirmDeleteBtn" type="button">KONFIRMASI</button>
+        </div>
+    </div>
     <div class="modal" id="roomModal">
         <div class="form-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4 style="margin:0; letter-spacing:1px;">Buat kamar baru</h4>
-                <button type="button" class="btn-new" style="background:#999;" onclick="closeModal()">Tutup</button>
+                <h4 id="roomModalTitle" style="margin:0; letter-spacing:1px;">Buat kamar baru</h4>
+                <button type="button" class="btn-new tutup-btn" onclick="closeModal()">Tutup</button>
+
             </div>
-            <form method="POST" action="{{ route('admin.rooms.store') }}" enctype="multipart/form-data">
+            <form id="roomModalForm" method="POST" action="{{ route('admin.rooms.store') }}" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="_method" id="roomModalMethod" value="">
                 <div class="form-grid">
                     <div class="field">
                         <label>Nama kamar</label>
-                        <input type="text" name="nama_kamar" value="{{ old('nama_kamar') }}" required>
+                        <input id="roomNameInput" type="text" name="nama_kamar" value="{{ old('nama_kamar') }}" required>
+                    </div>
+                    <div class="field">
+                        <label>Kategori</label>
+                        <select id="roomKategoriSelect" name="kategori" required>
+                            @php
+                                $categories = ['Standar', 'Superior', 'Deluxe', 'Suite', 'Family', 'Executive'];
+                                $oldKategori = old('kategori');
+                            @endphp
+                            @foreach ($categories as $cat)
+                                <option value="{{ $cat }}" {{ $oldKategori === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="field">
                         <label>Harga per malam</label>
-                        <input type="number" name="harga_permalam" min="0" step="1000" value="{{ old('harga_permalam') }}" required>
+                        <input id="roomHargaInput" type="number" name="harga_permalam" min="0" step="1000" value="{{ old('harga_permalam') }}" required>
                     </div>
                     <div class="field">
                         <label>Ukuran kamar</label>
-                        <input type="text" name="ukuran_kamar" value="{{ old('ukuran_kamar') }}" placeholder="contoh: 10 m2">
+                        <input id="roomUkuranInput" type="text" name="ukuran_kamar" value="{{ old('ukuran_kamar') }}" placeholder="contoh: 10 m2">
                     </div>
                     <div class="field">
                         <label>Status</label>
-                        <select name="status_kamar">
+                        <select id="roomStatusSelect" name="status_kamar">
                             <option value="Tersedia" {{ old('status_kamar') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
                             <option value="Telah di reservasi" {{ old('status_kamar') === 'Telah di reservasi' ? 'selected' : '' }}>Telah di reservasi</option>
                             <option value="Maintenance" {{ old('status_kamar') === 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
@@ -387,27 +575,162 @@
                     </div>
                     <div class="field" style="grid-column: 1 / -1;">
                         <label>Deskripsi</label>
-                        <textarea name="deskripsi" placeholder="Detail singkat kamar">{{ old('deskripsi') }}</textarea>
+                        <textarea id="roomDeskripsiInput" name="deskripsi" placeholder="Detail singkat kamar">{{ old('deskripsi') }}</textarea>
                     </div>
                     <div class="field">
-                        <label>Gambar</label>
-                        <input type="file" name="image" accept="image/*" required>
+                        <label>Gambar <small style="color:#777;">(kosongkan saat edit jika tidak diganti)</small></label>
+                        <input id="roomImageInput" type="file" name="image" accept="image/*" required>
                     </div>
                 </div>
                 <div class="actions-inline" style="margin-top:12px;">
-                    <button type="submit" class="btn-new">Simpan kamar</button>
+                    <button id="roomModalSubmit" type="submit" class="btn-new">Simpan kamar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        function openModal(){ document.getElementById('roomModal').classList.add('is-open'); }
-        function closeModal(){ document.getElementById('roomModal').classList.remove('is-open'); }
+        const roomModal = document.getElementById('roomModal');
+        const roomForm = document.getElementById('roomModalForm');
+        const methodInput = document.getElementById('roomModalMethod');
+        const titleEl = document.getElementById('roomModalTitle');
+        const submitBtn = document.getElementById('roomModalSubmit');
+        const nameInput = document.getElementById('roomNameInput');
+        const kategoriSelect = document.getElementById('roomKategoriSelect');
+        const hargaInput = document.getElementById('roomHargaInput');
+        const ukuranInput = document.getElementById('roomUkuranInput');
+        const statusSelect = document.getElementById('roomStatusSelect');
+        const deskripsiInput = document.getElementById('roomDeskripsiInput');
+        const imageInput = document.getElementById('roomImageInput');
+
+        function openModal(){
+            resetForm();
+            titleEl.textContent = 'Buat kamar baru';
+            submitBtn.textContent = 'Simpan kamar';
+            methodInput.value = '';
+            roomForm.action = "{{ route('admin.rooms.store') }}";
+            imageInput.required = true;
+            roomModal.classList.add('is-open');
+        }
+        function closeModal(){ roomModal.classList.remove('is-open'); }
+
+        function resetForm() {
+            nameInput.value = "{{ old('nama_kamar') }}";
+            kategoriSelect.value = "{{ $oldKategori ?? 'Standar' }}";
+            hargaInput.value = "{{ old('harga_permalam') }}";
+            ukuranInput.value = "{{ old('ukuran_kamar') }}";
+            statusSelect.value = "{{ old('status_kamar') ?? 'Tersedia' }}";
+            deskripsiInput.value = `{{ old('deskripsi') }}`;
+            imageInput.value = '';
+        }
+
+        function openEditModal(button){
+            const action = button.getAttribute('data-action');
+            const nama = button.getAttribute('data-nama') || '';
+            const kategori = button.getAttribute('data-kategori') || 'Standar';
+            const harga = button.getAttribute('data-harga') || '';
+            const ukuran = button.getAttribute('data-ukuran') || '';
+            const status = button.getAttribute('data-status') || 'Tersedia';
+            const deskripsi = button.getAttribute('data-deskripsi') || '';
+            const img = button.getAttribute('data-img') || '';
+
+            roomForm.action = action;
+            methodInput.value = 'PUT';
+            titleEl.textContent = 'Edit kamar';
+            submitBtn.textContent = 'Update kamar';
+
+            nameInput.value = nama;
+            kategoriSelect.value = kategori;
+            hargaInput.value = harga;
+            ukuranInput.value = ukuran;
+            statusSelect.value = status;
+            deskripsiInput.value = deskripsi;
+
+            imageInput.required = false;
+
+            roomModal.classList.add('is-open');
+        }
+
         @if($errors->any())
             // auto open modal when validation fails so user sees errors and data
             openModal();
         @endif
+
+        // Auto-hide flash success
+        document.addEventListener('DOMContentLoaded', function () {
+            const flashStack = document.getElementById('flashStack');
+            if (!flashStack) return;
+            setTimeout(() => flashStack.remove(), 4200);
+        });
+
+        // Loader saat pindah halaman dari admin rooms
+        document.addEventListener('DOMContentLoaded', function () {
+            const loader = document.getElementById('pageLoader');
+            if (!loader) return;
+
+            const showLoader = () => loader.classList.add('is-visible');
+
+            document.querySelectorAll('a[href]').forEach((link) => {
+                const href = link.getAttribute('href');
+                if (!href || href === '#' || href.startsWith('javascript:')) return;
+
+                link.addEventListener('click', function () {
+                    if (this.target === '_blank' || this.href === window.location.href) return;
+                    showLoader();
+                });
+            });
+
+            window.addEventListener('beforeunload', showLoader);
+        });
+
+        // Handle delete confirmation
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('confirmDeleteModal');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const deleteForm = document.getElementById('deleteRoomForm');
+            let selectedId = null;
+
+            document.querySelectorAll('.btn-delete').forEach((btn) => {
+                btn.addEventListener('click', function () {
+                    selectedId = this.dataset.roomId;
+                    modal.classList.add('is-open');
+                });
+            });
+
+            modal?.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    modal.classList.remove('is-open');
+                }
+            });
+
+            confirmBtn?.addEventListener('click', function () {
+                if (!selectedId || !deleteForm) return;
+                const template = "{{ route('admin.rooms.destroy', ['id' => ':id']) }}";
+                deleteForm.action = template.replace(':id', selectedId);
+                deleteForm.submit();
+            });
+        });
+        // Sidebar toggle on mobile
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            toggle?.addEventListener('click', function (e) {
+                e.stopPropagation();
+                sidebar?.classList.toggle('is-open');
+            });
+            document.addEventListener('click', function (e) {
+                if (window.innerWidth > 960) return;
+                if (!sidebar?.classList.contains('is-open')) return;
+                if (!sidebar.contains(e.target) && e.target !== toggle) {
+                    sidebar.classList.remove('is-open');
+                }
+            });
+        });
     </script>
+    <form id="deleteRoomForm" method="POST" style="display:none;">
+        @csrf
+        @method('DELETE')
+    </form>
 </body>
 </html>
+

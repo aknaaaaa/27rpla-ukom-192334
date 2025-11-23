@@ -229,7 +229,7 @@
             <input class="input" type="password" name="password" placeholder="********" required>
         </div>
 
-        <button class="btn" type="submit" id="loginBtn">Login</button>
+        <button class="btn" type="submit" id="loginBtn">MASUK</button>
 
         <p class="muted">
             Belum punya akun?

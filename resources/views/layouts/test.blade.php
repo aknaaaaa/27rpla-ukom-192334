@@ -72,7 +72,6 @@
         <div class="page-loader__spinner" role="status" aria-label="Loading"></div>
     </div>
     <div id="appToastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
-    @include('layouts.navigation')
     <main class="py-4">
         @yield('content')
     </main>
@@ -113,24 +112,6 @@
             toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
             toast.show();
         };
-
-        // Bersihkan keranjang & tanggal ketika user logout (POST/GET logout)
-        document.addEventListener('DOMContentLoaded', () => {
-            const clearStorage = () => {
-                localStorage.removeItem('room_cart');
-                localStorage.removeItem('booking_dates');
-                localStorage.removeItem('access_token');
-                document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
-            };
-
-            document.querySelectorAll('form[action*="logout"]').forEach((form) => {
-                form.addEventListener('submit', clearStorage);
-            });
-
-            document.querySelectorAll('a[href$="/logout"], a[href$="/logout"]').forEach((a) => {
-                a.addEventListener('click', clearStorage);
-            });
-        });
     </script>
 </body>
 </html>

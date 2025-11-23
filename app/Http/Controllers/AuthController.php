@@ -6,15 +6,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Cookie;
-use Laravel\Sanctum\PersonalAccessToken;
 use App\Models\User;
+use Laravel\Sanctum\PersonalAccessToken;
 // use laravel\Passport\HasApiTokens;
 
 class AuthController extends Controller
 {
     public function register(Request $request) 
     {
+        // Tentukan ID Role Default Anda 
+    
+    // Gabungkan data request dengan nilai default
+        // 1. Validasi Data
         $userData = Validator::make($request->all(), [
             'nama_user' => 'required|string|max:100', 
             'phone_number' => 'required|string|max:20', 
@@ -23,25 +26,21 @@ class AuthController extends Controller
         ]);
 
         if ($userData->fails()) {
-            return redirect()
-                ->route('register')
-                ->withErrors($userData)
-                ->withInput();
+            return redirect()->back()->withErrors($userData)->withInput();
         }
 
         $defaultRoleId = 2;
 
-        User::create([
+        $user = User::create([
             'id_role' => $defaultRoleId, 
             'nama_user' => $request->nama_user,
             'email' => $request->email,
             'phone_number' => $request->phone_number,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->password), // Wajib di-hash
         ]);
 
-        return redirect()
-            ->route('login')
-            ->with('success_message', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
+        // 4. Berikan Respons Sukses
+        return redirect()->back()->with('success_message', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
     }
     public function login(Request $request) 
     {
@@ -68,7 +67,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $user = Auth::user();
+        $user = Auth::user()->load('role');
         $request->session()->regenerate(); // start session untuk guard web
 
         // Cek apakah Passport sudah dikonfigurasi dan HasApiTokens digunakan
@@ -108,53 +107,41 @@ class AuthController extends Controller
         return response()->json(['message' => 'Unauthenticated'], 401);
     }
     public function logout(Request $request) {
-        $user = $request->user();
+        $bearer = $request->bearerToken();
+        $cookieToken = $request->cookie('sanctum_token');
+        $tokenString = $bearer ?: ($cookieToken ? urldecode($cookieToken) : null);
 
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sedang tidak login'
-            ], 401);
+        $accessToken = $tokenString ? PersonalAccessToken::findToken($tokenString) : null;
+        $user = $accessToken?->tokenable ?? $request->user();
+
+        // Jika ada token personal, hapus token itu
+        if ($accessToken) {
+            $accessToken->delete();
         }
 
-        // Hapus token Sanctum aktif + sesi web
-        if ($token = $user->currentAccessToken()) {
-            if (method_exists($token, 'delete')) {
-                $token->delete();
-            }
+        // Jika ada user terautentikasi, hapus semua token + logout session
+        if ($user) {
+            $user->tokens()->delete();
+            Auth::guard('web')->logout();
         }
 
-        $tokens = [];
-        if ($bearer = $request->bearerToken()) {
-            $tokens[] = $bearer;
-        }
-
-        if ($cookieToken = $request->cookie('sanctum_token')) {
-            $tokens[] = urldecode($cookieToken);
-        }
-
-        foreach ($tokens as $plainTextToken) {
-            if (! $plainTextToken) {
-                continue;
-            }
-
-            $tokenModel = PersonalAccessToken::findToken($plainTextToken);
-            if ($tokenModel) {
-                $tokenModel->delete();
-            }
-        }
-
-        Auth::guard('web')->logout();
-
-        if ($request->hasSession()) {
+        // Invalidate session jika ada
+        try {
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+        } catch (\Throwable $e) {
+            // abaikan jika session tidak tersedia
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Berhasil logout'
-        ], 200)->withCookie(Cookie::forget('sanctum_token'));
+        // Jika request JSON (API), kembalikan JSON; jika tidak, redirect ke login
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil logout'
+            ], 200);
+        }
+
+        return redirect()->route('layouts.login')->with('ok', 'Berhasil logout.');
     }
     public function user(Request $request)
 {

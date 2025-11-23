@@ -46,7 +46,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens([
             'api/auth/login',
             'api/auth/register',
+            'api/auth/logout',
             'admin/rooms',
+            'admin/rooms/*',
+            'api/payments/charge',
+            'api/midtrans/notify',
         ]);
 
         // cookie token diset dari client, jadi jangan dienkripsi/didekripsi oleh Laravel

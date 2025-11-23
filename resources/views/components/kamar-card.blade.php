@@ -1,28 +1,66 @@
-@props(['kamar', 'checkin' => null, 'checkout' => null])
+@php
+    $imageUrl = $kamar->gambar ?: asset('images/default.jpg');
+    $statusLower = strtolower($kamar->status_kamar);
+    $isReserved = $statusLower === 'telah di reservasi';
+    $isMaintenance = $statusLower === 'maintenance';
+    $isBlocked = $isReserved || $isMaintenance;
 
-<div class="card shadow-sm border rounded p-3" style="background: #f8f3ef;">
-    <div class="d-flex">
-        <img src="{{ asset($kamar['gambar']) }}" class="rounded" width="180" height="130">
-        <div class="ms-3 flex-grow-1">
-            <h5 class="fw-bold">{{ strtoupper($kamar['nama_kamar']) }}</h5>
-            <p class="text-muted small mb-1">SARAPAN TIDAK TERSEDIA</p>
-            <p class="text-muted small mb-1">TIDAK BISA REFUND & RESCHEDULE</p>
-            <p class="fw-semibold">INFORMASI SINGKAT</p>
-            <ul class="small mb-2">
-                <li>👤 {{ $kamar['kapasitas'] ?? '1 Orang' }}</li>
-                <li>📏 {{ $kamar['ukuran_kamar'] ?? '3x4 m' }}</li>
-            </ul>
-
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <strong>Rp{{ number_format($kamar['harga_permalam'], 0, ',', '.') }}</strong> / Malam
+    $imageStyle = '';
+    if ($isReserved) {
+        $imageStyle = 'filter: grayscale(1);';
+    } elseif ($isMaintenance) {
+        $imageStyle = 'filter: grayscale(1) opacity(0.7);';
+    }
+@endphp
+<div class="card shadow-sm mb-3 room-card w-100">
+    <div class="row g-0 align-items-stretch h-100">
+        <div class="col-md-4">
+            <div class="position-relative h-100">
+                @if($isMaintenance)
+                    <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">Maintenance</span>
+                @endif
+                <img src="{{ $imageUrl }}"
+                    class="img-fluid rounded-start room-card-img h-100"
+                    alt="{{ $kamar->nama_kamar }}"
+                    onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';"
+                    style="{{ $imageStyle }}">
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title text-uppercase fw-bold">{{ $kamar->nama_kamar }}</h5>
+                <p class="card-text small mb-1">Kategori: {{ $kamar->kategori ?? 'Standar' }}</p>
+                <p class="card-text small mb-1">Ukuran: {{ $kamar->ukuran_kamar ?? 'Tidak dicantumkan' }}</p>
+                <p class="card-text small mb-1">Status: {{ $kamar->status_kamar }}</p>
+                <p class="card-text mb-2 fw-semibold text-dark">
+                    Rp{{ number_format($kamar->harga_permalam, 0, ',', '.') }} / Malam
+                </p>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-dark btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#kamarDetailModal"
+                            data-nama="{{ $kamar->nama_kamar }}"
+                            data-deskripsi="{{ $kamar->deskripsi }}"
+                            data-gambar="{{ $imageUrl }}"
+                            data-harga="Rp{{ number_format($kamar->harga_permalam, 0, ',', '.') }} / Malam"
+                            data-ukuran="{{ $kamar->ukuran_kamar ?? 'Tidak dicantumkan' }}"
+                            data-status="{{ $kamar->status_kamar }}"
+                            data-url="{{ route('kamar.show', $kamar->id_kamar) }}">
+                        Detail
+                    </button>
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm"
+                            data-requires-auth="true"
+                            data-action="{{ $isBlocked ? '' : 'add-to-cart' }}"
+                            data-id="{{ $kamar->id_kamar }}"
+                            data-price="{{ $kamar->harga_permalam }}"
+                            data-nama="{{ $kamar->nama_kamar }}"
+                            data-status="{{ $kamar->status_kamar }}"
+                            data-gambar="{{ $imageUrl }}"
+                            {{ $isBlocked ? 'disabled' : '' }}>
+                        {{ $isBlocked ? 'Tidak Tersedia' : 'Keranjang' }}
+                    </button>
                 </div>
-                <form method="POST" action="{{ route('pemesanan.store', $kamar['id_kamar']) }}">
-                    @csrf
-                    <input type="hidden" name="checkin" value="{{ $checkin }}">
-                    <input type="hidden" name="checkout" value="{{ $checkout }}">
-                    <button class="btn btn-dark px-4 py-1">Pilih</button>
-                </form>
             </div>
         </div>
     </div>

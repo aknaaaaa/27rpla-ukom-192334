@@ -33,6 +33,7 @@
             padding: 28px 22px;
             position: relative;
             z-index: 2;
+            transition: transform 0.25s ease;
         }
         .brand {
             margin-bottom: 18px;
@@ -128,9 +129,78 @@
             margin: 0;
             line-height: 1.1;
         }
+        .hamburger {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid #cfcfcf;
+            background: #fff;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            z-index: 120;
+            box-shadow: 0 10px 16px rgba(0,0,0,0.08);
+            cursor: pointer;
+        }
+        @media (max-width: 960px) {
+            .dashboard-shell { flex-direction: column; }
+            .sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                width: 250px;
+                transform: translateX(-100%);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+                background: #fff;
+                z-index: 110;
+                padding-top: 72px;
+            }
+            .sidebar.is-open { transform: translateX(0); }
+            .sidebar .menu { grid-template-columns: 1fr; }
+            .main { padding-left: 16px; padding-right: 16px; }
+            .hamburger { display: inline-flex; }
+            .cards { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+        }
+        @media (max-width: 600px) {
+            .menu { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+            .cards { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .card__value { font-size: 32px; }
+        }
         .card--wide {
             grid-column: 1 / -1;
             min-height: 200px;
+        }
+        /* Loading overlay saat pindah halaman */
+        .page-loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease;
+        }
+        .page-loader.is-visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 6px solid #e1e1e1;
+            border-top-color: #2c2c2c;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         @media (max-width: 980px) {
             .dashboard-shell { flex-direction: column; }
@@ -144,41 +214,14 @@
             'total_orders' => 12,
             'occupied_rooms' => 136,
             'available_rooms' => 0,
+            'maintenance_rooms' => 0,
             'total_revenue' => 'Rp 0',
         ];
     @endphp
 
+    <button class="hamburger" id="sidebarToggle" aria-label="Toggle menu"><i class="bi bi-list"></i></button>
     <div class="dashboard-shell">
-        <aside class="sidebar">
-            <div class="brand">
-                <p class="brand__name">D'Kasuari</p>
-                <div class="brand__address">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    <span>Jl. Kasuari RT 03 RW 18</span>
-                </div>
-            </div>
-
-            <nav class="menu">
-                <a href="{{ route('admin.dashboard') }}" class="menu__item is-active">
-                    <i class="bi bi-grid-1x2-fill menu__icon"></i> Dashboard
-                </a>
-                <a href="{{ route('admin.rooms') }}" class="menu__item">
-                    <i class="bi bi-door-open-fill menu__icon"></i> Kamar
-                </a>
-                <a href="#" class="menu__item">
-                    <i class="bi bi-box-seam menu__icon"></i> Pesanan
-                </a>
-                <a href="#" class="menu__item">
-                    <i class="bi bi-people menu__icon"></i> Pelanggan
-                </a>
-                <a href="#" class="menu__item">
-                    <i class="bi bi-credit-card-2-back menu__icon"></i> Pembayaran
-                </a>
-                <a href="#" class="menu__item">
-                    <i class="bi bi-box-arrow-right menu__icon"></i> Keluar
-                </a>
-            </nav>
-        </aside>
+        @include('admin.partials.sidebar', ['active' => 'dashboard'])
 
         <main class="main">
             <div class="content">
@@ -197,6 +240,10 @@
                         <p class="card__title">Jumlah Kamar Tersisa</p>
                         <p class="card__value">{{ $metrics['available_rooms'] }}</p>
                     </div>
+                    <div class="card">
+                        <p class="card__title">Jumlah Kamar Maintenance</p>
+                        <p class="card__value">{{ $metrics['maintenance_rooms'] }}</p>
+                    </div>
                     <div class="card card--wide">
                         <p class="card__title">Total Pendapatan</p>
                         <p class="card__value">{{ $metrics['total_revenue'] }}</p>
@@ -205,5 +252,51 @@
             </div>
         </main>
     </div>
+
+    <div class="page-loader" id="pageLoader" aria-hidden="true">
+        <div class="loader-spinner" role="status" aria-label="Loading"></div>
+    </div>
+
+    <script>
+        // Tampilkan overlay ketika pindah halaman dari dashboard admin
+        document.addEventListener('DOMContentLoaded', function () {
+            const loader = document.getElementById('pageLoader');
+            if (!loader) return;
+
+            const showLoader = () => loader.classList.add('is-visible');
+
+            // Saat user klik link (kecuali anchor kosong)
+            document.querySelectorAll('a[href]').forEach((link) => {
+                const href = link.getAttribute('href');
+                if (!href || href === '#' || href.startsWith('javascript:')) return;
+
+                link.addEventListener('click', function (e) {
+                    // Jangan tampilkan jika tetap di halaman yang sama
+                    if (this.target === '_blank' || this.href === window.location.href) return;
+                    showLoader();
+                });
+            });
+
+            // Fallback: ketika browser mulai unload
+            window.addEventListener('beforeunload', showLoader);
+        });
+        // Sidebar toggle on mobile
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            toggle?.addEventListener('click', function (e) {
+                e.stopPropagation();
+                sidebar?.classList.toggle('is-open');
+            });
+            document.addEventListener('click', function (e) {
+                if (window.innerWidth > 960) return;
+                if (!sidebar?.classList.contains('is-open')) return;
+                if (!sidebar.contains(e.target) && e.target !== toggle) {
+                    sidebar.classList.remove('is-open');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
+

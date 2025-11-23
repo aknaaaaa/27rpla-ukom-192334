@@ -7,48 +7,17 @@ use Illuminate\Http\Request;
 
 class KamarController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        // Ambil input tanggal dari form
-        // ambil nilai checkin dan checkout dari form
-        $checkIn = $request->input('checkin');
-        $checkOut = $request->input('checkout');
+        $kamars = Kamar::latest()->get();
 
-        $query = Kamar::query();
+        return view('kamar.index', compact('kamars'));
+    }
 
-        // filter kamar jika tanggal diisi
-        if ($checkIn && $checkOut) {
-            $query->whereDoesntHave('pemesanans', function ($q) use ($checkIn, $checkOut) {
-                $q->where(function ($sub) use ($checkIn, $checkOut) {
-                    // bentrok jika checkin < checkout dan checkout > checkin
-                    $sub->where('check_in', '<', $checkOut)
-                        ->where('check_out', '>', $checkIn);
-                });
-            });
-        }
+    public function show($id)
+    {
+        $kamar = Kamar::findOrFail($id);
 
-
-        // Ambil semua kamar
-        $query = Kamar::query();
-
-        /*
-        // 🔒 Logika filter tanggal — sementara dinonaktifkan
-        if ($checkIn && $checkOut) {
-            // Filter kamar yang tidak memiliki pemesanan bentrok
-            $query->whereDoesntHave('pemesanans', function ($q) use ($checkIn, $checkOut) {
-                $q->where(function ($sub) use ($checkIn, $checkOut) {
-                    $sub->where(function ($w) use ($checkIn, $checkOut) {
-                        $w->where('check_in', '<', $checkOut)
-                          ->where('check_out', '>', $checkIn);
-                    });
-                });
-            });
-        }
-        */
-
-        // Ambil semua kamar tanpa filter
-        $kamars = $query->get();
-
-        return view('kamar.index', compact('kamars', 'checkIn', 'checkOut'));
+        return view('kamar.detail', compact('kamar'));
     }
 }
