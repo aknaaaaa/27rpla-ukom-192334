@@ -248,7 +248,51 @@
                 </div>
             </div>
 
-            <div class="row mt-4 g-4">
+            <div class="row mt-4 g-3">
+                <div class="col-12">
+                    <div class="pill-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Tambahan Fasilitas</h6>
+                            <small class="text-muted">Opsional, akan menambah total</small>
+                        </div>
+                        <div class="addon-list">
+                            <div class="addon-item d-flex justify-content-between align-items-center py-2 border-bottom" data-addon-id="EXTRA_BED" data-addon-price="150000" data-addon-per-night="1">
+                                <div>
+                                    <strong>Extra Bed</strong>
+                                    <div class="text-muted small">Per malam</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">Rp150.000</span>
+                                    <input type="number" min="0" value="0" step="1" class="form-control form-control-sm" style="width:90px;" data-addon-qty>
+                                </div>
+                            </div>
+                            <div class="addon-item d-flex justify-content-between align-items-center py-2 border-bottom" data-addon-id="BREAKFAST" data-addon-price="50000" data-addon-per-night="1">
+                                <div>
+                                    <strong>Sarapan</strong>
+                                    <div class="text-muted small">Per malam / orang</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">Rp50.000</span>
+                                    <input type="number" min="0" value="0" step="1" class="form-control form-control-sm" style="width:90px;" data-addon-qty>
+                                </div>
+                            </div>
+                            <div class="addon-item d-flex justify-content-between align-items-center py-2" data-addon-id="LATE_CHECKOUT" data-addon-price="75000" data-addon-per-night="0">
+                                <div>
+                                    <strong>Late Checkout</strong>
+                                    <div class="text-muted small">Sekali bayar</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">Rp75.000</span>
+                                    <input type="number" min="0" value="0" step="1" class="form-control form-control-sm" style="width:90px;" data-addon-qty>
+                                </div>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2" style="font-size: 12px;">Tambahan akan otomatis dihitung di ringkasan & tagihan.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3 g-4">
                 <div class="col-12">
                     <div class="pill-card">
                         <input type="hidden" id="orderIdHidden" value="{{ session('checkout_order.id_pemesanan') ?? request('order_id') }}">
@@ -306,49 +350,6 @@
                 </div>
             </div>
 
-            <div class="row mt-3 g-3">
-                <div class="col-12">
-                    <div class="pill-card">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">Tambahan Fasilitas</h6>
-                            <small class="text-muted">Opsional, akan menambah total</small>
-                        </div>
-                        <div class="addon-list">
-                            <div class="addon-item d-flex justify-content-between align-items-center py-2 border-bottom" data-addon-id="EXTRA_BED" data-addon-price="150000" data-addon-per-night="1">
-                                <div>
-                                    <strong>Extra Bed</strong>
-                                    <div class="text-muted small">Per malam</div>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="text-muted small">Rp150.000</span>
-                                    <input type="number" min="0" value="0" step="1" class="form-control form-control-sm" style="width:90px;" data-addon-qty>
-                                </div>
-                            </div>
-                            <div class="addon-item d-flex justify-content-between align-items-center py-2 border-bottom" data-addon-id="BREAKFAST" data-addon-price="50000" data-addon-per-night="1">
-                                <div>
-                                    <strong>Sarapan</strong>
-                                    <div class="text-muted small">Per malam / orang</div>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="text-muted small">Rp50.000</span>
-                                    <input type="number" min="0" value="0" step="1" class="form-control form-control-sm" style="width:90px;" data-addon-qty>
-                                </div>
-                            </div>
-                            <div class="addon-item d-flex justify-content-between align-items-center py-2" data-addon-id="LATE_CHECKOUT" data-addon-price="75000" data-addon-per-night="0">
-                                <div>
-                                    <strong>Late Checkout</strong>
-                                    <div class="text-muted small">Sekali bayar</div>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="text-muted small">Rp75.000</span>
-                                    <input type="number" min="0" value="0" step="1" class="form-control form-control-sm" style="width:90px;" data-addon-qty>
-                                </div>
-                            </div>
-                        </div>
-                        <small class="text-muted d-block mt-2" style="font-size: 12px;">Tambahan akan otomatis dihitung di ringkasan & tagihan.</small>
-                    </div>
-                </div>
-            </div>
             <div id="paymentResult" class="mt-3 small"></div>
         </div>
     </div>

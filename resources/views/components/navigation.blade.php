@@ -15,19 +15,15 @@
             <!-- Menu Link -->
             <ul class="navbar-nav flex-row">
                 <li class="nav-item">
-                    <a class="nav-link font-aboreto px-2" href="#">Tentang</a>
+                    <a class="nav-link font-aboreto px-2" href="#about">Tentang</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link font-aboreto px-2" href="#">Produk</a>
+                    <a class="nav-link font-aboreto px-2" href="#sekilas">Produk</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link font-aboreto px-2" href="#">Layanan</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link font-aboreto px-2" href="#">Kontak</a>
+                    <a class="nav-link font-aboreto px-2" href="#lokasi">Lokasi</a>
                 </li>
 
                 <!-- Profil -->

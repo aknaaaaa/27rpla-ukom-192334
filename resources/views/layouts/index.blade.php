@@ -261,9 +261,9 @@
 </section>
 
 <!-- SEKILAS -->
-<section class="sekilas-section">
+<section class="sekilas-section" id="sekilas">
   <div class="container text-center">
-    <h2 class="fw-bold mb-1 font-aboreto garis-bawah">SEKILAS</h2>
+    <h2 class="fw-bold mb-1 font-aboreto garis-bawah">pRODUK</h2>
     @if(!empty($sekilasRooms) && $sekilasRooms->count())
       <div class="sekilas-grid">
         @foreach ($sekilasRooms as $room)
@@ -283,7 +283,7 @@
 </section>
 
 <!-- LOCATION -->
-<section class="map-section">
+<section class="map-section" id="lokasi">
   <div class="container">
     <h2 class="fw-bold mb-3 font-aboreto garis-bawah text-center">LOKASI</h2>
     <p class="text-center font-aboreto text-muted mb-4">Kunjungi kami di lokasi berikut:</p>
