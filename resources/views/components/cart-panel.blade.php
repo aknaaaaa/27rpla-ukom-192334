@@ -138,7 +138,18 @@
             });
 
             const viewBtn = document.getElementById('viewCartBtn');
-            if (viewBtn) viewBtn.addEventListener('click', renderCart);
+            if (viewBtn) {
+                viewBtn.addEventListener('click', async () => {
+                    const items = JSON.parse(localStorage.getItem('room_cart') || '[]');
+                    if (!items.length) {
+                        window.showAppToast?.('Keranjang masih kosong.', 'info');
+                        return;
+                    }
+                    const ok = window.requireAuth ? await window.requireAuth({}) : true;
+                    if (!ok) return;
+                    window.location.href = "{{ route('checkout') }}";
+                });
+            }
 
             const checkoutBtn = document.getElementById('checkoutBtn');
             if (checkoutBtn) {

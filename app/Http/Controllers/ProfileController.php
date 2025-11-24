@@ -39,4 +39,28 @@ class ProfileController extends Controller
             'avatar_url' => asset($relativeUrl),
         ]);
     }
+
+    public function deleteAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Pengguna tidak ditemukan.',
+            ], 401);
+        }
+
+        if ($user->avatar_url && Str::startsWith($user->avatar_url, '/storage/')) {
+            $previous = Str::after($user->avatar_url, '/storage/');
+            Storage::disk('public')->delete($previous);
+        }
+
+        $user->avatar_url = null;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Foto profil dihapus.',
+            'avatar_url' => null,
+        ]);
+    }
 }

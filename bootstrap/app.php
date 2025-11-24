@@ -47,6 +47,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/auth/login',
             'api/auth/register',
             'api/auth/logout',
+            // Allow logout via GET/POST without CSRF to prevent 419 on stale sessions
+            'logout',
+            'logout/*',
             'admin/rooms',
             'admin/rooms/*',
             'api/payments/charge',

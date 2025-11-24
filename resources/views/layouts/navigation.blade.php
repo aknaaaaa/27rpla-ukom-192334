@@ -8,7 +8,7 @@
                 <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Produk</a></li>
                 <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Layanan</a></li>
                 <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Kontak</a></li>
-                <li class="nav-item"><a class="nav-link px-3" onclick="cekProfil()"><img src="images/person-circle.svg"></a></li>
+                <li class="nav-item"><a class="nav-link px-3" onclick="cekProfil()"><img src="{{ asset('images/person-circle.svg') }}" alt="Profil"></a></li>
 
             </ul>
         </div>
@@ -20,7 +20,7 @@ async function cekProfil(){
   const token = localStorage.getItem('access_token');
 
   if(!token){
-    window.location.href = "{{ route('layouts.login') }}";
+    window.location.href = "{{ route('login') }}";
     return;
   }
 
@@ -50,6 +50,6 @@ async function cekProfil(){
 
   localStorage.removeItem('access_token');
   document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
-  window.location.href = "{{ route('layouts.login') }}";
+    window.location.href = "{{ route('login') }}";
 }
 </script>

@@ -5,8 +5,12 @@ use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
+    // Redirect accidental GET visits on the API register endpoint to the web form
+    Route::get('/register', fn () => redirect()->route('register'))->middleware('web');
+
     Route::post('/login',  [AuthController::class, 'login'])->middleware(['web', 'sanctum.guest'])->name('auth.api');
-    Route::post('/register', [AuthController::class, 'register'])->middleware('web')->name('register');
+    // Use a unique name to avoid clashing with the web "register" page route
+    Route::post('/register', [AuthController::class, 'register'])->middleware('web')->name('auth.api.register');
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('web');
 
     Route::middleware('auth:sanctum')->group(function () {

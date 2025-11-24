@@ -30,6 +30,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('sanctum.session')->group(function () {
     Route::get('/profile', [LayoutsController::class, 'profile'])->name('profile.profile');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
     Route::get('/checkout', [LayoutsController::class, 'checkout'])->name('checkout');
     Route::get('/checkout/success', function () {
         $payment = session()->pull('last_payment');

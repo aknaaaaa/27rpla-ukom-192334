@@ -172,27 +172,42 @@
 
         <div class="field">
             <label class="label">NAMA LENGKAP</label>
-            <input class="input" type="text" name="nama_user" placeholder="Nama lengkap" required>
+            <input class="input" type="text" name="nama_user" placeholder="Nama lengkap" value="{{ old('nama_user') }}" required>
+            @error('nama_user')
+            <p style="color: red; font-size: 0.9em;">{{ $message }}</p>
+            @enderror
         </div>
 
         <div class="field">
             <label class="label">NOMOR TELEPON</label>
-            <input class="input" type="tel" name="phone_number" placeholder="08xxxxxxxxxx" required>
+            <input class="input" type="tel" name="phone_number" placeholder="08xxxxxxxxxx" value="{{ old('phone_number') }}" required>
+            @error('phone_number')
+            <p style="color: red; font-size: 0.9em;">{{ $message }}</p>
+            @enderror
         </div>
 
         <div class="field">
             <label class="label">EMAIL</label>
-            <input class="input" type="email" name="email" placeholder="nama@email.com" required>
+            <input class="input" type="email" name="email" placeholder="nama@email.com" value="{{ old('email') }}" required>
+            @error('email')
+            <p style="color: red; font-size: 0.9em;">{{ $message }}</p>
+            @enderror
         </div>
 
         <div class="field">
             <label class="label">PASSWORD</label>
             <input class="input" type="password" name="password" placeholder="********" required>
+            @error('password')
+            <p style="color: red; font-size: 0.9em;">{{ $message }}</p>
+            @enderror
         </div>
 
         <div class="field">
             <label class="label">KONFIRMASI PASSWORD</label>
             <input class="input" type="password" name="password_confirmation" placeholder="********" required>
+            @error('password')
+            <p style="color: red; font-size: 0.9em;">{{ $message }}</p>
+            @enderror
             @error('password_confirmation')
             <p style="color: red; font-size: 0.9em;">{{ $message }}</p>
         @enderror

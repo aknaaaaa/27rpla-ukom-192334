@@ -111,13 +111,6 @@
                 </div>
             </div>
 
-            <div class="filters">
-                <input type="text" placeholder="Cari nama / kode pesanan" aria-label="Cari">
-                <select aria-label="Filter tanggal">
-                    <option>Tanggal</option>
-                </select>
-            </div>
-
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -184,4 +177,3 @@
     </script>
 </body>
 </html>
-

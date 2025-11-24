@@ -26,8 +26,8 @@
                             Silakan masuk atau daftar lebih dulu supaya pesananmu tercatat dan mudah dilacak.
                         </p>
                         <div class="d-flex gap-2 flex-wrap">
-                            <a href="{{ route('layouts.register') }}" class="btn btn-dark btn-sm px-4">Daftar</a>
-                            <a href="{{ route('layouts.login') }}" class="btn btn-outline-secondary btn-sm px-4">Masuk</a>
+                            <a href="{{ route('register') }}" class="btn btn-dark btn-sm px-4">Daftar</a>
+                            <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm px-4">Masuk</a>
                         </div>
                     </div>
                 </div>

@@ -18,12 +18,25 @@ class AuthController extends Controller
     
     // Gabungkan data request dengan nilai default
         // 1. Validasi Data
-        $userData = Validator::make($request->all(), [
-            'nama_user' => 'required|string|max:100', 
-            'phone_number' => 'required|string|max:20', 
-            'email' => 'required|email|unique:user,email', 
-            'password' => 'required|min:6|confirmed',
-        ]);
+        $userData = Validator::make(
+            $request->all(),
+            [
+                'nama_user' => 'required|string|max:100',
+                'phone_number' => 'required|string|max:20',
+                'email' => 'required|email|unique:user,email',
+                'password' => 'required|min:6|confirmed',
+            ],
+            [
+                'nama_user.required' => 'Nama lengkap wajib diisi.',
+                'phone_number.required' => 'Nomor telepon wajib diisi.',
+                'email.required' => 'Email wajib diisi.',
+                'email.email' => 'Format email tidak valid.',
+                'email.unique' => 'Email sudah terdaftar.',
+                'password.required' => 'Password wajib diisi.',
+                'password.min' => 'Password minimal :min karakter.',
+                'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            ]
+        );
 
         if ($userData->fails()) {
             return redirect()->back()->withErrors($userData)->withInput();
@@ -141,7 +154,7 @@ class AuthController extends Controller
             ], 200);
         }
 
-        return redirect()->route('layouts.login')->with('ok', 'Berhasil logout.');
+        return redirect()->route('login')->with('ok', 'Berhasil logout.');
     }
     public function user(Request $request)
 {
