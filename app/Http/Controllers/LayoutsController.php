@@ -34,10 +34,13 @@ class LayoutsController extends Controller
             ->limit(3)
             ->get();
         $history = Pemesanan::with(['kamar', 'pembayaran'])
-            ->where('id_user', $user?->id_user)
-            ->latest()
-            ->skip(3)
-            ->take(10)
+            ->where('id_user', $user->id_user)
+            ->whereHas('pembayaran', function ($query) {
+                $query->whereIn('status_pembayaran', ['Telah dibayar', 'Dibatalkan']);
+            })
+            // Urutkan berdasarkan tanggal dibuat, yang terbaru di atas
+            ->orderBy('created_at', 'desc') 
+            ->limit(100) 
             ->get();
 
         return view('profile.profile', [
