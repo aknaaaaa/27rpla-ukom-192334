@@ -226,24 +226,29 @@
         <main class="main">
             <div class="content">
                 <div class="top-line"></div>
-
+                   <!-- Kumpulan Card Produk-->
                 <div class="cards">
+                   <!--Card Total Pesanan-->
                     <div class="card">
                         <p class="card__title">Total Pesanan</p>
                         <p class="card__value">{{ $metrics['total_orders'] }}</p>
                     </div>
+                    <!--Card Total Kamar Terisi-->
                     <div class="card">
                         <p class="card__title">Jumlah Kamar Terisi</p>
                         <p class="card__value">{{ $metrics['occupied_rooms'] }}</p>
                     </div>
+                    <!--Card Total Kamar Tersisa-->
                     <div class="card">
                         <p class="card__title">Jumlah Kamar Tersisa</p>
                         <p class="card__value">{{ $metrics['available_rooms'] }}</p>
                     </div>
+                    <!--Card Total Kamar Yang sedang di maintenance-->
                     <div class="card">
                         <p class="card__title">Jumlah Kamar Maintenance</p>
                         <p class="card__value">{{ $metrics['maintenance_rooms'] }}</p>
                     </div>
+                    <!--Card Total PEndapatan-->
                     <div class="card card--wide">
                         <p class="card__title">Total Pendapatan</p>
                         <p class="card__value">{{ $metrics['total_revenue'] }}</p>
