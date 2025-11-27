@@ -479,7 +479,8 @@
                                 <div class="room-head">
                                     <h3 class="room-title">{{ strtoupper($room->nama_kamar) }}</h3>
                                     <div class="room-count">
-                                        Status: {{ $room->status_kamar ?? 'Tersedia' }}
+                                        <div>Status: {{ $room->status_kamar ?? 'Tersedia' }}</div>
+                                        <div style="font-size: 12px; margin-top: 4px; color: #666;">Stok: <strong>{{ $room->stok ?? 0 }}</strong> kamar</div>
                                     </div>
                                 </div>
 
@@ -487,16 +488,23 @@
                                 <div class="meta-block">
                                     <h5>Kategori</h5>
                                     <div class="divider"></div>
-                                    <div class="meta-item"><i class="bi bi-tags"></i> {{ $room->kategori ?? 'Standar' }}</div>
+                                    <div class="meta-item"><i class="bi bi-tags"></i> {{ $room->kategoriRelasi->name ?? $room->kategori ?? 'Standar' }}</div>
                                     <div class="meta-item"><i class="bi bi-square"></i> {{ $room->ukuran_kamar ?? '-' }}</div>
+                                    <div class="meta-item"><i class="bi bi-people"></i> Kapasitas: <strong>{{ $room->kapasitas ?? 2 }} orang</strong></div>
                                 </div>
                                     <div class="meta-block">
                                         <h5>Fasilitas</h5>
                                         <div class="divider"></div>
-                                        <div class="meta-item">
-                                            <span class="badge-muted">Sarapan tidak tersedia</span>
-                                        </div>
-                                        <div class="meta-item"><p>DESKRIPSI:</p>{{ $room->deskripsi ?? 'Tidak bisa refund & reschedule' }}</div>
+                                        @forelse($room->fasilitas as $f)
+                                            <div class="meta-item">
+                                                <span class="badge-muted">{{ $f->nama_fasilitas }}</span>
+                                            </div>
+                                        @empty
+                                            <div class="meta-item">
+                                                <span class="badge-muted">Tidak ada fasilitas</span>
+                                            </div>
+                                        @endforelse
+                                        <div class="meta-item"><p>DESKRIPSI:</p>{{ $room->deskripsi ?? 'Tidak ada deskripsi' }}</div>
                                     </div>
                                 </div>
 
@@ -512,9 +520,10 @@
                                             type="button"
                                             data-action="{{ route('admin.rooms.update', $room->id_kamar) }}"
                                             data-nama="{{ $room->nama_kamar }}"
-                                            data-kategori="{{ $room->kategori }}"
+                                            data-kategori-id="{{ $room->id_kategori ?? '' }}"
                                             data-harga="{{ $room->harga_permalam }}"
                                             data-stok="{{ $room->stok ?? 1 }}"
+                                            data-kapasitas="{{ $room->kapasitas ?? 2 }}"
                                             data-ukuran="{{ $room->ukuran_kamar }}"
                                             data-status="{{ $room->status_kamar }}"
                                             data-deskripsi="{{ e($room->deskripsi) }}"
@@ -564,13 +573,10 @@
                     </div>
                     <div class="field">
                         <label>Kategori</label>
-                        <select id="roomKategoriSelect" name="kategori" required>
-                            @php
-                                $categories = ['Standar', 'Superior', 'Deluxe', 'Suite', 'Family', 'Executive'];
-                                $oldKategori = old('kategori');
-                            @endphp
-                            @foreach ($categories as $cat)
-                                <option value="{{ $cat }}" {{ $oldKategori === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                        <select id="roomKategoriSelect" name="id_kategori" required onchange="loadFasilitas()">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach ($kategoris as $kat)
+                                <option value="{{ $kat->id }}">{{ $kat->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -581,6 +587,10 @@
                     <div class="field">
                         <label>Stok kamar</label>
                         <input id="roomStokInput" type="number" name="stok" min="1" value="{{ old('stok', 1) }}" required>
+                    </div>
+                    <div class="field">
+                        <label>Kapasitas (orang)</label>
+                        <input id="roomKapasitasInput" type="number" name="kapasitas" min="1" max="10" value="{{ old('kapasitas', 2) }}" required>
                     </div>
                     <div class="field">
                         <label>Ukuran kamar</label>
@@ -598,6 +608,12 @@
                         <label>Deskripsi</label>
                         <textarea id="roomDeskripsiInput" name="deskripsi" placeholder="Detail singkat kamar">{{ old('deskripsi') }}</textarea>
                     </div>
+                    <div class="field" style="grid-column: 1 / -1;">
+                        <label>Fasilitas <small style="color:#777;">(pilih fasilitas yang tersedia)</small></label>
+                        <div id="fasilitasContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 8px;">
+                            <!-- Akan diisi dengan JS -->
+                        </div>
+                    </div>
                     <div class="field">
                         <label>Gambar <small style="color:#777;">(kosongkan saat edit jika tidak diganti)</small></label>
                         <input id="roomImageInput" type="file" name="image" accept="image/*" required>
@@ -610,6 +626,42 @@
         </div>
     </div>
 
+    <style>
+        .fasilitas-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            background: #f8f8f8;
+            border-radius: 6px;
+            border: 1px solid #d5d5d5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .fasilitas-checkbox:hover {
+            background: #f0f0f0;
+            border-color: #2c2c2c;
+        }
+        .fasilitas-checkbox input[type="checkbox"] {
+            margin-top: 2px;
+            cursor: pointer;
+        }
+        .fasilitas-checkbox-label {
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .fasilitas-checkbox-label strong {
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+        .fasilitas-checkbox-label small {
+            color: #999;
+            font-size: 11px;
+        }
+    </style>
+
     <script>
         const roomModal = document.getElementById('roomModal');
         const roomForm = document.getElementById('roomModalForm');
@@ -618,12 +670,51 @@
         const submitBtn = document.getElementById('roomModalSubmit');
         const nameInput = document.getElementById('roomNameInput');
         const kategoriSelect = document.getElementById('roomKategoriSelect');
+
         const hargaInput = document.getElementById('roomHargaInput');
         const stokInput = document.getElementById('roomStokInput');
+        const kapasitasInput = document.getElementById('roomKapasitasInput');
         const ukuranInput = document.getElementById('roomUkuranInput');
         const statusSelect = document.getElementById('roomStatusSelect');
         const deskripsiInput = document.getElementById('roomDeskripsiInput');
         const imageInput = document.getElementById('roomImageInput');
+        const fasilitasContainer = document.getElementById('fasilitasContainer');
+
+        // Load fasilitas berdasarkan kategori yang dipilih
+        async function loadFasilitas() {
+            const kategoriId = kategoriSelect.value;
+            fasilitasContainer.innerHTML = '';
+
+            if (!kategoriId) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/kategoris/${kategoriId}/fasilitas`);
+                const fasilitas = await response.json();
+
+                if (fasilitas.length === 0) {
+                    fasilitasContainer.innerHTML = '<p style="grid-column: 1/-1; color: #999; font-size: 12px;">Tidak ada fasilitas tersedia untuk kategori ini.</p>';
+                    return;
+                }
+
+                fasilitas.forEach(f => {
+                    const label = document.createElement('label');
+                    label.className = 'fasilitas-checkbox';
+                    label.innerHTML = `
+                        <input type="checkbox" name="fasilitas[]" value="${f.id_fasilitas}">
+                        <span class="fasilitas-checkbox-label">
+                            <strong>${f.nama_fasilitas}</strong>
+                            ${f.deskripsi ? `<small>${f.deskripsi}</small>` : ''}
+                        </span>
+                    `;
+                    fasilitasContainer.appendChild(label);
+                });
+            } catch (error) {
+                console.error('Error loading fasilitas:', error);
+                fasilitasContainer.innerHTML = '<p style="grid-column: 1/-1; color: #c00; font-size: 12px;">Gagal memuat fasilitas.</p>';
+            }
+        }
 
         function openModal(){
             resetForm();
@@ -637,22 +728,25 @@
         function closeModal(){ roomModal.classList.remove('is-open'); }
 
         function resetForm() {
-            nameInput.value = "{{ old('nama_kamar') }}";
-            kategoriSelect.value = "{{ $oldKategori ?? 'Standar' }}";
-            hargaInput.value = "{{ old('harga_permalam') }}";
-            stokInput.value = "{{ old('stok', 1) }}";
-            ukuranInput.value = "{{ old('ukuran_kamar') }}";
-            statusSelect.value = "{{ old('status_kamar') ?? 'Tersedia' }}";
-            deskripsiInput.value = `{{ old('deskripsi') }}`;
+            nameInput.value = "";
+            kategoriSelect.value = "";
+            hargaInput.value = "";
+            stokInput.value = "1";
+            kapasitasInput.value = "2";
+            ukuranInput.value = "";
+            statusSelect.value = "Tersedia";
+            deskripsiInput.value = "";
             imageInput.value = '';
+            fasilitasContainer.innerHTML = '';
         }
 
         function openEditModal(button){
             const action = button.getAttribute('data-action');
             const nama = button.getAttribute('data-nama') || '';
-            const kategori = button.getAttribute('data-kategori') || 'Standar';
+            const kategoriId = button.getAttribute('data-kategori-id') || '';
             const harga = button.getAttribute('data-harga') || '';
             const stok = button.getAttribute('data-stok') || '1';
+            const kapasitas = button.getAttribute('data-kapasitas') || '2';
             const ukuran = button.getAttribute('data-ukuran') || '';
             const status = button.getAttribute('data-status') || 'Tersedia';
             const deskripsi = button.getAttribute('data-deskripsi') || '';
@@ -664,14 +758,18 @@
             submitBtn.textContent = 'Update kamar';
 
             nameInput.value = nama;
-            kategoriSelect.value = kategori;
+            kategoriSelect.value = kategoriId;
             hargaInput.value = harga;
             stokInput.value = stok;
+            kapasitasInput.value = kapasitas;
             ukuranInput.value = ukuran;
             statusSelect.value = status;
             deskripsiInput.value = deskripsi;
 
             imageInput.required = false;
+
+            // Load fasilitas untuk kategori ini
+            loadFasilitas();
 
             roomModal.classList.add('is-open');
         }

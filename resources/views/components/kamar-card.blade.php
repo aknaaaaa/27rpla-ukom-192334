@@ -28,7 +28,14 @@
             <div class="card-body">
                 <h5 class="card-title text-uppercase fw-bold">{{ $kamar->nama_kamar }}</h5>
                 <p class="card-text small mb-1">Ukuran: {{ $kamar->ukuran_kamar ?? 'Tidak dicantumkan' }}</p>
+                <p class="card-text small mb-1">Kapasitas: <strong>{{ $kamar->kapasitas ?? 2 }} orang</strong></p>
                 <p class="card-text small mb-1">Status: {{ $kamar->status_kamar }}</p>
+                <p class="card-text small mb-1">
+                    <strong>Stok: {{ $kamar->stok ?? 0 }} kamar</strong>
+                    <span class="badge {{ ($kamar->stok ?? 0) > 0 ? 'bg-success' : 'bg-danger' }}">
+                        {{ ($kamar->stok ?? 0) > 0 ? 'Tersedia' : 'Habis' }}
+                    </span>
+                </p>
                 <p class="card-text mb-2 fw-semibold text-dark">
                     Rp{{ number_format($kamar->harga_permalam, 0, ',', '.') }} / Malam
                 </p>
