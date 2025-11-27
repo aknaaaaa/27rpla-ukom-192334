@@ -1,4 +1,4 @@
-@extends('layouts.test')
+@extends('layouts.app')
 
 @section('title', 'Pembayaran Berhasil')
 
@@ -41,7 +41,7 @@
 <div class="container">
     <div class="success-shell">
         <div class="success-card">
-            <div class="success-icon">✓</div>
+            <div class="success-icon">&#10003;</div>
             <h2 class="fw-bold">Pembayaran Berhasil</h2>
             <p class="text-muted mb-3">Terima kasih telah melakukan pembayaran. Detail pemesanan bisa Anda lihat di halaman riwayat.</p>
             <a href="{{ route('profile.profile') }}" class="btn btn-primary mt-2">Lihat Riwayat Sekarang</a>
@@ -52,6 +52,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // kosongkan keranjang & tanggal setelah berhasil
+        localStorage.removeItem('room_cart');
+        localStorage.removeItem('booking_dates');
+
         let seconds = 5;
         const label = document.getElementById('countdown');
         const interval = setInterval(() => {
@@ -59,7 +63,7 @@
             if (label) label.textContent = seconds;
             if (seconds <= 0) {
                 clearInterval(interval);
-                window.location.href = "{{ route('profile.profile') }}";
+                window.location.href = "{{ route('profile.profile', ['tab' => 'history']) }}";
             }
         }, 1000);
     });

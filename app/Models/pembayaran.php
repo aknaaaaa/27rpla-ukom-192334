@@ -14,15 +14,20 @@ class Pembayaran extends Model
         'id_pembayaran',
         'id_pemesanan',
         'total',
+        'payment_method',
+        'payment_date',
+        'amount_paid',
+        'status_pembayaran',
     ];
 
     protected $casts = [
         'payment_date' => 'date',
         'amount_paid' => 'float',
+        'total' => 'float',
     ];
 
     public function pemesanan(): BelongsTo
     {
-        return $this->belongsTo(Pemesanan::class, 'id_pemesanan', 'id_pemesanan');
+        return $this->belongsTo(Pemesanan::class, 'id_pemesanan', 'id');
     }
 }

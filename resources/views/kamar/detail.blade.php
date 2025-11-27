@@ -7,7 +7,8 @@
     <div class="col-md-6">
         <img src="{{ $kamar->gambar ?: asset('images/default.jpg') }}"
              class="img-fluid rounded shadow-sm mb-3"
-             alt="{{ $kamar->nama_kamar }}">
+             alt="{{ $kamar->nama_kamar }}"
+             onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';">
     </div>
     <div class="col-md-6">
         <div class="card shadow-sm border-0 rounded-4">
@@ -20,13 +21,18 @@
 
                 <div class="mt-4">
                     <a href="{{ route('kamar.index') }}" class="btn btn-outline-secondary">Kembali</a>
+                    @php $statusLower = strtolower($kamar->status_kamar); $blocked = in_array($statusLower, ['telah di reservasi', 'maintenance']); @endphp
                     <button class="btn btn-dark"
                             type="button"
                             data-requires-auth="true"
-                            data-url="{{ route('kamar.show', $kamar->id_kamar) }}"
+                            data-action="{{ $blocked ? '' : 'add-to-cart' }}"
+                            data-id="{{ $kamar->id_kamar }}"
+                            data-price="{{ $kamar->harga_permalam }}"
                             data-nama="{{ $kamar->nama_kamar }}"
-                            data-gambar="{{ $kamar->gambar ?: asset('images/default.jpg') }}">
-                        Pilih
+                            data-status="{{ $kamar->status_kamar }}"
+                            data-gambar="{{ $kamar->gambar ?: asset('images/default.jpg') }}"
+                            {{ $blocked ? 'disabled' : '' }}>
+                        {{ $blocked ? 'Tidak Tersedia' : 'Pilih' }}
                     </button>
                 </div>
             </div>

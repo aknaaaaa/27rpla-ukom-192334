@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 class Pemesanan extends Model
 {
     protected $table = 'pemesanans';
-    protected $primaryKey = 'id_pemesanan';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'id_user',
@@ -19,11 +19,23 @@ class Pemesanan extends Model
         'check_in',
         'check_out',
         'total_hari',
+        'kode_pesanan',
+        'tanggal_pemesanan',
+        'tanggal_checkin',
+        'tanggal_checkout',
+        'status',
+        'nama_penginap',
+        'email_penginap',
+        'telepon_penginap',
+        'total_harga',
     ];
 
     protected $casts = [
         'check_in' => 'date',
         'check_out' => 'date',
+        'tanggal_checkin' => 'date',
+        'tanggal_checkout' => 'date',
+        'tanggal_pemesanan' => 'date',
     ];
 
     public function user(): BelongsTo
@@ -38,12 +50,12 @@ class Pemesanan extends Model
 
     public function pembayaran(): HasOne
     {
-        return $this->hasOne(Pembayaran::class, 'id_pemesanan', 'id_pemesanan');
+        return $this->hasOne(Pembayaran::class, 'id_pemesanan', 'id');
     }
 
     public function getStatusLabelAttribute(): string
     {
-        $paymentStatus = $this->pembayaran->status_pembayaran ?? 'Belum dibayar';
+        $paymentStatus = $this->pembayaran?->status_pembayaran ?? 'Belum dibayar';
         $today = Carbon::today();
 
         if ($paymentStatus === 'Dibatalkan') {

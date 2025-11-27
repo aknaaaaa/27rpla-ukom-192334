@@ -60,7 +60,7 @@ class PaymentController extends Controller
             'items.*.price' => 'required|numeric|min:1',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.id' => 'nullable',
-            'id_pemesanan' => 'nullable|exists:pemesanans,id_pemesanan',
+            'id_pemesanan' => 'nullable|exists:pemesanans,id',
             'customer.first_name' => 'nullable|string|max:80',
             'customer.email' => 'nullable|email',
             'customer.phone' => 'nullable|string|max:20',
@@ -103,13 +103,8 @@ class PaymentController extends Controller
                 'name' => 'Tax & Service',
                 'price' => $tax,
                 'quantity' => 1,
-                ]);
-
-                session(['last_payment' => [
-                    'status' => $status === 'Telah dibayar' ? 'success' : 'pending',
-                    'order' => $orderId,
-                ]]);
-            }
+            ]);
+        }
         $grossAmount = $items->sum(fn ($i) => $i['price'] * $i['quantity']);
 
         // buat pemesanan minimal jika belum ada id_pemesanan namun user login
@@ -123,15 +118,24 @@ class PaymentController extends Controller
                 ], 422);
             }
 
+            // Get check-in and check-out dates from request or default to today+1day
+            $checkinStr = $request->input('checkin_date');
+            $checkoutStr = $request->input('checkout_date');
+            
+            $checkinDate = $checkinStr ? Carbon::parse($checkinStr) : Carbon::today();
+            $checkoutDate = $checkoutStr ? Carbon::parse($checkoutStr) : Carbon::today()->addDay();
+
             $pemesanan = Pemesanan::create([
                 'id_user' => Auth::id(),
                 'id_kamar' => $firstItemId,
-                'booking_code' => 'BOOK-' . Str::upper(Str::random(6)),
-                'check_in' => Carbon::today(),
-                'check_out' => Carbon::today()->addDay(),
-                'total_hari' => 1,
+                'kode_pesanan' => 'BOOK-' . Str::upper(Str::random(6)),
+                'tanggal_checkin' => $checkinDate,
+                'tanggal_checkout' => $checkoutDate,
+                'tanggal_pemesanan' => Carbon::now(),
+                'status' => 'Menunggu',
+                'total_harga' => $grossAmount,
             ]);
-            $pemesananId = $pemesanan->id_pemesanan;
+            $pemesananId = $pemesanan->id;
             $orderId = 'PMS-' . $pemesananId . '-' . Str::upper(Str::random(6));
         }
 
@@ -200,6 +204,9 @@ class PaymentController extends Controller
                         'status_pembayaran' => $status,
                     ]
                 );
+
+                // Store pemesanan data in session for redirect to complete page
+                session(['last_pemesanan' => ['id' => $pemesananId]]);
             }
 
             return response()->json($response);

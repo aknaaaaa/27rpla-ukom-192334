@@ -28,23 +28,40 @@ class LayoutsController extends Controller
     public function profile(Request $request){
         $user = Auth::user();
         $tab = $request->query('tab', 'profile');
-        $orders = Pemesanan::with(['kamar', 'pembayaran'])
+        $subTab = $request->query('sub', 'ongoing');
+        $today = \Carbon\Carbon::today();
+
+        // Ambil semua pemesanan dengan pembayaran yang sudah dibayar
+        $allOrders = Pemesanan::with(['kamar', 'pembayaran'])
             ->where('id_user', $user?->id_user)
+            ->whereHas('pembayaran', function ($q) {
+                $q->where('status_pembayaran', 'Telah dibayar');
+            })
             ->latest()
-            ->limit(3)
             ->get();
-        $history = Pemesanan::with(['kamar', 'pembayaran'])
-            ->where('id_user', $user?->id_user)
-            ->latest()
-            ->skip(3)
-            ->take(10)
-            ->get();
+
+        // Pisahkan ke ongoing (sedang berlangsung) dan completed (sudah selesai)
+        // Gunakan tanggal_checkout (kolom actual dari DB)
+        $ongoingOrders = $allOrders->filter(function ($order) use ($today) {
+            $checkoutDate = $order->tanggal_checkout ?? $order->check_out;
+            return $today->lessThanOrEqualTo($checkoutDate);
+        })->values();
+
+        $completedOrders = $allOrders->filter(function ($order) use ($today) {
+            $checkoutDate = $order->tanggal_checkout ?? $order->check_out;
+            return $today->greaterThan($checkoutDate);
+        })->values();
+
+        // Untuk kompatibilitas dengan view lama, ambil top 3 ongoing untuk panel profile
+        $orders = $ongoingOrders->take(3);
 
         return view('profile.profile', [
             'user' => $user,
             'orders' => $orders,
-            'history' => $history,
+            'ongoingOrders' => $ongoingOrders,
+            'completedOrders' => $completedOrders,
             'tab' => $tab,
+            'subTab' => $subTab,
         ]);
     }
 

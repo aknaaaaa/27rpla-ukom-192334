@@ -106,6 +106,10 @@
                     <div class="value">{{ $metrics['pending'] }}</div>
                 </div>
                 <div class="card">
+                    <h4>Total Selesai</h4>
+                    <div class="value">{{ $metrics['completed'] }}</div>
+                </div>
+                <div class="card">
                     <h4>Total Dibatalkan</h4>
                     <div class="value">{{ $metrics['canceled'] }}</div>
                 </div>
@@ -128,6 +132,7 @@
                             <th>No Telepon</th>
                             <th>Status</th>
                             <th>Kamar</th>
+                            <th>Nominal</th>
                             <th>Tanggal</th>
                             <th></th>
                         </tr>
@@ -135,7 +140,7 @@
                     <tbody>
                         @forelse($orders as $order)
                             <tr>
-                                <td>#{{ $order->booking_code }}</td>
+                                <td><strong>#{{ $order->kode_pesanan }}</strong></td>
                                 <td>{{ $order->user->nama_user ?? '-' }}</td>
                                 <td>{{ $order->user->email ?? '-' }}</td>
                                 <td>{{ $order->user->phone_number ?? '-' }}</td>
@@ -152,12 +157,13 @@
                                     <span class="status-badge {{ $class }}">{{ strtoupper($order->status_label) }}</span>
                                 </td>
                                 <td>{{ $order->kamar->nama_kamar ?? '-' }}</td>
-                                <td>{{ optional($order->check_in)->translatedFormat('d M Y') }} - {{ optional($order->check_out)->translatedFormat('d M Y') }}</td>
+                                <td>Rp{{ number_format($order->pembayaran->amount_paid ?? 0, 0, ',', '.') }}</td>
+                                <td>{{ optional($order->tanggal_checkin)->translatedFormat('d M Y') }} - {{ optional($order->tanggal_checkout)->translatedFormat('d M Y') }}</td>
                                 <td class="ellipsis">...</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" style="text-align:center;color:#888;">Belum ada data pemesanan.</td>
+                                <td colspan="9" style="text-align:center;color:#888;">Belum ada data pemesanan.</td>
                             </tr>
                         @endforelse
                     </tbody>

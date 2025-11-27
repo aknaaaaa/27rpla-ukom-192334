@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminKamarController;
 use App\Http\Controllers\AdminPelangganController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\KategoriController;
 
@@ -36,6 +37,8 @@ Route::middleware('sanctum.session')->group(function () {
         abort_if(!$payment, 403);
         return view('kamar.payment-success', ['payment' => $payment]);
     })->name('checkout.success');
+    Route::get('/checkout/complete', [CheckoutController::class, 'complete'])->name('checkout.complete');
+    Route::get('/checkout/invoice/{id}', [CheckoutController::class, 'invoice'])->name('checkout.invoice');
     Route::post('/payments/charge', [PaymentController::class, 'charge'])->name('payments.charge');
 });
 
