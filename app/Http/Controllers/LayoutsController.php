@@ -63,14 +63,14 @@ class LayoutsController extends Controller
         $occupiedRooms = Kamar::where('status_kamar', 'Telah di reservasi')->count();
         $availableRooms = Kamar::where('status_kamar', 'Tersedia')->count();
         $maintenanceRooms = Kamar::where('status_kamar', 'Maintenance')->count();
-
+        $totalRevenue = Pembayaran::sum('total');
 
         $metrics = [
             'total_orders' => $totalOrders,
             'occupied_rooms' => $occupiedRooms,
             'available_rooms' => $availableRooms,
             'maintenance_rooms' => $maintenanceRooms,
- 
+            'total_revenue' => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),
         ];
 
 return view('admin.dashboard.index', [

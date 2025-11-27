@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Kamar - D'Kasuari</title>
-
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -172,11 +170,10 @@
         .tutup-btn {
             background: #999;
             color: white;
-            transition: 0.3s ease; /* biar halus */
+            transition: 0.3s ease;
         }
-
         .tutup-btn:hover {
-            background: #777; /* warna saat hover */
+            background: #777;
             cursor: pointer;
         }
         .rooms {
@@ -284,10 +281,8 @@
             font-family: 'Aboreto', sans-serif;
             text-decoration: none;
             display: inline-flex;
-            /* align-items: center; */
             justify-content: center;
         }
-        /* Confirm modal */
         .confirm-backdrop {
             position: fixed;
             inset: 0;
@@ -330,7 +325,6 @@
             cursor: pointer;
             width: 100%;
         }
-        /* Loading overlay saat berpindah halaman */
         .page-loader {
             position: fixed;
             inset: 0;
@@ -683,18 +677,15 @@
         }
 
         @if($errors->any())
-            // auto open modal when validation fails so user sees errors and data
             openModal();
         @endif
 
-        // Auto-hide flash success
         document.addEventListener('DOMContentLoaded', function () {
             const flashStack = document.getElementById('flashStack');
             if (!flashStack) return;
             setTimeout(() => flashStack.remove(), 4200);
         });
 
-        // Loader saat pindah halaman dari admin rooms
         document.addEventListener('DOMContentLoaded', function () {
             const loader = document.getElementById('pageLoader');
             if (!loader) return;
@@ -714,7 +705,6 @@
             window.addEventListener('beforeunload', showLoader);
         });
 
-        // Handle delete confirmation
         document.addEventListener('DOMContentLoaded', function () {
             const modal = document.getElementById('confirmDeleteModal');
             const confirmBtn = document.getElementById('confirmDeleteBtn');
@@ -741,7 +731,6 @@
                 deleteForm.submit();
             });
         });
-        // Sidebar toggle on mobile
         document.addEventListener('DOMContentLoaded', function () {
             const toggle = document.getElementById('sidebarToggle');
             const sidebar = document.querySelector('.sidebar');

@@ -19,7 +19,6 @@ class AdminKamarController extends Controller
 
     public function edit($id)
     {
-        // Edit lewat modal
         return redirect()->route('admin.rooms.index')->with('edit_id', $id);
     }
 
@@ -34,9 +33,11 @@ class AdminKamarController extends Controller
             'deskripsi' => 'nullable|string',
             'status_kamar' => 'nullable|in:Tersedia,Telah di reservasi,Maintenance',
             'image' => 'required|image|max:4096|mimes:jpg,jpeg,png,webp',
+        ], [
+            'nama_kamar.unique' => 'Nama kamar sudah digunakan.',
+            'nama_kamar.required' => 'Nama kamar wajib diisi.',
         ]);
 
-        // Upload Gambar
         $upload = Cloudinary::uploadApi()->upload(
             $request->file('image')->getRealPath(),
             ['folder' => env('CLOUDINARY_UPLOAD_FOLDER', 'hotel_d-kasuari')]
@@ -70,11 +71,13 @@ class AdminKamarController extends Controller
             'deskripsi' => 'nullable|string',
             'status_kamar' => 'nullable|in:Tersedia,Telah di reservasi,Maintenance',
             'image' => 'nullable|image|max:4096|mimes:jpg,jpeg,png,webp',
+        ], [
+            'nama_kamar.unique' => 'Nama kamar sudah digunakan.',
+            'nama_kamar.required' => 'Nama kamar wajib diisi.',
         ]);
 
         $imageUrl = $room->gambar;
 
-        // Upload gambar baru jika ada
         if ($request->hasFile('image')) {
             $upload = Cloudinary::uploadApi()->upload(
                 $request->file('image')->getRealPath(),

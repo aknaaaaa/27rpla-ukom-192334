@@ -215,7 +215,7 @@
             'occupied_rooms' => 136,
             'available_rooms' => 0,
             'maintenance_rooms' => 0,
-
+            'total_revenue' => 'Rp 0',
         ];
     @endphp
 
@@ -243,6 +243,10 @@
                     <div class="card">
                         <p class="card__title">Jumlah Kamar Maintenance</p>
                         <p class="card__value">{{ $metrics['maintenance_rooms'] }}</p>
+                    </div>
+                    <div class="card card--wide">
+                        <p class="card__title">Total Pendapatan</p>
+                        <p class="card__value">{{ $metrics['total_revenue'] }}</p>
                     </div>
                 </div>
             </div>
@@ -295,4 +299,3 @@
     </script>
 </body>
 </html>
-
