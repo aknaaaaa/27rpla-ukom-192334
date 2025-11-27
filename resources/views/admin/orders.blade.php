@@ -260,26 +260,30 @@
 
         <main class="main">
             <div class="top-line"></div>
-
+            <!--Kumpulan Card pemesanan-->
             <div class="cards">
+                <!--Kumpulan Card pemesanan-->
                 <div class="card">
                     <h4>Total Pemesanan</h4>
                     <div class="value">{{ $metrics['total'] }}</div>
                 </div>
+                <!--Kumpulan Card pemesanan sesuai dengan pembayaran yang berhasil-->
                 <div class="card">
                     <h4>Total Ditempati</h4>
                     <div class="value">{{ $metrics['occupied'] }}</div>
                 </div>
+                <!--Kumpulan Card pemesanan sesuai dengan pembayaran yang pending/menunggu-->
                 <div class="card">
                     <h4>Total Menunggu</h4>
                     <div class="value">{{ $metrics['pending'] }}</div>
                 </div>
+                <!--Kumpulan Card pemesanan sesuai dengan pembayaran yang dibatalkan/gagal-->
                 <div class="card">
                     <h4>Total Dibatalkan</h4>
                     <div class="value">{{ $metrics['canceled'] }}</div>
                 </div>
             </div>
-
+            <!--Table untuk data pesanan -->
             <div class="table-wrap">
                 <table>
                     <thead>

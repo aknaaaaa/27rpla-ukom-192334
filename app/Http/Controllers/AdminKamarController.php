@@ -29,7 +29,6 @@ class AdminKamarController extends Controller
     {
         $validated = $request->validate([
             'nama_kamar' => ['required', 'string', 'max:100'],
-            'kategori' => ['required', 'string', 'max:100'],
             'harga_permalam' => ['required', 'numeric', 'min:0'],
             'ukuran_kamar' => ['nullable', 'string', 'max:50'],
             'deskripsi' => ['nullable', 'string'],
@@ -41,7 +40,6 @@ class AdminKamarController extends Controller
 
         Kamar::create([
             'nama_kamar' => $validated['nama_kamar'],
-            'kategori' => $validated['kategori'],
             'harga_permalam' => $validated['harga_permalam'],
             'ukuran_kamar' => $validated['ukuran_kamar'] ?? null,
             'deskripsi' => $validated['deskripsi'] ?? null,
@@ -58,7 +56,6 @@ class AdminKamarController extends Controller
 
         $validated = $request->validate([
             'nama_kamar' => ['required', 'string', 'max:100'],
-            'kategori' => ['required', 'string', 'max:100'],
             'harga_permalam' => ['required', 'numeric', 'min:0'],
             'ukuran_kamar' => ['nullable', 'string', 'max:50'],
             'deskripsi' => ['nullable', 'string'],
@@ -74,7 +71,6 @@ class AdminKamarController extends Controller
 
         $room->update([
             'nama_kamar' => $validated['nama_kamar'],
-            'kategori' => $validated['kategori'],
             'harga_permalam' => $validated['harga_permalam'],
             'ukuran_kamar' => $validated['ukuran_kamar'] ?? null,
             'deskripsi' => $validated['deskripsi'] ?? null,

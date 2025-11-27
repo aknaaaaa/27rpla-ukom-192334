@@ -7,63 +7,205 @@
     <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
-        :root { --text:#2c2c2c; --muted:#9a9a9a; --shadow:0 14px 22px rgba(0,0,0,0.08); }
-        *{box-sizing:border-box;}
-        body{margin:0;font-family:'Aboreto',sans-serif;color:var(--text);background:#f9f9f9;}
-        .dashboard-shell{display:flex;min-height:100vh;}
-        .sidebar{
-            width:230px;
-            background:#fff;
-            box-shadow:8px 0 26px rgba(0,0,0,0.06);
-            padding:28px 22px;
-            z-index:2;
+        :root {
+            --text: #2c2c2c;
+            --muted: #9a9a9a;
+            --shadow: 0 14px 22px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Aboreto', sans-serif;
+            color: var(--text);
+            background: #f9f9f9;
+        }
+
+        .dashboard-shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 230px;
+            background: #fff;
+            box-shadow: 8px 0 26px rgba(0, 0, 0, 0.06);
+            padding: 28px 22px;
+            z-index: 2;
             position: sticky;
             top: 0;
             height: 100vh;
             overflow-y: auto;
         }
-        .brand{margin-bottom:18px;}
-        .brand__name{font-family:'Mea Culpa',cursive;font-size:28px;margin:0;line-height:1.1;}
-        .brand__address{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:0.4px;color:var(--muted);text-transform:uppercase;}
-        .menu{margin-top:40px;display:grid;gap:18px;}
-        .menu__item{display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none;letter-spacing:1px;font-size:13px;text-transform:uppercase;transition:color .2s ease,transform .2s ease;}
-        .menu__item:hover{color:#000;transform:translateX(4px);}
-        .menu__item.is-active{font-weight:600;}
-        .menu__icon{font-size:20px;width:22px;text-align:center;}
-        .main{flex:1;padding:20px 34px 40px;position:relative;background:#fcfcfc;}
-        .top-line{border-bottom:1px solid #e0e0e0;margin:8px 0 20px;}
-        .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px;}
-        .card{border:1px solid #d3d3d3;border-radius:12px;padding:14px 12px;background:#fff;box-shadow:var(--shadow);}
-        .card h4{margin:0;font-size:14px;letter-spacing:0.8px;color:var(--muted);}
-        .card .value{font-size:24px;margin:6px 0 0;font-weight:700;}
-        .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
-        .filters input,.filters select{padding:10px 12px;border:1px solid #cfcfcf;background:#f4f4f4;border-radius:10px;font-size:13px;}
-        .table-wrap{background:#fff;border:1px solid #c9c9c9;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
-        table{width:100%;border-collapse:collapse;font-size:13px;}
-        th,td{padding:10px 12px;border-bottom:1px solid #e1e1e1;}
-        th{background:#2d2b2b;color:#fff;text-align:left;letter-spacing:0.8px;font-size:12px;}
-        tr:hover td{background:#fafafa;}
-        .btn-link-detail{
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            padding:6px 10px;
-            border-radius:8px;
-            border:1px solid #cfcfcf;
-            text-decoration:none;
-            color:#2c2c2c;
-            background:#fff;
-            font-weight:600;
-            font-size:12px;
-            transition:all 0.2s ease;
-            box-shadow:0 6px 12px rgba(0,0,0,0.06);
+
+        .brand {
+            margin-bottom: 18px;
         }
-        .btn-link-detail:hover{
-            background:#2c2c2c;
-            color:#fff;
-            border-color:#2c2c2c;
-            transform:translateY(-1px);
+
+        .brand__name {
+            font-family: 'Mea Culpa', cursive;
+            font-size: 28px;
+            margin: 0;
+            line-height: 1.1;
         }
+
+        .brand__address {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            letter-spacing: 0.4px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .menu {
+            margin-top: 40px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .menu__item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: 1px;
+            font-size: 13px;
+            text-transform: uppercase;
+            transition: color .2s ease, transform .2s ease;
+        }
+
+        .menu__item:hover {
+            color: #000;
+            transform: translateX(4px);
+        }
+
+        .menu__item.is-active {
+            font-weight: 600;
+        }
+
+        .menu__icon {
+            font-size: 20px;
+            width: 22px;
+            text-align: center;
+        }
+
+        .main {
+            flex: 1;
+            padding: 20px 34px 40px;
+            position: relative;
+            background: #fcfcfc;
+        }
+
+        .top-line {
+            border-bottom: 1px solid #e0e0e0;
+            margin: 8px 0 20px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            border: 1px solid #d3d3d3;
+            border-radius: 12px;
+            padding: 14px 12px;
+            background: #fff;
+            box-shadow: var(--shadow);
+        }
+
+        .card h4 {
+            margin: 0;
+            font-size: 14px;
+            letter-spacing: 0.8px;
+            color: var(--muted);
+        }
+
+        .card .value {
+            font-size: 24px;
+            margin: 6px 0 0;
+            font-weight: 700;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 10px 12px;
+            border: 1px solid #cfcfcf;
+            background: #f4f4f4;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .table-wrap {
+            background: #fff;
+            border: 1px solid #c9c9c9;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        th {
+            background: #2d2b2b;
+            color: #fff;
+            text-align: left;
+            letter-spacing: 0.8px;
+            font-size: 12px;
+        }
+
+        tr:hover td {
+            background: #fafafa;
+        }
+
+        .btn-link-detail {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid #cfcfcf;
+            text-decoration: none;
+            color: #2c2c2c;
+            background: #fff;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-link-detail:hover {
+            background: #2c2c2c;
+            color: #fff;
+            border-color: #2c2c2c;
+            transform: translateY(-1px);
+        }
+
         .hamburger {
             position: fixed;
             top: 16px;
@@ -78,34 +220,71 @@
             justify-content: center;
             font-size: 22px;
             z-index: 120;
-            box-shadow: 0 10px 16px rgba(0,0,0,0.08);
+            box-shadow: 0 10px 16px rgba(0, 0, 0, 0.08);
             cursor: pointer;
         }
-        @media(max-width:960px){
-            .dashboard-shell{flex-direction:column;}
-            .sidebar{
-                position:fixed;
-                inset:0 auto 0 0;
-                width:250px;
-                transform: translateX(-100%);
-                box-shadow:0 6px 16px rgba(0,0,0,0.12);
-                background:#fff;
-                z-index:110;
-                transition: transform 0.25s ease;
-                padding-top:72px;
+
+        @media(max-width:960px) {
+            .dashboard-shell {
+                flex-direction: column;
             }
-            .sidebar.is-open { transform: translateX(0); }
-            .sidebar .menu { grid-template-columns: 1fr; }
-            .main{padding:18px; padding-left:16px; padding-right:16px;}
-            .hamburger { display: inline-flex; }
-            .cards{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
+
+            .sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                width: 250px;
+                transform: translateX(-100%);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+                background: #fff;
+                z-index: 110;
+                transition: transform 0.25s ease;
+                padding-top: 72px;
+            }
+
+            .sidebar.is-open {
+                transform: translateX(0);
+            }
+
+            .sidebar .menu {
+                grid-template-columns: 1fr;
+            }
+
+            .main {
+                padding: 18px;
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .hamburger {
+                display: inline-flex;
+            }
+
+            .cards {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
         }
-        @media(max-width:700px){
-            .main{padding:18px;}
-            .filters{flex-direction:column;}
-            .filters input,.filters select{width:100%;}
-            .table-wrap{overflow-x:auto;}
-            table{min-width:720px;}
+
+        @media(max-width:700px) {
+            .main {
+                padding: 18px;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filters input,
+            .filters select {
+                width: 100%;
+            }
+
+            .table-wrap {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 720px;
+            }
         }
     </style>
 </head>
@@ -116,22 +295,19 @@
 
         <main class="main">
             <div class="top-line"></div>
-
+            <!--Kumpulan Card-->
             <div class="cards">
+            <!--Kumpulan Card Total Pengguna-->
                 <div class="card">
                     <h4>Total Pengguna</h4>
                     <div class="value">{{ $metrics['total_customers'] }}</div>
                 </div>
-                <div class="card">
-                    <h4>Total Admin</h4>
-                    <div class="value">{{ $metrics['total_admins'] }}</div>
-                </div>
             </div>
-
+            <!--Input untuk search pengguna berdasarkan nama/email/no telepon -->
             <div class="filters">
                 <input style="font-family: Aboreto;" type="text" placeholder="Cari nama / email / telepon" aria-label="Cari" oninput="filterTable(this.value)">
             </div>
-
+            <!--Table untuk kumpulan data pengguna-->
             <div class="table-wrap">
                 <table id="customersTable">
                     <thead>
@@ -157,13 +333,15 @@
                                 <td>{{ $displayRole }}</td>
                                 <td>{{ optional($customer->created_at)->translatedFormat('d M Y') ?? '-' }}</td>
                                 <td>
+                                    <!--Tombol untuk href ke detail pengguna-->
                                     <a href="{{ route('admin.pelanggan.show', $customer->id_user) }}"
-                                       class="btn-link-detail">
+                                        class="btn-link-detail">
                                         <i class="bi bi-person-lines-fill"></i> Detail
                                     </a>
                                 </td>
                             </tr>
                         @empty
+                        <!--Halaman yang di tampilkan jika data pelanggan tidak ada-->
                             <tr>
                                 <td colspan="6" style="text-align:center;color:#888;">Belum ada data pelanggan.</td>
                             </tr>
