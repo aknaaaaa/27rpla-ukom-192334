@@ -9,23 +9,34 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('pemesanans', function (Blueprint $table) {
-            $table->id('id_pemesanan');
-            $table->foreignId('id_user')
-                  ->constrained('user', 'id_user')
-                  ->cascadeOnDelete();
-            $table->foreignId('id_kamar')
-                  ->constrained('kamars', 'id_kamar')
-                  ->cascadeOnDelete();
-            $table->string('booking_code', 20)->unique();
-            $table->date('check_in');
-            $table->date('check_out');
-            $table->integer('total_hari');
-            $table->timestamps();
-        });
-    }
+public function up(): void
+{
+Schema::create('pemesanans', function (Blueprint $table) {
+    $table->id(); // PK = id
+
+    $table->unsignedBigInteger('id_user');
+    $table->foreign('id_user')
+          ->references('id_user')
+          ->on('user')
+          ->cascadeOnDelete();
+
+    $table->string('kode_pesanan')->unique();
+    $table->date('tanggal_pemesanan');
+    $table->date('tanggal_checkin');
+    $table->date('tanggal_checkout');
+    $table->string('status')->default('Menunggu');
+
+    $table->string('nama_penginap')->nullable();
+    $table->string('email_penginap')->nullable();
+    $table->string('telepon_penginap')->nullable();
+
+    $table->unsignedBigInteger('total_harga')->default(0);
+
+    $table->timestamps();
+});
+
+
+}
 
     /**
      * Reverse the migrations.

@@ -12,22 +12,6 @@
         overflow-y: auto;
     }
 }
-.menu__item--logout{
-    color:#c0392b;
-    border:1px solid rgba(192,57,43,0.25);
-    padding:10px 12px;
-    border-radius:10px;
-    font-weight:700;
-}
-.menu__item--logout .menu__icon{
-    color:inherit;
-}
-.menu__item--logout:hover{
-    background:#c0392b;
-    color:#fff;
-    border-color:#c0392b;
-    transform:translateX(0);
-}
 </style>
 
 <aside class="sidebar sticky-sidebar">
@@ -42,7 +26,7 @@
     @php(
         $menu = [
             ['route' => 'admin.dashboard', 'icon' => 'bi-grid-1x2-fill', 'label' => 'Dashboard', 'key' => 'dashboard'],
-            ['route' => 'admin.rooms', 'icon' => 'bi-door-open-fill', 'label' => 'Kamar', 'key' => 'rooms'],
+            ['route' => 'admin.rooms.index', 'icon' => 'bi-door-open-fill', 'label' => 'Kamar', 'key' => 'rooms'],
             ['route' => 'admin.orders', 'icon' => 'bi-box-seam', 'label' => 'Pesanan', 'key' => 'orders'],
             ['route' => 'admin.pelanggan', 'icon' => 'bi-people', 'label' => 'Penginap', 'key' => 'customers'],
         ]
@@ -55,8 +39,45 @@
                 <i class="bi {{ $item['icon'] }} menu__icon"></i> {{ $item['label'] }}
             </a>
         @endforeach
-        <a href="{{ route('logout.get') }}" class="menu__item menu__item--logout" onclick="localStorage.removeItem('room_cart');localStorage.removeItem('booking_dates');localStorage.removeItem('access_token');">
+        <a href="#" onclick="doLogout()" class="menu__item">
             <i class="bi bi-box-arrow-right menu__icon"></i> Keluar
         </a>
     </nav>
 </aside>
+
+<script>
+async function doLogout() {
+    if (!confirm('Apakah Anda yakin ingin logout?')) {
+        return;
+    }
+
+    const token = localStorage.getItem('access_token');
+    
+    try {
+        const res = await fetch('{{ route('logout') }}', {
+            method: 'POST',
+            headers: {
+                'Authorization': token ? 'Bearer ' + token : '',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            credentials: 'include',
+            body: JSON.stringify({})
+        });
+
+        // Clear localStorage dan cookies
+        localStorage.removeItem('access_token');
+        document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        
+        // Redirect ke login
+        window.location.href = '{{ route('layouts.login') }}';
+    } catch (e) {
+        console.error('Logout error:', e);
+        // Force logout bahkan jika request gagal
+        localStorage.removeItem('access_token');
+        document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        window.location.href = '{{ route('layouts.login') }}';
+    }
+}
+</script>

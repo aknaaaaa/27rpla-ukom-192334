@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Kamar;
 use App\Models\Pembayaran;
 use App\Models\Pemesanan;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,34 +20,48 @@ class LayoutsController extends Controller
     }
     public function daftar()
     {
-        return view('auth.register');
+        return view('layouts.register');
     }
     public function masuk(){
-        return view('auth.login');
+        return view('layouts.login');
     }
     public function profile(Request $request){
         $user = Auth::user();
         $tab = $request->query('tab', 'profile');
-        $orders = Pemesanan::with(['kamar', 'pembayaran'])
+        $subTab = $request->query('sub', 'ongoing');
+        $today = \Carbon\Carbon::today();
+
+        // Ambil semua pemesanan dengan pembayaran yang sudah dibayar
+        $allOrders = Pemesanan::with(['kamar', 'pembayaran'])
             ->where('id_user', $user?->id_user)
-            ->latest()
-            ->limit(3)
-            ->get();
-        $history = Pemesanan::with(['kamar', 'pembayaran'])
-            ->where('id_user', $user->id_user)
-            ->whereHas('pembayaran', function ($query) {
-                $query->whereIn('status_pembayaran', ['Telah dibayar', 'Dibatalkan']);
+            ->whereHas('pembayaran', function ($q) {
+                $q->where('status_pembayaran', 'Telah dibayar');
             })
-            // Urutkan berdasarkan tanggal dibuat, yang terbaru di atas
-            ->orderBy('created_at', 'desc') 
-            ->limit(100) 
+            ->latest()
             ->get();
+
+        // Pisahkan ke ongoing (sedang berlangsung) dan completed (sudah selesai)
+        // Gunakan tanggal_checkout (kolom actual dari DB)
+        $ongoingOrders = $allOrders->filter(function ($order) use ($today) {
+            $checkoutDate = $order->tanggal_checkout ?? $order->check_out;
+            return $today->lessThanOrEqualTo($checkoutDate);
+        })->values();
+
+        $completedOrders = $allOrders->filter(function ($order) use ($today) {
+            $checkoutDate = $order->tanggal_checkout ?? $order->check_out;
+            return $today->greaterThan($checkoutDate);
+        })->values();
+
+        // Untuk kompatibilitas dengan view lama, ambil top 3 ongoing untuk panel profile
+        $orders = $ongoingOrders->take(3);
 
         return view('profile.profile', [
             'user' => $user,
             'orders' => $orders,
-            'history' => $history,
+            'ongoingOrders' => $ongoingOrders,
+            'completedOrders' => $completedOrders,
             'tab' => $tab,
+            'subTab' => $subTab,
         ]);
     }
 
@@ -67,23 +80,20 @@ class LayoutsController extends Controller
         $occupiedRooms = Kamar::where('status_kamar', 'Telah di reservasi')->count();
         $availableRooms = Kamar::where('status_kamar', 'Tersedia')->count();
         $maintenanceRooms = Kamar::where('status_kamar', 'Maintenance')->count();
-        $totalRooms = Kamar::count();
-        $totalUsers = User::count();
-        $totalRevenue = Pembayaran::where('status_pembayaran', 'Telah dibayar')->sum('amount_paid');
+        $totalRevenue = Pembayaran::sum('total');
 
         $metrics = [
             'total_orders' => $totalOrders,
-            'total_users' => $totalUsers,
-            'total_rooms' => $totalRooms,
             'occupied_rooms' => $occupiedRooms,
             'available_rooms' => $availableRooms,
             'maintenance_rooms' => $maintenanceRooms,
             'total_revenue' => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),
         ];
 
-        return view('admin.dashboard', [
-            'metrics' => $metrics,
-        ]);
+return view('admin.dashboard.index', [
+    'metrics' => $metrics,
+]);
+
     }
 
     public function adminRooms()

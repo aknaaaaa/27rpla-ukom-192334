@@ -132,7 +132,7 @@
                 <p class="muted">Perbarui informasi kamar yang sudah ada.</p>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <a class="btn outline" href="{{ route('admin.rooms') }}"><i class="bi bi-arrow-left"></i> Kembali</a>
+                <a class="btn outline" href="{{ route('admin.rooms.index') }}"><i class="bi bi-arrow-left"></i> Kembali</a>
                 <button form="editRoomForm" class="btn"><i class="bi bi-save"></i> Simpan</button>
             </div>
         </div>

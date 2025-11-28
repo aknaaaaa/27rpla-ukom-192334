@@ -40,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'sanctum.session' => EnsureSanctumAuthenticated::class,
             'auth' => \App\Http\Middleware\Authenticate::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+            'role' => \App\Http\Middleware\CheckRole::class,
         ]);
 
         // kecualikan endpoint API auth dari pengecekan CSRF agar bisa dipanggil tanpa cookie XSRF

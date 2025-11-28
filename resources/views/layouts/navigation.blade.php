@@ -5,10 +5,10 @@
             <a href="{{ route('kamar.index') }}" class="btn btn-dark me-3 font-aboreto">PESAN SEKARANG</a>
             <ul class="navbar-nav flex-row">
                 <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#about">Tentang</a></li>
-                <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#sekilas">Produk</a></li>
+                <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Produk</a></li>
                 <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Layanan</a></li>
-                <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#lokasi">Lokasi</a></li>
-                <li class="nav-item"><a class="nav-link px-3" onclick="cekProfil()"><img src="{{ asset('images/person-circle.svg') }}" alt="Profil"></a></li>
+                <li class="nav-item"><a class="nav-link font-aboreto px-2" href="#">Kontak</a></li>
+                <li class="nav-item"><a class="nav-link px-3" onclick="cekProfil()"><img src="images/person-circle.svg"></a></li>
 
             </ul>
         </div>
@@ -20,7 +20,7 @@ async function cekProfil(){
   const token = localStorage.getItem('access_token');
 
   if(!token){
-    window.location.href = "{{ route('login') }}";
+    window.location.href = "{{ route('layouts.login') }}";
     return;
   }
 
@@ -36,20 +36,25 @@ async function cekProfil(){
 
     if(res.ok){
       const data = await res.json().catch(() => ({}));
+      console.log('Auth Check Response:', data); // Debug
+      
       const roleId = Number(data?.user?.id_role ?? 0);
+      console.log('User Role ID:', roleId); // Debug
+      
       const target = roleId === 1
         ? "{{ route('admin.dashboard') }}"
         : "{{ route('profile.profile') }}";
 
+      console.log('Redirecting to:', target); // Debug
       window.location.href = target;
       return;
     }
   }catch(e){
-    console.error(e);
+    console.error('Error in cekProfil:', e);
   }
 
   localStorage.removeItem('access_token');
   document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    window.location.href = "{{ route('login') }}";
+  window.location.href = "{{ route('layouts.login') }}";
 }
 </script>

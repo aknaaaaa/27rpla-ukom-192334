@@ -11,17 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kamars', function (Blueprint $table) {
-            $table->id('id_kamar');
-            $table->string('nama_kamar', 100);
-            $table->decimal('harga_permalam', 12, 2);
-            $table->string('ukuran_kamar', 50)->nullable();
-            $table->text('deskripsi')->nullable();
-            $table->string('gambar')->nullable();
-            $table->enum('status_kamar', ['Tersedia', 'Telah di reservasi', 'Maintenance'])
-                  ->default('Tersedia');
-            $table->timestamps();
-        });
+Schema::create('kamars', function (Blueprint $table) {
+    $table->id('id_kamar');
+
+    $table->string('nama_kamar', 255)->unique();
+    $table->string('kategori', 50);
+
+    $table->decimal('harga_permalam', 12, 2);
+    $table->string('ukuran_kamar', 50)->nullable();
+    $table->text('deskripsi')->nullable();
+
+    $table->integer('stok_kamar')->default(0);
+
+    $table->string('gambar')->nullable();
+
+    $table->enum('status_kamar', [
+        'Tersedia',
+        'Penuh',
+        'Maintenance'
+    ])->default('Tersedia');
+
+    $table->timestamps();
+});
     }
 
     /**

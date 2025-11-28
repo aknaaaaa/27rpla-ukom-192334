@@ -106,70 +106,29 @@
             border-bottom: 1px solid #e0e0e0;
             margin: 12px 0 22px;
         }
-        .kpi-grid{
-            display:grid;
-            grid-template-columns:repeat(3,minmax(0,1fr));
-            gap:12px;
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+            margin-bottom: 20px;
         }
-        .tile{
-            background:#fff;
-            border:1px solid #dcdcdc;
-            border-radius:4px;
-            padding:18px 16px;
-            box-shadow:0 6px 12px rgba(0,0,0,0.06);
-            min-height:110px;
-            display:flex;
-            flex-direction:column;
-            justify-content:space-between;
-            letter-spacing:0.4px;
+        .card {
+            background: #fff;
+            padding: 22px;
+            min-height: 150px;
+            box-shadow: var(--card-shadow);
+            letter-spacing: 0.5px;
+            border-radius: 5px;
         }
-        .tile__label{
-            margin:0 0 6px;
-            font-size:12px;
-            text-transform:uppercase;
-            color:#4a4a4a;
+        .card__title {
+            font-size: 12px;
+            margin: 0 0 14px;
         }
-        .tile__value{
-            margin:0;
-            font-size:36px;
-            line-height:1.1;
-            font-weight:400;
+        .card__value {
+            font-size: 44px;
+            margin: 0;
+            line-height: 1.1;
         }
-        .tile__row{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:10px;
-        }
-        .tile__icon{
-            font-size:32px;
-            color:#202020;
-        }
-        .tile--hero{
-            grid-column:1 / -1;
-        }
-        .tile--orders{
-            grid-column:1 / 3;
-        }
-        .tile--users{
-            grid-column:3 / 4;
-        }
-        .tile--dark{
-            background:#111;
-            color:#fff;
-            border-color:#111;
-        }
-        .tile--muted{
-            background:#d9d9d9;
-            border-color:#d9d9d9;
-        }
-        .tile--ghost{
-            background:#fff;
-        }
-        .tile--dark .tile__label,
-        .tile--dark .tile__icon{color:#fff;}
-        .tile--muted .tile__icon{color:#222;}
-        .tile--ghost .tile__icon{color:#000;}
         .hamburger {
             position: fixed;
             top: 16px;
@@ -203,14 +162,16 @@
             .sidebar .menu { grid-template-columns: 1fr; }
             .main { padding-left: 16px; padding-right: 16px; }
             .hamburger { display: inline-flex; }
-            .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
-            .tile--orders,
-            .tile--users{grid-column:auto;}
+            .cards { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
         }
         @media (max-width: 600px) {
             .menu { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-            .kpi-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
-            .tile__value{font-size:30px;}
+            .cards { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .card__value { font-size: 32px; }
+        }
+        .card--wide {
+            grid-column: 1 / -1;
+            min-height: 200px;
         }
         /* Loading overlay saat pindah halaman */
         .page-loader {
@@ -251,10 +212,9 @@
     @php
         $metrics = $metrics ?? [
             'total_orders' => 12,
-            'total_users' => 0,
-            'total_rooms' => 0,
-            'occupied_rooms' => 0,
+            'occupied_rooms' => 136,
             'available_rooms' => 0,
+            'maintenance_rooms' => 0,
             'total_revenue' => 'Rp 0',
         ];
     @endphp
@@ -266,45 +226,27 @@
         <main class="main">
             <div class="content">
                 <div class="top-line"></div>
-                <div class="kpi-grid">
-                    <div class="tile tile--hero">
-                        <p class="tile__label">Total Pendapatan</p>
-                        <p class="tile__value">{{ $metrics['total_revenue'] }}</p>
+
+                <div class="cards">
+                    <div class="card">
+                        <p class="card__title">Total Pesanan</p>
+                        <p class="card__value">{{ $metrics['total_orders'] }}</p>
                     </div>
-                    <div class="tile tile--orders">
-                        <p class="tile__label">Total Pesanan</p>
-                        <div class="tile__row">
-                            <p class="tile__value">{{ $metrics['total_orders'] }}</p>
-                            <i class="bi bi-cart3 tile__icon"></i>
-                        </div>
+                    <div class="card">
+                        <p class="card__title">Jumlah Kamar Terisi</p>
+                        <p class="card__value">{{ $metrics['occupied_rooms'] }}</p>
                     </div>
-                    <div class="tile tile--users">
-                        <p class="tile__label">Total Pengguna</p>
-                        <div class="tile__row">
-                            <p class="tile__value">{{ $metrics['total_users'] }}</p>
-                            <i class="bi bi-person tile__icon"></i>
-                        </div>
+                    <div class="card">
+                        <p class="card__title">Jumlah Kamar Tersisa</p>
+                        <p class="card__value">{{ $metrics['available_rooms'] }}</p>
                     </div>
-                    <div class="tile tile--dark">
-                        <p class="tile__label">Jumlah Kamar</p>
-                        <div class="tile__row">
-                            <p class="tile__value">{{ $metrics['total_rooms'] }}</p>
-                            <i class="bi bi-phone tile__icon"></i>
-                        </div>
+                    <div class="card">
+                        <p class="card__title">Jumlah Kamar Maintenance</p>
+                        <p class="card__value">{{ $metrics['maintenance_rooms'] }}</p>
                     </div>
-                    <div class="tile tile--muted">
-                        <p class="tile__label">Jumlah Kamar Terisi</p>
-                        <div class="tile__row">
-                            <p class="tile__value">{{ $metrics['occupied_rooms'] }}</p>
-                            <i class="bi bi-briefcase tile__icon"></i>
-                        </div>
-                    </div>
-                    <div class="tile tile--ghost">
-                        <p class="tile__label">Jumlah Kamar Tersedia</p>
-                        <div class="tile__row">
-                            <p class="tile__value">{{ $metrics['available_rooms'] }}</p>
-                            <i class="bi bi-box-arrow-up-right tile__icon"></i>
-                        </div>
+                    <div class="card card--wide">
+                        <p class="card__title">Total Pendapatan</p>
+                        <p class="card__value">{{ $metrics['total_revenue'] }}</p>
                     </div>
                 </div>
             </div>

@@ -51,16 +51,16 @@
         <span>Back</span>
     </a>
     <div class="d-flex justify-content-center mb-5">
-        <form id="dateSearchForm" class="d-flex gap-3 align-items-center">
+        <form class="d-flex gap-3 align-items-center">
             <div>
                 <label>Check In</label>
-                <input type="date" id="checkInField" class="form-control">
+                <input type="date" class="form-control">
             </div>
             <div>
                 <label>Check Out</label>
-                <input type="date" id="checkOutField" class="form-control">
+                <input type="date" class="form-control">
             </div>
-            <button class="btn btn-dark mt-3" type="submit">Simpan</button>
+            <button class="btn btn-dark mt-3">Cari</button>
         </form>
     </div>
 
@@ -100,67 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
             location.href = backBtn.getAttribute('href');
         });
     }
-
-    // sinkronisasi tanggal dari halaman kamar ke checkout melalui localStorage
-    const checkInField = document.getElementById('checkInField');
-    const checkOutField = document.getElementById('checkOutField');
-    const dateForm = document.getElementById('dateSearchForm');
-    const today = new Date();
-
-    const toInputDate = (dateObj) => dateObj.toISOString().split('T')[0];
-    const addDays = (dateObj, days) => {
-        const clone = new Date(dateObj);
-        clone.setDate(clone.getDate() + days);
-        return clone;
-    };
-
-    const persistDates = (showToast = false) => {
-        const payload = {
-            check_in: checkInField?.value || '',
-            check_out: checkOutField?.value || '',
-        };
-        localStorage.setItem('booking_dates', JSON.stringify(payload));
-        window.dispatchEvent(new CustomEvent('booking:updated', { detail: payload }));
-        if (showToast) {
-            window.showAppToast?.('Tanggal menginap disimpan. Silakan lanjut ke checkout.', 'success');
-        }
-    };
-
-    const ensureCheckoutAfterCheckin = () => {
-        if (!checkInField || !checkOutField) return;
-        if (!checkInField.value) return;
-        if (!checkOutField.value || checkOutField.value <= checkInField.value) {
-            checkOutField.value = toInputDate(addDays(new Date(checkInField.value), 1));
-        }
-    };
-
-    const hydrateDates = () => {
-        if (!checkInField || !checkOutField) return;
-        const saved = JSON.parse(localStorage.getItem('booking_dates') || '{}');
-        const defaultCheckIn = toInputDate(today);
-        const defaultCheckOut = toInputDate(addDays(today, 1));
-
-        checkInField.value = saved.check_in || defaultCheckIn;
-        checkOutField.value = saved.check_out || defaultCheckOut;
-        ensureCheckoutAfterCheckin();
-    };
-
-    hydrateDates();
-
-    checkInField?.addEventListener('change', () => {
-        ensureCheckoutAfterCheckin();
-        persistDates();
-    });
-    checkOutField?.addEventListener('change', () => {
-        ensureCheckoutAfterCheckin();
-        persistDates();
-    });
-
-    dateForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        ensureCheckoutAfterCheckin();
-        persistDates(true);
-    });
 });
 </script>
 @endsection

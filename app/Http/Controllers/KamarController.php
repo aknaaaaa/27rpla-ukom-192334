@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 
 class KamarController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kamars = Kamar::latest()->get();
+        $kamars = Kamar::all();
 
         return view('kamar.index', compact('kamars'));
     }

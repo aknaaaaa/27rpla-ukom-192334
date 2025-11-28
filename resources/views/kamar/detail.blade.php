@@ -41,5 +41,4 @@
 </div>
 
 @include('components.auth-alert')
-@include('components.cart-script')
 @endsection
