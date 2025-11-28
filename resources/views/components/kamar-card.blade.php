@@ -13,98 +13,165 @@
     }
 @endphp
 <style>
-    .card-room-modern {
-        border: 1px solid #e4e4e4;
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 12px 26px rgba(0,0,0,0.06);
-        background: #fff;
+    .room-card-hotel {
         display: grid;
-        grid-template-rows: 170px auto;
+        grid-template-columns: 280px 1fr;
+        gap: 16px;
+        border: 1px solid #e3e3e3;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #ffffff, #fafafa);
+        box-shadow: 0 14px 30px rgba(0,0,0,0.08);
+        overflow: hidden;
+        min-height: 240px;
     }
-    .card-room-modern .visual {
-        background-size: cover;
-        background-position: center;
+    .room-thumb {
         position: relative;
+        height: 220px;
+        background: #f5f5f5;
     }
-    .card-room-modern .visual::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.55));
+    .room-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
-    .card-room-modern .visual .tag,
-    .card-room-modern .visual .price,
-    .card-room-modern .visual .status {
+    .room-badge {
         position: absolute;
-        z-index: 2;
+        top: 10px;
+        left: 10px;
+        background: rgba(0,0,0,0.7);
+        color: #fff;
         padding: 6px 10px;
         border-radius: 999px;
         font-size: 12px;
         letter-spacing: 0.4px;
-        color: #fff;
-        background: rgba(0,0,0,0.55);
     }
-    .card-room-modern .visual .tag { top: 12px; left: 12px; }
-    .card-room-modern .visual .price { bottom: 12px; right: 12px; background: #111; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-    .card-room-modern .visual .status { top: 12px; right: 12px; }
-    .card-room-modern .body { padding: 14px; display: grid; gap: 6px; }
-    .card-room-modern .title-row { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
-    .card-room-modern h5 { margin:0; letter-spacing:0.6px; }
-    .card-room-modern .stock { font-size: 12px; padding:4px 8px; border-radius:8px; background:#f2f2f2; }
-    .card-room-modern .meta { display:flex; flex-wrap:wrap; gap:8px; font-size: 12px; color:#4b5563; }
-    .card-room-modern .actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
-    .card-room-modern .desc { margin:0; color:#6b7280; line-height:1.5; font-size: 13px; }
+    .room-status {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+    }
+    .room-price-tag {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.75);
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        letter-spacing: 0.3px;
+    }
+    .room-body {
+        padding: 16px 18px 18px 0;
+        display: grid;
+        gap: 8px;
+        align-content: center;
+    }
+    .room-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    .room-title { margin: 0; letter-spacing: 0.6px; font-weight: 700; color: #1f2937; }
+    .room-stock {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 12px;
+        background: #f3f4f6;
+        color: #111827;
+        border: 1px solid #e5e7eb;
+    }
+    .room-meta { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: #4b5563; }
+    .room-desc { margin: 0; color: #6b7280; font-size: 13px; line-height: 1.6; max-width: 90%; }
+    .room-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .qty-control { display:flex; align-items:center; gap:8px; }
+    .qty-control button {
+        width:32px; height:32px;
+        border-radius:8px;
+        border:1px solid #d7d7d7;
+        background:#fff;
+        display:inline-flex; align-items:center; justify-content:center;
+        font-weight:700;
+    }
+    .qty-control input {
+        width:60px;
+        text-align:center;
+        border:1px solid #d7d7d7;
+        border-radius:8px;
+        padding:6px 8px;
+    }
+    @media (max-width: 720px) {
+        .room-card-hotel { grid-template-columns: 1fr; }
+        .room-thumb { height: 200px; }
+        .room-body { padding-left: 14px; }
+    }
 </style>
-<div class="card-room-modern">
-    <div class="visual" style="background-image:url('{{ $imageUrl }}'); {{ $imageStyle }}">
-        <span class="tag">{{ $kamar->kategoriRelasi->name ?? $kamar->kategori ?? 'Kamar' }}</span>
-        <span class="status" style="background: {{ $isMaintenance ? '#f59e0b' : ($isBlocked ? '#dc2626' : '#16a34a') }};">
-            {{ $kamar->status_kamar }}
+<div class="room-card-hotel">
+    <div class="room-thumb">
+        <img src="{{ $imageUrl }}" alt="{{ $kamar->nama_kamar }}" onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';" style="{{ $imageStyle }}">
+        <span class="room-badge">{{ strtoupper($kamar->kategoriRelasi->name ?? $kamar->kategori ?? 'KAMAR') }}</span>
+        <span class="room-status" style="background: {{ $isMaintenance ? '#9ca3af' : ($isBlocked ? '#b91c1c' : '#22c55e') }};">
+            {{ strtoupper($kamar->status_kamar) }}
         </span>
-        <span class="price">Rp{{ number_format($kamar->harga_permalam, 0, ',', '.') }}/malam</span>
+        <span class="room-price-tag">Rp{{ number_format($kamar->harga_permalam, 0, ',', '.') }}/malam</span>
     </div>
-    <div class="body">
-        <div class="title-row">
+    <div class="room-body">
+        <div class="room-head">
             <div>
-                <h5 class="fw-bold">{{ $kamar->nama_kamar }}</h5>
-                <div class="meta">
+                <h5 class="room-title">{{ strtoupper($kamar->nama_kamar) }}</h5>
+                <div class="room-meta">
                     <span><i class="bi bi-people"></i> {{ $kamar->kapasitas ?? 2 }} orang</span>
                     <span><i class="bi bi-aspect-ratio"></i> {{ $kamar->ukuran_kamar ?? 'Tidak dicantumkan' }}</span>
                 </div>
             </div>
-            <span class="stock {{ ($kamar->stok ?? 0) > 0 ? 'text-success' : 'text-danger' }}">
-                Stok {{ $kamar->stok ?? 0 }}
-            </span>
+            <span class="room-stock">Stok {{ $kamar->stok ?? 0 }}</span>
         </div>
-        <p class="desc">
-            {{ $kamar->deskripsi ? \Illuminate\Support\Str::limit($kamar->deskripsi, 110) : 'Tidak ada deskripsi.' }}
-        </p>
-        <div class="actions">
-            <button class="btn btn-dark btn-sm"
-                    data-bs-toggle="modal"
-                    data-bs-target="#kamarDetailModal"
-                    data-nama="{{ $kamar->nama_kamar }}"
-                    data-deskripsi="{{ $kamar->deskripsi }}"
-                    data-gambar="{{ $imageUrl }}"
-                    data-harga="Rp{{ number_format($kamar->harga_permalam, 0, ',', '.') }} / Malam"
-                    data-ukuran="{{ $kamar->ukuran_kamar ?? 'Tidak dicantumkan' }}"
-                    data-status="{{ $kamar->status_kamar }}"
-                    data-url="{{ route('kamar.show', $kamar->id_kamar) }}">
-                Detail
-            </button>
-            <button type="button"
-                    class="btn btn-outline-primary btn-sm"
-                    data-requires-auth="true"
-                    data-action="{{ $isBlocked ? '' : 'add-to-cart' }}"
-                    data-id="{{ $kamar->id_kamar }}"
-                    data-price="{{ $kamar->harga_permalam }}"
-                    data-nama="{{ $kamar->nama_kamar }}"
-                    data-status="{{ $kamar->status_kamar }}"
-                    data-gambar="{{ $imageUrl }}"
-                    {{ $isBlocked ? 'disabled' : '' }}>
-                {{ $isBlocked ? 'Tidak Tersedia' : 'Keranjang' }}
-            </button>
+        <p class="room-desc">{{ $kamar->deskripsi ? \Illuminate\Support\Str::limit($kamar->deskripsi, 110) : 'Tidak ada deskripsi.' }}</p>
+        <div class="room-actions">
+            <div class="qty-control">
+                <button type="button" class="btn-dec" data-qty-dec>-</button>
+                <input type="number" min="1" value="1" data-qty-input>
+                <button type="button" class="btn-inc" data-qty-inc>+</button>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-dark btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kamarDetailModal"
+                        data-nama="{{ $kamar->nama_kamar }}"
+                        data-deskripsi="{{ $kamar->deskripsi }}"
+                        data-gambar="{{ $imageUrl }}"
+                        data-harga="Rp{{ number_format($kamar->harga_permalam, 0, ',', '.') }} / Malam"
+                        data-ukuran="{{ $kamar->ukuran_kamar ?? 'Tidak dicantumkan' }}"
+                        data-status="{{ $kamar->status_kamar }}"
+                        data-url="{{ route('kamar.show', $kamar->id_kamar) }}">
+                    Detail
+                </button>
+                <button type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        data-requires-auth="true"
+                        data-action="{{ $isBlocked ? '' : 'add-to-cart' }}"
+                        data-id="{{ $kamar->id_kamar }}"
+                        data-price="{{ $kamar->harga_permalam }}"
+                        data-nama="{{ $kamar->nama_kamar }}"
+                        data-status="{{ $kamar->status_kamar }}"
+                        data-gambar="{{ $imageUrl }}"
+                        data-stok="{{ $kamar->stok ?? 0 }}"
+                        {{ $isBlocked ? 'disabled' : '' }}>
+                    {{ $isBlocked ? 'Tidak Tersedia' : 'Keranjang' }}
+                </button>
+            </div>
         </div>
     </div>
 </div>
