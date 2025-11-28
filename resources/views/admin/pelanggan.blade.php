@@ -223,6 +223,61 @@
             box-shadow: 0 10px 16px rgba(0, 0, 0, 0.08);
             cursor: pointer;
         }
+        .pagination-container{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            gap:8px;
+            padding:14px 0;
+        }
+        .pagination-button{
+            padding:8px 14px;
+            border:1px solid #ccc;
+            background-color:#f8f8f8;
+            color:var(--text);
+            cursor:pointer;
+            border-radius:8px;
+            font-family:'Aboreto', sans-serif;
+            font-size:13px;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .pagination-button:hover:not(.active):not(:disabled){
+            background-color:#eee;
+        }
+        .pagination-button.active{
+            background-color:#2d2b2b;
+            color:#fff;
+            border-color:#2d2b2b;
+            font-weight:600;
+        }
+        .pagination-button:disabled{
+            cursor:not-allowed;
+            opacity:0.5;
+        }
+        
+        /* Style untuk label filter tanggal */
+        .date-filter-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            color: var(--text);
+            padding: 0 5px;
+        }
+        
+        .date-filter-group input[type="date"] {
+            font-family: Arial, sans-serif; /* Mengganti font untuk input date agar lebih mudah dibaca di berbagai browser */
+        }
+        
+        .date-filter-group-start,
+        .date-filter-group-end {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
 
         @media(max-width:960px) {
             .dashboard-shell {
@@ -278,6 +333,22 @@
                 width: 100%;
             }
 
+            .date-filter-group {
+                /* Untuk memastikan input tanggal juga 100% lebar */
+                width: 100%;
+                justify-content: space-between;
+                padding: 0;
+            }
+            
+            .date-filter-group-start,
+            .date-filter-group-end {
+                 width: 48%; /* Bagi lebar group */
+            }
+
+            .date-filter-group input[type="date"] {
+                flex-grow: 1;
+            }
+
             .table-wrap {
                 overflow-x: auto;
             }
@@ -295,19 +366,15 @@
 
         <main class="main">
             <div class="top-line"></div>
-            <!--Kumpulan Card-->
             <div class="cards">
-            <!--Kumpulan Card Total Pengguna-->
-                <div class="card">
+            <div class="card">
                     <h4>Total Pengguna</h4>
                     <div class="value">{{ $metrics['total_customers'] }}</div>
                 </div>
             </div>
-            <!--Input untuk search pengguna berdasarkan nama/email/no telepon -->
             <div class="filters">
-                <input style="font-family: Aboreto;" type="text" placeholder="Cari nama / email / telepon" aria-label="Cari" oninput="filterTable(this.value)">
+                <input style="font-family: Aboreto;" type="text" placeholder="Cari nama / email / telepon" aria-label="Cari" oninput="filterTable(this.value)">                
             </div>
-            <!--Table untuk kumpulan data pengguna-->
             <div class="table-wrap">
                 <table id="customersTable">
                     <thead>
@@ -325,15 +392,16 @@
                             @php
                                 $isAdmin = strcasecmp($customer->role_name ?? '', 'Admin') === 0;
                                 $displayRole = $isAdmin ? 'Admin' : 'Penginap';
+                                $joinDate = optional($customer->created_at)->translatedFormat('d M Y') ?? '-';
+                                $sortDate = optional($customer->created_at)->format('Y-m-d') ?? ''; // Format untuk perbandingan
                             @endphp
-                            <tr data-role="{{ strtolower($displayRole) }}">
+                            <tr data-role="{{ strtolower($displayRole) }}" data-join-date="{{ $sortDate }}">
                                 <td>{{ $customer->nama_user }}</td>
                                 <td>{{ $customer->email }}</td>
                                 <td>{{ $customer->phone_number }}</td>
                                 <td>{{ $displayRole }}</td>
-                                <td>{{ optional($customer->created_at)->translatedFormat('d M Y') ?? '-' }}</td>
+                                <td>{{ $joinDate }}</td>
                                 <td>
-                                    <!--Tombol untuk href ke detail pengguna-->
                                     <a href="{{ route('admin.pelanggan.show', $customer->id_user) }}"
                                         class="btn-link-detail">
                                         <i class="bi bi-person-lines-fill"></i> Detail
@@ -341,25 +409,63 @@
                                 </td>
                             </tr>
                         @empty
-                        <!--Halaman yang di tampilkan jika data pelanggan tidak ada-->
-                            <tr>
+                        <tr>
                                 <td colspan="6" style="text-align:center;color:#888;">Belum ada data pelanggan.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+            @if($customers->hasPages())
+            <div class="pagination-container">
+                @if($customers->onFirstPage())
+                    <button class="pagination-button" disabled>Prev</button>
+                @else
+                    <a class="pagination-button" href="{{ $customers->previousPageUrl() }}">Prev</a>
+                @endif
+
+                @foreach($customers->getUrlRange(1, $customers->lastPage()) as $page => $url)
+                    <a class="pagination-button {{ $page == $customers->currentPage() ? 'active' : '' }}" href="{{ $url }}">{{ $page }}</a>
+                @endforeach
+
+                @if($customers->hasMorePages())
+                    <a class="pagination-button" href="{{ $customers->nextPageUrl() }}">Next</a>
+                @else
+                    <button class="pagination-button" disabled>Next</button>
+                @endif
+            </div>
+            @endif
         </main>
     </div>
     <script>
+        // Fungsi untuk filter berdasarkan nama/email/telepon
         const filterTable = (keyword) => {
             const rows = document.querySelectorAll('#customersTable tbody tr');
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(keyword.toLowerCase()) ? '' : 'none';
+                // Sembunyikan/tampilkan baris berdasarkan kata kunci
+                const isKeywordMatch = text.includes(keyword.toLowerCase());
+                
+                // Cek apakah baris sudah disembunyikan oleh filter tanggal
+                const isDateFilteredOut = row.style.display === 'none' && row.hasAttribute('data-date-filtered');
+                
+                if (isKeywordMatch) {
+                    // Jika cocok dengan kata kunci, tampilkan jika belum disembunyikan oleh filter tanggal
+                    if (!isDateFilteredOut) {
+                         row.style.display = '';
+                    }
+                } else {
+                    // Jika tidak cocok dengan kata kunci, sembunyikan
+                    row.style.display = 'none';
+                }
             });
+            // Panggil filter tanggal lagi untuk memastikan tanggal yang disembunyikan oleh keyword tidak muncul
+            if (typeof filterDate === 'function') {
+                filterDate();
+            }
         };
 
+        // Fungsi untuk filter berdasarkan Role (dipertahankan dari kode asli)
         const filterRole = (role) => {
             const rows = document.querySelectorAll('#customersTable tbody tr');
             rows.forEach(row => {
@@ -370,7 +476,8 @@
                     row.style.display = rowRole === role.toLowerCase() ? '' : 'none';
                 }
             });
-        };
+
+        const filterDate = () => {};
 
         document.addEventListener('DOMContentLoaded', function () {
             const toggle = document.getElementById('sidebarToggle');

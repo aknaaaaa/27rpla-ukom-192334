@@ -12,6 +12,22 @@
         overflow-y: auto;
     }
 }
+.menu__item--logout{
+    color:#c0392b;
+    border:1px solid rgba(192,57,43,0.25);
+    padding:10px 12px;
+    border-radius:10px;
+    font-weight:700;
+}
+.menu__item--logout .menu__icon{
+    color:inherit;
+}
+.menu__item--logout:hover{
+    background:#c0392b;
+    color:#fff;
+    border-color:#c0392b;
+    transform:translateX(0);
+}
 </style>
 
 <aside class="sidebar sticky-sidebar">
@@ -39,7 +55,7 @@
                 <i class="bi {{ $item['icon'] }} menu__icon"></i> {{ $item['label'] }}
             </a>
         @endforeach
-        <a href="{{ route('logout.get') }}" class="menu__item" onclick="localStorage.removeItem('room_cart');localStorage.removeItem('booking_dates');localStorage.removeItem('access_token');">
+        <a href="{{ route('logout.get') }}" class="menu__item menu__item--logout" onclick="localStorage.removeItem('room_cart');localStorage.removeItem('booking_dates');localStorage.removeItem('access_token');">
             <i class="bi bi-box-arrow-right menu__icon"></i> Keluar
         </a>
     </nav>

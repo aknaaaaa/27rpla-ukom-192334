@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
+        /* ... CSS Anda yang sudah ada ... */
         :root { 
             --text:#2c2c2c; 
             --muted:#9a9a9a; 
@@ -124,6 +125,17 @@
             border-radius:10px;
             font-size:13px;
         }
+        .status-filter{
+            padding:10px 12px;
+            border:1px solid #cfcfcf;
+            background:#fff;
+            border-radius:10px;
+            font-size:13px;
+            min-width:180px;
+            box-shadow:0 8px 16px rgba(0,0,0,0.04);
+            cursor:pointer;
+        }
+
         .table-wrap{
             background:#fff;
             border:1px solid #c9c9c9;
@@ -244,12 +256,69 @@
             .filters input,.filters select{
                 width:100%;
             }
+
             .table-wrap{
                 overflow-x:auto;
             }
             table{
                 min-width:720px;
             }
+        }
+        /* Gaya untuk Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 0 0;
+            gap: 8px;
+        }
+        .pagination-button {
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            background-color: #f8f8f8;
+            color: var(--text);
+            cursor: pointer;
+            border-radius: 8px;
+            font-family: 'Aboreto', sans-serif;
+            font-size: 13px;
+        }
+        .pagination-button:hover:not(.active):not(:disabled) {
+            background-color: #eee;
+        }
+        .pagination-button.active {
+            background-color: #2d2b2b;
+            color: #fff;
+            border-color: #2d2b2b;
+            font-weight: 600;
+        }
+        .pagination-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        /* Penempatan kontainer pagination di luar table-wrap */
+        .main > .pagination-container {
+            margin-top: 15px;
+        }
+        .btn-link-detail{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:6px 10px;
+            border-radius:8px;
+            border:1px solid #cfcfcf;
+            text-decoration:none;
+            color:#2c2c2c;
+            background:#fff;
+            font-weight:600;
+            font-size:12px;
+            transition:all 0.2s ease;
+            box-shadow:0 6px 12px rgba(0,0,0,0.06);
+        }
+        .btn-link-detail:hover{
+            background:#2c2c2c;
+            color:#fff;
+            border-color:#2c2c2c;
+            transform:translateY(-1px);
         }
     </style>
 </head>
@@ -260,32 +329,45 @@
 
         <main class="main">
             <div class="top-line"></div>
-            <!--Kumpulan Card pemesanan-->
             <div class="cards">
-                <!--Kumpulan Card pemesanan-->
                 <div class="card">
                     <h4>Total Pemesanan</h4>
                     <div class="value">{{ $metrics['total'] }}</div>
                 </div>
-                <!--Kumpulan Card pemesanan sesuai dengan pembayaran yang berhasil-->
                 <div class="card">
                     <h4>Total Ditempati</h4>
                     <div class="value">{{ $metrics['occupied'] }}</div>
                 </div>
-                <!--Kumpulan Card pemesanan sesuai dengan pembayaran yang pending/menunggu-->
                 <div class="card">
                     <h4>Total Menunggu</h4>
                     <div class="value">{{ $metrics['pending'] }}</div>
                 </div>
-                <!--Kumpulan Card pemesanan sesuai dengan pembayaran yang dibatalkan/gagal-->
                 <div class="card">
                     <h4>Total Dibatalkan</h4>
                     <div class="value">{{ $metrics['canceled'] }}</div>
                 </div>
             </div>
-            <!--Table untuk data pesanan -->
+            
+            <div class="filters">
+                <input 
+                    style="font-family: Aboreto;" 
+                    type="text" 
+                    id="bookingSearch"
+                    placeholder="Cari ID Pesanan / Nama / Email" 
+                    aria-label="Cari" 
+                    oninput="setPage(1); filterOrders();"
+                >
+
+                <select id="statusFilter" onchange="setPage(1); filterOrders();" aria-label="Filter status" class="status-filter">
+                    <option value="">Semua Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+            
             <div class="table-wrap">
-                <table>
+                <table id="ordersTable">
                     <thead>
                         <tr>
                             <th>No Pesanan</th>
@@ -295,43 +377,252 @@
                             <th>Status</th>
                             <th>Kamar</th>
                             <th>Tanggal</th>
-                            <th></th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($orders as $order)
-                            <tr>
+                            @php
+                                $status = strtolower($order->status_label);
+                                $class = [
+                                    'pending' => 'status-pending',
+                                    'occupying' => 'status-occupying',
+                                    'canceled' => 'status-canceled',
+                                    'completed' => 'status-completed',
+                                ][$status] ?? 'status-pending';
+                                
+                                // Format tanggal Check-in untuk perbandingan di JS (YYYY-MM-DD)
+                                $checkInDateSort = optional($order->check_in)->format('Y-m-d') ?? '';
+                            @endphp
+                            <tr 
+                                data-booking-code="{{ strtolower($order->booking_code) }}"
+                                data-customer-name="{{ strtolower($order->user->nama_user ?? '') }}"
+                                data-customer-email="{{ strtolower($order->user->email ?? '') }}"
+                                data-status="{{ $status }}"
+                            >
                                 <td>#{{ $order->booking_code }}</td>
                                 <td>{{ $order->user->nama_user ?? '-' }}</td>
                                 <td>{{ $order->user->email ?? '-' }}</td>
                                 <td>{{ $order->user->phone_number ?? '-' }}</td>
                                 <td>
-                                    @php
-                                        $status = strtolower($order->status_label);
-                                        $class = [
-                                            'pending' => 'status-pending',
-                                            'occupying' => 'status-occupying',
-                                            'canceled' => 'status-canceled',
-                                            'completed' => 'status-completed',
-                                        ][$status] ?? 'status-pending';
-                                    @endphp
                                     <span class="status-badge {{ $class }}">{{ strtoupper($order->status_label) }}</span>
                                 </td>
                                 <td>{{ $order->kamar->nama_kamar ?? '-' }}</td>
                                 <td>{{ optional($order->check_in)->translatedFormat('d M Y') }} - {{ optional($order->check_out)->translatedFormat('d M Y') }}</td>
-                                <td class="ellipsis">...</td>
+                                <td>
+                                    <a href="{{ route('admin.orders.show', $order->booking_code) }}" class="btn-link-detail" title="Lihat detail pesanan">
+                                        <i class="bi bi-receipt"></i> Detail
+                                    </a>
+                                </td>
                             </tr>
                         @empty
-                            <tr>
+                            <tr id="noDataRowDefault" style="display:none;">
                                 <td colspan="8" style="text-align:center;color:#888;">Belum ada data pemesanan.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+            <div class="pagination-container" id="paginationContainer">
+                </div>
         </main>
     </div>
     <script>
+        // --- Variabel Global untuk Pagination ---
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        /**
+         * Mengatur halaman saat ini dan memicu pembaruan tampilan
+         * @param {number} page - Nomor halaman yang ingin dituju
+         * @param {Array<HTMLElement>} filteredRows - Daftar baris yang sudah difilter (opsional, jika dipanggil dari setupPagination)
+         */
+        const setPage = (page, filteredRows) => {
+            const totalPages = Math.ceil((filteredRows ? filteredRows.length : 0) / rowsPerPage);
+            
+            // Batasi nomor halaman
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+            
+            currentPage = page;
+
+            // Panggil displayList jika dipanggil dari tombol pagination
+            if (filteredRows) {
+                 displayList(filteredRows, rowsPerPage, currentPage);
+            }
+            
+            // Panggil filterOrders jika dipanggil dari filter/pencarian
+            if (!filteredRows) {
+                filterOrders(true); // Memanggil filterOrders tanpa mereset halaman
+            }
+
+            // Update status tombol pagination
+            setupPagination(filteredRows);
+        }
+
+        /**
+         * Menampilkan baris data yang sesuai dengan halaman saat ini.
+         * @param {Array<HTMLElement>} list - Daftar baris yang sudah difilter
+         * @param {number} rowsPer_Page - Jumlah baris per halaman
+         * @param {number} page - Halaman saat ini
+         */
+        const displayList = (list, rowsPer_Page, page) => {
+            const start = rowsPer_Page * (page - 1);
+            const end = start + rowsPer_Page;
+            
+            list.forEach((row, index) => {
+                // Sembunyikan semua baris
+                row.style.display = 'none';
+                
+                // Tampilkan hanya baris dalam rentang halaman saat ini
+                if (index >= start && index < end) {
+                    row.style.display = '';
+                }
+            });
+        }
+        
+        /**
+         * Membuat dan menampilkan tombol pagination.
+         * @param {Array<HTMLElement>} list - Daftar baris yang sudah difilter
+         */
+        const setupPagination = (list) => {
+            const paginationContainer = document.getElementById('paginationContainer');
+            paginationContainer.innerHTML = '';
+            
+            const totalPages = Math.ceil(list.length / rowsPerPage);
+            
+            if (totalPages <= 1) {
+                paginationContainer.style.display = 'none';
+                return;
+            }
+
+            paginationContainer.style.display = 'flex';
+            
+            // Tombol Previous
+            const prevButton = document.createElement('button');
+            prevButton.innerText = 'Prev';
+            prevButton.classList.add('pagination-button');
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => setPage(currentPage - 1, list);
+            paginationContainer.appendChild(prevButton);
+
+            // Tombol Halaman
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.classList.add('pagination-button');
+                if (i === currentPage) {
+                    button.classList.add('active');
+                }
+                button.onclick = () => setPage(i, list);
+                paginationContainer.appendChild(button);
+            }
+
+            // Tombol Next
+            const nextButton = document.createElement('button');
+            nextButton.innerText = 'Next';
+            nextButton.classList.add('pagination-button');
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => setPage(currentPage + 1, list);
+            paginationContainer.appendChild(nextButton);
+        }
+
+
+        /**
+         * Fungsi utama untuk filter dan Pagination.
+         * @param {boolean} keepPage - Jika true, tidak mereset currentPage ke 1.
+         */
+        const filterOrders = (keepPage = false) => {
+            const keyword = document.getElementById('bookingSearch').value.toLowerCase().trim();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const allRows = Array.from(document.querySelectorAll('#ordersTable tbody tr'));
+            
+            // Ambil pesan default "Belum ada data"
+            const noDataRow = document.getElementById('noDataRowDefault');
+
+            // --- 1. Filter Data (Menentukan baris yang cocok) ---
+            const filteredRows = allRows.filter(row => {
+                // Lewati baris "Belum ada data pemesanan"
+                if (row === noDataRow) return false;
+
+                const bookingCode = row.getAttribute('data-booking-code') || '';
+                const customerName = row.getAttribute('data-customer-name') || '';
+                const customerEmail = row.getAttribute('data-customer-email') || '';
+                const status = row.getAttribute('data-status') || '';
+                
+                let isMatch = true;
+
+                // 1.1 Filter Kata Kunci
+                if (keyword) {
+                    const isSearchingForId = keyword.startsWith('#') || keyword.startsWith('book-');
+                    let isKeywordMatch = false;
+
+                    if (isSearchingForId) {
+                        const cleanedKeyword = keyword.replace('#', ''); 
+                        isKeywordMatch = bookingCode.includes(cleanedKeyword);
+                    } else {
+                        const isCodeMatch = bookingCode.includes(keyword);
+                        const isNameMatch = customerName.includes(keyword);
+                        const isEmailMatch = customerEmail.includes(keyword);
+                        isKeywordMatch = isCodeMatch || isNameMatch || isEmailMatch;
+                    }
+                    
+                    if (!isKeywordMatch) {
+                        isMatch = false;
+                    }
+                }
+
+                // 1.2 Filter Status (Completed / Pending / Failed)
+                if (isMatch && statusFilter) {
+                    if (statusFilter === 'failed') {
+                        if (status !== 'canceled') {
+                            isMatch = false;
+                        }
+                    } else if (status !== statusFilter) {
+                        isMatch = false;
+                    }
+                }
+
+                // Kembalikan true/false untuk menentukan apakah baris ini cocok
+                return isMatch;
+            });
+            
+            // --- 2. Tampilkan Pagination dan List ---
+            
+            // Reset halaman ke-1 jika filter berubah (kecuali jika keepPage=true)
+            if (!keepPage) {
+                currentPage = 1;
+            } else {
+                // Pastikan current page tidak melebihi batas setelah filter
+                const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                } else if (totalPages === 0) {
+                    currentPage = 1;
+                }
+            }
+
+            // Tampilkan list sesuai halaman saat ini
+            displayList(filteredRows, rowsPerPage, currentPage);
+            
+            // Buat tombol pagination
+            setupPagination(filteredRows);
+            
+            // --- 3. Kelola Pesan "Tidak Ada Data" ---
+            if (noDataRow) {
+                if (filteredRows.length === 0 && allRows.length > 0) {
+                    noDataRow.querySelector('td').textContent = "Tidak ada data pemesanan yang cocok dengan filter.";
+                    noDataRow.style.display = '';
+                } else if (allRows.length === 0) {
+                    noDataRow.querySelector('td').textContent = "Belum ada data pemesanan.";
+                    noDataRow.style.display = '';
+                } else {
+                    noDataRow.style.display = 'none';
+                }
+            }
+        };
+
+
         document.addEventListener('DOMContentLoaded', function () {
             const toggle = document.getElementById('sidebarToggle');
             const sidebar = document.querySelector('.sidebar');
@@ -346,6 +637,9 @@
                     sidebar.classList.remove('is-open');
                 }
             });
+            
+            // Panggil filterOrders() saat halaman dimuat
+            filterOrders();
         });
     </script>
 </body>
