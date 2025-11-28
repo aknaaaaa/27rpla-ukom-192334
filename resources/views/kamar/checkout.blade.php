@@ -410,6 +410,7 @@
         const checkInInput = document.getElementById('checkInInput');
         const checkOutInput = document.getElementById('checkOutInput');
         const otherGuestSwitch = document.getElementById('otherGuestSwitch');
+        const vaSelect = document.getElementById('vaSelect');
         const addonNodes = Array.from(document.querySelectorAll('[data-addon-id]'));
 
         const toInputDate = (dateObj) => dateObj.toISOString().split('T')[0];
@@ -612,10 +613,35 @@
             if (vaRadio) vaRadio.checked = true;
         });
 
+        const toggleLoading = (isLoading) => {
+            if (!payBtn) return;
+            payBtn.disabled = isLoading;
+            payBtn.textContent = isLoading ? 'Memproses...' : 'Bayar Sekarang';
+        };
+
         const setResult = (html, variant = 'info') => {
             if (!resultBox) return;
             resultBox.className = `mt-3 small alert alert-${variant}`;
             resultBox.innerHTML = html;
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        const renderApiError = (data, fallback = 'Gagal membuat pembayaran.') => {
+            const lines = [];
+            if (data?.message) lines.push(data.message);
+
+            const errors = data?.errors || {};
+            Object.keys(errors).forEach((key) => {
+                const val = errors[key];
+                const msg = Array.isArray(val) ? val.join(', ') : val;
+                lines.push(`${key}: ${msg}`);
+            });
+
+            if (data?.error) lines.push(`Detail: ${data.error}`);
+            if (data?.developer_hint) lines.push(`<code>${data.developer_hint}</code>`);
+
+            if (!lines.length) lines.push(fallback);
+            setResult(lines.join('<br>'), 'danger');
         };
 
         const copyVA = async (text, buttonEl) => {
@@ -791,6 +817,7 @@
                     name: item.nama || 'Kamar',
                     price: Number(item.harga || 0),
                     quantity: Number(item.quantity || 1) * nights,
+                    room_units: Number(item.quantity || 1),
                 })),
                 booking,
             };
@@ -799,6 +826,7 @@
                 name: addon.name,
                 price: Number(addon.price || 0),
                 quantity: addon.qty * (addon.perNight ? nights : 1),
+                room_units: 0,
             }));
             payload.items.push(...addonItems);
             if (orderId) {
@@ -806,7 +834,7 @@
             }
 
             setResult('Membuat transaksi ke Midtrans...', 'info');
-            payBtn.disabled = true;
+            toggleLoading(true);
 
             try {
                 const res = await fetch("{{ route('api.payments.charge') }}", {
@@ -821,8 +849,7 @@
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    const msg = data?.message || 'Gagal membuat pembayaran.';
-                    setResult(msg, 'danger');
+                    renderApiError(data);
                     return;
                 }
 
@@ -873,7 +900,7 @@
             } catch (error) {
                 setResult('Terjadi kesalahan jaringan.', 'danger');
             } finally {
-                payBtn.disabled = false;
+                toggleLoading(false);
             }
         });
     })();

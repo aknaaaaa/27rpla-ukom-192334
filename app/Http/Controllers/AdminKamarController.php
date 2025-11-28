@@ -13,16 +13,26 @@ class AdminKamarController extends Controller
     public function index()
     {
         $rooms = Kamar::with('kategoriRelasi', 'fasilitas')->latest()->get();
-        $kategoris = Kategori::all();
+        $kategoris = Kategori::orderBy('name')->get();
 
         return view('admin.rooms.index', compact('rooms', 'kategoris'));
     }
 
-    public function getFasilitas($kategoriId)
+    public function getFasilitas($kategoriId, Request $request)
     {
+        $roomId = $request->query('room_id');
+
         $fasilitas = Fasilitas::where('id_kategori', $kategoriId)
-            ->whereNull('id_kamar')
-            ->get(['id_fasilitas', 'nama_fasilitas', 'deskripsi']);
+            ->when($roomId, function ($query) use ($roomId) {
+                $query->where(function ($sub) use ($roomId) {
+                    $sub->whereNull('id_kamar')
+                        ->orWhere('id_kamar', $roomId);
+                });
+            }, function ($query) {
+                $query->whereNull('id_kamar');
+            })
+            ->orderBy('nama_fasilitas')
+            ->get(['id_fasilitas', 'nama_fasilitas', 'deskripsi', 'id_kamar']);
         
         return response()->json($fasilitas);
     }
@@ -38,11 +48,11 @@ class AdminKamarController extends Controller
             'nama_kamar' => 'required|string|max:100|unique:kamars,nama_kamar',
             'id_kategori' => 'required|exists:categories,id',
             'harga_permalam' => 'required|numeric|min:0',
-            'stok' => 'required|integer|min:1',
+            'stok' => 'required|integer|min:0',
             'kapasitas' => 'required|integer|min:1|max:10',
             'ukuran_kamar' => 'nullable|string|max:50',
             'deskripsi' => 'nullable|string',
-            'status_kamar' => 'nullable|in:Tersedia,Telah di reservasi,Maintenance',
+            'status_kamar' => 'nullable|in:Tersedia,Penuh,Maintenance,Telah di reservasi',
             'image' => 'required|image|max:4096|mimes:jpg,jpeg,png,webp',
             'fasilitas' => 'nullable|array',
             'fasilitas.*' => 'exists:fasilitas,id_fasilitas',
@@ -60,6 +70,12 @@ class AdminKamarController extends Controller
         $imageUrl = $upload['secure_url'];
 
         $kategori = Kategori::findOrFail($validated['id_kategori']);
+        $status = $validated['status_kamar'] ?? 'Tersedia';
+        if (($validated['stok'] ?? 0) <= 0 && strtolower($status) !== 'maintenance') {
+            $status = 'Penuh';
+        } elseif (($validated['stok'] ?? 0) > 0 && strtolower($status) === 'penuh') {
+            $status = 'Tersedia';
+        }
 
         $kamar = Kamar::create([
             'nama_kamar' => $validated['nama_kamar'],
@@ -70,7 +86,7 @@ class AdminKamarController extends Controller
             'kapasitas' => $validated['kapasitas'],
             'ukuran_kamar' => $validated['ukuran_kamar'] ?? null,
             'deskripsi' => $validated['deskripsi'] ?? null,
-            'status_kamar' => $validated['status_kamar'] ?? 'Tersedia',
+            'status_kamar' => $status,
             'gambar' => $imageUrl,
         ]);
 
@@ -91,11 +107,11 @@ class AdminKamarController extends Controller
             'nama_kamar' => 'required|string|max:100|unique:kamars,nama_kamar,' . $id . ',id_kamar',
             'id_kategori' => 'required|exists:categories,id',
             'harga_permalam' => 'required|numeric|min:0',
-            'stok' => 'required|integer|min:1',
+            'stok' => 'required|integer|min:0',
             'kapasitas' => 'required|integer|min:1|max:10',
             'ukuran_kamar' => 'nullable|string|max:50',
             'deskripsi' => 'nullable|string',
-            'status_kamar' => 'nullable|in:Tersedia,Telah di reservasi,Maintenance',
+            'status_kamar' => 'nullable|in:Tersedia,Penuh,Maintenance,Telah di reservasi',
             'image' => 'nullable|image|max:4096|mimes:jpg,jpeg,png,webp',
             'fasilitas' => 'nullable|array',
             'fasilitas.*' => 'exists:fasilitas,id_fasilitas',
@@ -117,17 +133,24 @@ class AdminKamarController extends Controller
         }
 
         $kategori = Kategori::findOrFail($validated['id_kategori']);
+        $status = $validated['status_kamar'] ?? $room->status_kamar;
+        $stokBaru = $validated['stok'] ?? $room->stok;
+        if ($stokBaru <= 0 && strtolower($status) !== 'maintenance') {
+            $status = 'Penuh';
+        } elseif ($stokBaru > 0 && strtolower($status) === 'penuh') {
+            $status = 'Tersedia';
+        }
 
         $room->update([
             'nama_kamar' => $validated['nama_kamar'],
             'id_kategori' => $validated['id_kategori'],
             'kategori' => $kategori->name,
             'harga_permalam' => $validated['harga_permalam'],
-            'stok' => $validated['stok'],
+            'stok' => $stokBaru,
             'kapasitas' => $validated['kapasitas'],
             'ukuran_kamar' => $validated['ukuran_kamar'] ?? null,
             'deskripsi' => $validated['deskripsi'] ?? null,
-            'status_kamar' => $validated['status_kamar'] ?? $room->status_kamar,
+            'status_kamar' => $status,
             'gambar' => $imageUrl,
         ]);
 
@@ -156,4 +179,3 @@ class AdminKamarController extends Controller
         return redirect()->route('admin.rooms.index')->with('ok', 'Kamar berhasil dihapus.');
     }
 }
-

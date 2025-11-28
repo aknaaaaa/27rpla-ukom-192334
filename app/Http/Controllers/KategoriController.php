@@ -11,14 +11,13 @@ class KategoriController extends Controller
 {
     public function index()
     {
-        $kategoris = Kategori::with('fasilitas')->latest()->get();
+        $kategoris = Kategori::with('fasilitas')->orderBy('name')->get();
         return view('admin.kategori.index', compact('kategoris'));
     }
 
     public function create()
     {
-        $kamars = Kamar::all();
-        return view('admin.kategori.create', compact('kamars'));
+        return redirect()->route('admin.kategori.index');
     }
 
     public function store(Request $request)
@@ -37,8 +36,7 @@ class KategoriController extends Controller
 
     public function edit($id)
     {
-        $kategori = Kategori::findOrFail($id);
-        return view('admin.kategori.edit', compact('kategori'));
+        return redirect()->route('admin.kategori.index')->with('edit_id', $id);
     }
 
     public function update(Request $request, $id)
@@ -109,4 +107,3 @@ class KategoriController extends Controller
         return redirect()->route('admin.kategori.index')->with('ok', 'Fasilitas berhasil dihapus.');
     }
 }
-

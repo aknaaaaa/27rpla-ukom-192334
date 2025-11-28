@@ -22,6 +22,45 @@
             background: #f9f9f9;
         }
         .dashboard-shell { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 230px;
+            background: #fff;
+            box-shadow: 8px 0 26px rgba(0,0,0,0.06);
+            padding: 28px 22px;
+            position: relative;
+            z-index: 2;
+        }
+        .brand { margin-bottom: 18px; }
+        .brand__name {
+            font-family: 'Mea Culpa', cursive;
+            font-size: 28px;
+            margin: 0;
+            line-height: 1.1;
+        }
+        .brand__address {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            letter-spacing: 0.4px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+        .menu { margin-top: 40px; display: grid; gap: 18px; padding: 0; list-style: none; }
+        .menu__item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-main);
+            text-decoration: none;
+            letter-spacing: 1px;
+            font-size: 13px;
+            text-transform: uppercase;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .menu__item:hover { color: #000; transform: translateX(4px); }
+        .menu__item.is-active { font-weight: 600; }
+        .menu__icon { font-size: 20px; width: 22px; text-align: center; }
         .main {
             flex: 1;
             position: relative;
