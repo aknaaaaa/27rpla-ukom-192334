@@ -161,7 +161,7 @@
             if(response.status === 201) {
                 // Tampilkan pesan sukses dan arahkan ke login
                 alert(response.data.message);
-                location.href = '{{ route('layouts.login') }}';
+                location.href = '{{ route('login') }}';
             }
             
         } catch (error) {
@@ -246,7 +246,7 @@
 
         <p class="muted">
             Sudah punya akun?
-            <a href="{{ route('layouts.login') }}">Masuk</a>.
+            <a href="{{ route('login') }}">Masuk</a>.
         </p>
     </form>
 </main>

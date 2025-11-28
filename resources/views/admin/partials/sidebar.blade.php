@@ -71,13 +71,13 @@ async function doLogout() {
         document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
         
         // Redirect ke login
-        window.location.href = '{{ route('layouts.login') }}';
+        window.location.href = '{{ route('login') }}';
     } catch (e) {
         console.error('Logout error:', e);
         // Force logout bahkan jika request gagal
         localStorage.removeItem('access_token');
         document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        window.location.href = '{{ route('layouts.login') }}';
+        window.location.href = '{{ route('login') }}';
     }
 }
 </script>
