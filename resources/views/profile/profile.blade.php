@@ -182,6 +182,7 @@
                                         </div>
                                     </div>
                                     <input type="file" id="avatarFileInput" accept="image/*" hidden>
+                                    <button type="button" id="removeAvatarBtn" class="btn btn-outline-secondary btn-sm mt-2 {{ $hasAvatar ? '' : 'd-none' }}">Hapus Foto</button>
                                 </div>
                                 <div>
                                     <div style="font-size: 18px; letter-spacing: 0.6px;">{{ $displayName }}</div>
@@ -252,7 +253,88 @@
 document.addEventListener('DOMContentLoaded', () => {
     const avatarTrigger = document.getElementById('avatarTrigger');
     const avatarFileInput = document.getElementById('avatarFileInput');
+    const avatarImage = document.getElementById('avatarImage');
+    const removeAvatarBtn = document.getElementById('removeAvatarBtn');
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const showToast = window.showAppToast || ((msg) => alert(msg));
+
     avatarTrigger?.addEventListener('click', () => avatarFileInput?.click());
+
+    avatarFileInput?.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 4 * 1024 * 1024) {
+            showToast('Ukuran foto maksimal 4MB.', 'danger');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        avatarTrigger?.classList.add('is-uploading');
+
+        try {
+            const res = await fetch("{{ route('profile.avatar') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: formData,
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                const msg = data?.message || 'Gagal mengunggah foto.';
+                showToast(msg, 'danger');
+                return;
+            }
+
+            const url = data.avatar_url || data.url || '';
+            if (url && avatarImage) {
+                avatarImage.src = url;
+                avatarTrigger?.classList.add('has-image');
+                removeAvatarBtn?.classList.remove('d-none');
+            }
+            showToast('Foto profil berhasil diperbarui.', 'success');
+        } catch (err) {
+            showToast('Terjadi kesalahan saat mengunggah foto.', 'danger');
+        } finally {
+            avatarTrigger?.classList.remove('is-uploading');
+            if (avatarFileInput) avatarFileInput.value = '';
+        }
+    });
+
+    removeAvatarBtn?.addEventListener('click', async () => {
+        avatarTrigger?.classList.add('is-uploading');
+        try {
+            const res = await fetch("{{ route('profile.avatar.delete') }}", {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json',
+                },
+                credentials: 'same-origin',
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                const msg = data?.message || 'Gagal menghapus foto.';
+                showToast(msg, 'danger');
+                return;
+            }
+            if (avatarImage) {
+                avatarImage.removeAttribute('src');
+            }
+            avatarTrigger?.classList.remove('has-image');
+            removeAvatarBtn?.classList.add('d-none');
+            showToast('Foto profil dihapus.', 'success');
+        } catch (err) {
+            showToast('Terjadi kesalahan saat menghapus foto.', 'danger');
+        } finally {
+            avatarTrigger?.classList.remove('is-uploading');
+        }
+    });
 
     // Render keranjang dari localStorage pada tab cart
     const cartPanel = document.getElementById('cartPanel');

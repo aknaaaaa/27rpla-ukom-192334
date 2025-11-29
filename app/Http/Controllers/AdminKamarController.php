@@ -35,22 +35,13 @@ class AdminKamarController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_kamar' => 'required|string|max:100|unique:kamars,nama_kamar',
-            'id_kategori' => 'required|exists:categories,id',
-            'harga_permalam' => 'required|numeric|min:0',
-            'stok' => 'required|integer|min:1',
-            'kapasitas' => 'required|integer|min:1|max:10',
-            'ukuran_kamar' => 'nullable|string|max:50',
-            'deskripsi' => 'nullable|string',
-            'status_kamar' => 'nullable|in:Tersedia,Telah di reservasi,Maintenance',
-            'image' => 'required|image|max:4096|mimes:jpg,jpeg,png,webp',
-            'fasilitas' => 'nullable|array',
-            'fasilitas.*' => 'exists:fasilitas,id_fasilitas',
-        ], [
-            'nama_kamar.unique' => 'Nama kamar sudah digunakan.',
-            'nama_kamar.required' => 'Nama kamar wajib diisi.',
-            'kapasitas.required' => 'Kapasitas kamar wajib diisi.',
-            'id_kategori.required' => 'Kategori wajib dipilih.',
+            'nama_kamar' => ['required', 'string', 'max:100'],
+            'kategori' => ['required', 'string', 'max:100'],
+            'harga_permalam' => ['required', 'numeric', 'min:0'],
+            'ukuran_kamar' => ['nullable', 'string', 'max:50'],
+            'deskripsi' => ['nullable', 'string'],
+            'status_kamar' => ['nullable', 'in:Tersedia,Telah di reservasi,Maintenance'],
+            'image' => ['required', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'],
         ]);
 
         $upload = Cloudinary::uploadApi()->upload(
@@ -63,8 +54,7 @@ class AdminKamarController extends Controller
 
         $kamar = Kamar::create([
             'nama_kamar' => $validated['nama_kamar'],
-            'id_kategori' => $validated['id_kategori'],
-            'kategori' => $kategori->name,
+            'kategori' => $validated['kategori'],
             'harga_permalam' => $validated['harga_permalam'],
             'stok' => $validated['stok'],
             'kapasitas' => $validated['kapasitas'],
@@ -88,22 +78,13 @@ class AdminKamarController extends Controller
         $room = Kamar::findOrFail($id);
 
         $validated = $request->validate([
-            'nama_kamar' => 'required|string|max:100|unique:kamars,nama_kamar,' . $id . ',id_kamar',
-            'id_kategori' => 'required|exists:categories,id',
-            'harga_permalam' => 'required|numeric|min:0',
-            'stok' => 'required|integer|min:1',
-            'kapasitas' => 'required|integer|min:1|max:10',
-            'ukuran_kamar' => 'nullable|string|max:50',
-            'deskripsi' => 'nullable|string',
-            'status_kamar' => 'nullable|in:Tersedia,Telah di reservasi,Maintenance',
-            'image' => 'nullable|image|max:4096|mimes:jpg,jpeg,png,webp',
-            'fasilitas' => 'nullable|array',
-            'fasilitas.*' => 'exists:fasilitas,id_fasilitas',
-        ], [
-            'nama_kamar.unique' => 'Nama kamar sudah digunakan.',
-            'nama_kamar.required' => 'Nama kamar wajib diisi.',
-            'id_kategori.required' => 'Kategori wajib dipilih.',
-            'kapasitas.required' => 'Kapasitas kamar wajib diisi.',
+            'nama_kamar' => ['required', 'string', 'max:100'],
+            'kategori' => ['required', 'string', 'max:100'],
+            'harga_permalam' => ['required', 'numeric', 'min:0'],
+            'ukuran_kamar' => ['nullable', 'string', 'max:50'],
+            'deskripsi' => ['nullable', 'string'],
+            'status_kamar' => ['nullable', 'in:Tersedia,Telah di reservasi,Maintenance'],
+            'image' => ['nullable', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'],
         ]);
 
         $imageUrl = $room->gambar;
@@ -120,8 +101,7 @@ class AdminKamarController extends Controller
 
         $room->update([
             'nama_kamar' => $validated['nama_kamar'],
-            'id_kategori' => $validated['id_kategori'],
-            'kategori' => $kategori->name,
+            'kategori' => $validated['kategori'],
             'harga_permalam' => $validated['harga_permalam'],
             'stok' => $validated['stok'],
             'kapasitas' => $validated['kapasitas'],

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('kamars', function (Blueprint $table) {
             if (!Schema::hasColumn('kamars', 'kapasitas')) {
-                $table->integer('kapasitas')->default(2)->after('stok')->comment('Jumlah orang yang bisa menginap');
+                $table->integer('kapasitas')->default(2)->comment('Jumlah orang yang bisa menginap');
             }
         });
     }

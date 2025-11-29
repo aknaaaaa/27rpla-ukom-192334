@@ -1,4 +1,4 @@
-@extends('layouts.app')
+87ui@extends('layouts.app')
 
 @section('title', 'Pembayaran Berhasil')
 

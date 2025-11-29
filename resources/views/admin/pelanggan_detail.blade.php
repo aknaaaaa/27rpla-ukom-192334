@@ -7,8 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mea+Culpa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
-        /* [KOMENTAR CSS DIMASUKKAN DI BLOK <style> INI] */
-        /* ... (CSS di sini) ... */
         :root { 
             --text:#2c2c2c; 
             --muted:#9a9a9a; 
@@ -267,20 +265,15 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const toggle = document.getElementById('sidebarToggle'); // Tombol hamburger
-            const sidebar = document.querySelector('.sidebar'); // Elemen sidebar
-            
-            // Event listener untuk tombol hamburger: membuka/menutup sidebar
+            const toggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
             toggle?.addEventListener('click', function (e) {
                 e.stopPropagation();
                 sidebar?.classList.toggle('is-open');
             });
-            
-            // Event listener untuk menutup sidebar ketika mengklik di luar sidebar (hanya di mobile)
             document.addEventListener('click', function (e) {
-                if (window.innerWidth > 960) return; // Nonaktif di desktop
+                if (window.innerWidth > 960) return;
                 if (!sidebar?.classList.contains('is-open')) return;
-                // Cek apakah klik terjadi di luar sidebar dan di luar tombol toggle
                 if (!sidebar.contains(e.target) && e.target !== toggle) {
                     sidebar.classList.remove('is-open');
                 }
