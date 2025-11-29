@@ -198,7 +198,7 @@
                     }
                     const ok = window.requireAuth ? await window.requireAuth({}) : true;
                     if (!ok) return;
-                    window.location.href = "{{ route('checkout') }}";
+                    window.location.href = "{{ url('/profile?tab=cart') }}";
                 });
             }
 
