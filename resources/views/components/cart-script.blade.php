@@ -37,18 +37,24 @@
                 return;
             }
             const items = getCart();
+            const stok = Number(payload.stok || 0);
             const exists = items.find((item) => item.id === payload.id);
+            const incomingQty = parsePrice(payload.quantity) || 1;
+
             if (exists) {
-                exists.quantity = parsePrice(exists.quantity) || 1;
-                exists.quantity += 1;
+                const next = Math.max(1, exists.quantity + incomingQty);
+                exists.quantity = stok > 0 ? Math.min(next, stok) : next;
+                exists.stok = stok || exists.stok;
                 saveCart(items);
                 window.showAppToast?.('Jumlah kamar ditambah di keranjang.', 'info');
                 return;
             }
 
+            const qty = stok > 0 ? Math.min(incomingQty, stok) : incomingQty;
             items.push({
                 ...payload,
-                quantity: parsePrice(payload.quantity) || 1,
+                stok: stok || undefined,
+                quantity: qty,
             });
             saveCart(items);
             window.showAppToast?.('Kamar ditambahkan ke keranjang.', 'success');
@@ -61,12 +67,15 @@
             buttons.forEach((btn) => {
                 btn.addEventListener('click', async (event) => {
                     event.preventDefault();
+                    const qtyInput = btn.closest('.card-room-modern')?.querySelector('[data-qty-input]');
+                    const quantityVal = qtyInput ? Number(qtyInput.value || 1) : 1;
                     const payload = {
                         id: Number(btn.getAttribute('data-id')),
                         nama: btn.getAttribute('data-nama') || 'Kamar',
                         harga: parsePrice(btn.getAttribute('data-price') || 0),
                         status: btn.getAttribute('data-status') || 'Tersedia',
-                        quantity: 1,
+                        quantity: quantityVal,
+                        stok: Number(btn.getAttribute('data-stok') || 0),
                         gambar: btn.getAttribute('data-gambar') || undefined,
                     };
 

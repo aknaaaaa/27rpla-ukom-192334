@@ -18,10 +18,10 @@ Route::get('/kamar/{id}', [KamarController::class, 'show'])->name('kamar.show');
 
 // ==================== AUTH ROUTES ====================
 Route::middleware('guest')->group(function () {
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('layouts.register');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
     
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('layouts.login');
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('auth.api');
 });
 

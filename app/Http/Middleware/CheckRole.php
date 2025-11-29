@@ -19,7 +19,7 @@ class CheckRole
 
         // Jika user tidak authenticated
         if (!$user) {
-            return redirect()->route('layouts.login')->with('error', 'Silakan login terlebih dahulu.');
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
         // Convert role parameter to role ID

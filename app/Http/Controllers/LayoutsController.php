@@ -77,7 +77,7 @@ class LayoutsController extends Controller
     public function adminDashboard()
     {
         $totalOrders = Pemesanan::count();
-        $occupiedRooms = Kamar::where('status_kamar', 'Telah di reservasi')->count();
+        $occupiedRooms = Kamar::whereIn('status_kamar', ['Telah di reservasi', 'Penuh'])->count();
         $availableRooms = Kamar::where('status_kamar', 'Tersedia')->count();
         $maintenanceRooms = Kamar::where('status_kamar', 'Maintenance')->count();
         $totalRevenue = Pembayaran::sum('total');

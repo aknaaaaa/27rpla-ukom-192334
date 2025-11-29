@@ -233,7 +233,7 @@
 
         <p class="muted">
             Belum punya akun?
-            <a href="{{ route('layouts.register') }}">Daftar</a>.
+            <a href="{{ route('register') }}">Daftar</a>.
         </p>
     </form>
 </main>

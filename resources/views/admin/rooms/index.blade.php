@@ -1,853 +1,450 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Kamar - D'Kasuari</title>
-    <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Mea+Culpa&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+@php $active = 'rooms'; @endphp
+@extends('admin.layouts.admin')
 
-    <style>
-        :root {
-            --text-main: #2c2c2c;
-            --muted: #9a9a9a;
-            --badge-bg: #d9d9d9;
-            --shadow: 0 14px 22px rgba(0,0,0,0.08);
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Aboreto', sans-serif;
-            color: var(--text-main);
-            background: #f9f9f9;
-        }
-        .dashboard-shell { display: flex; min-height: 100vh; }
-        .sidebar {
-            width: 230px;
-            background: #fff;
-            box-shadow: 8px 0 26px rgba(0,0,0,0.06);
-            padding: 28px 22px;
-            position: relative;
-            z-index: 2;
-            transition: transform 0.25s ease;
-        }
-        .brand { margin-bottom: 18px; }
-        .brand__name {
-            font-family: 'Mea Culpa', cursive;
-            font-size: 28px;
-            margin: 0;
-            line-height: 1.1;
-        }
-        .brand__address {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            letter-spacing: 0.4px;
-            color: var(--muted);
-            text-transform: uppercase;
-        }
-        .menu { margin-top: 40px; display: grid; gap: 18px; }
-        .menu__item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-main);
-            text-decoration: none;
-            letter-spacing: 1px;
-            font-size: 13px;
-            text-transform: uppercase;
-            transition: color 0.2s ease, transform 0.2s ease;
-        }
-        .menu__item:hover { color: #000; transform: translateX(4px); }
-        .menu__item.is-active { font-weight: 600; }
-        .menu__icon { font-size: 20px; width: 22px; text-align: center; }
-        .main {
-            flex: 1;
-            position: relative;
-            padding: 20px 34px 40px;
-            overflow: hidden;
-            background: #fcfcfc;
-        }
-        .main::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                repeating-linear-gradient(120deg, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 22px),
-                repeating-linear-gradient(60deg, rgba(0,0,0,0.035) 0, rgba(0,0,0,0.035) 1px, transparent 1px, transparent 26px);
-            opacity: 0.35;
-            pointer-events: none;
-        }
-        .content { position: relative; z-index: 1; }
-        .top-line { border-bottom: 1px solid #e0e0e0; margin: 8px 0 20px; }
-        .modal {
-            position: fixed;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.35);
-            z-index: 30;
-            padding: 16px;
-            font-family: 'Aboreto', sans-serif;
-            animation: fadeIn 0.2s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal.is-open { display: flex; }
-        .form-card{
-            background: #fff;
-            border: 1px solid #d8d8d8;
-            border-radius: 14px;
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-            width: min(720px, 100%);
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .form-grid{
-            display: grid;
-            gap: 16px;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            margin: 16px 0;
-        }
-        .field {
-            display: flex;
-            flex-direction: column;
-        }
-        .field label{
-            display: block;
-            font-size: 12px;
-            letter-spacing: 0.6px;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-main);
-        }
-        .field input,
-        .field textarea,
-        .field select{
-            width: 100%;
-            border: 1px solid #d5d5d5;
-            background: #f8f8f8;
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 13px;
-            font-family: 'Aboreto', sans-serif;
-            transition: border-color 0.2s ease, background 0.2s ease;
-        }
-        .field input:focus,
-        .field textarea:focus,
-        .field select:focus{
-            outline: none;
-            border-color: #2c2c2c;
-            background: #fff;
-        }
-        .field textarea{ min-height: 80px; resize: vertical; }
-        .actions-inline{
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid #e5e5e5;
-        }
-        .btn-new {
-            display: inline-block;
-            padding: 10px 18px;
-            background: #2d2b2b;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            letter-spacing: 0.5px;
-            font-size: 13px;
-            font-family: 'Aboreto', sans-serif;
-        }
-        .tutup-btn {
-            background: #999;
-            color: white;
-            transition: 0.3s ease;
-        }
-        .tutup-btn:hover {
-            background: #777;
-            cursor: pointer;
-        }
-        .rooms {
-            display: grid;
-            gap: 14px;
-        }
-        .room-card {
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 20px;
-            background: #fff;
-            border: 1px solid #c9c9c9;
-            border-radius: 14px;
-            padding: 16px;
-            box-shadow: var(--shadow);
-        }
-        .room-card img {
-            width: 100%;
-            height: 210px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-        .room-body {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        .room-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 10px;
-        }
-        .room-title { font-size: 24px; margin: 0; letter-spacing: 0.8px; }
-        .room-count { font-size: 12px; letter-spacing: 0.7px; text-align: right; }
-        .meta {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 14px;
-            margin-bottom: 12px;
-        }
-        .meta-block { font-size: 12px; letter-spacing: 0.6px; }
-        .meta-block h5 {
-            margin: 0 0 6px;
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-        .meta-item i { font-size: 14px; }
-        .badge-muted {
-            display: inline-block;
-            background: var(--badge-bg);
-            padding: 4px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            letter-spacing: 0.5px;
-        }
-        .divider {
-            border-top: 1px solid #cfcfcf;
-            margin: 6px 0 10px;
-            max-width: 260px;
-        }
-        .status-price {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .status-badges {
-            display: flex;
-            gap: 8px;
-        }
-        .price {
-            font-size: 20px;
-            letter-spacing: 1px;
-            text-align: right;
-        }
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-top: auto;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            align-items: center;
-        }
-        .btn-pill {
-            flex: 0 0 auto;
-            min-width: 120px;
-            padding: 10px 14px;
-            background: #2d2b2b;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            letter-spacing: 0.6px;
-            font-size: 13px;
-            font-family: 'Aboreto', sans-serif;
-            text-decoration: none;
-            display: inline-flex;
-            justify-content: center;
-        }
-        .confirm-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.25);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            z-index: 40;
-        }
-        .confirm-backdrop.is-open { display: flex; }
-        .confirm-card {
-            background: #fff;
-            border-radius: 14px;
-            padding: 18px 20px;
-            width: min(320px, 100%);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.16);
-            text-align: center;
-            border: 1px solid #dcdcdc;
-            font-family: 'Aboreto', sans-serif;
-        }
-        .confirm-card h4 {
-            margin: 0 0 12px;
-            font-size: 14px;
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-        .confirm-divider {
-            height: 1px;
-            background: #c1c1c1;
-            margin: 10px 0 16px;
-        }
-        .confirm-btn {
-            background: #2d2b2b;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            letter-spacing: 0.8px;
-            cursor: pointer;
-            width: 100%;
-        }
-        .page-loader {
-            position: fixed;
-            inset: 0;
-            background: rgba(255,255,255,0.75);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(2px);
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .2s ease;
-        }
-        .page-loader.is-visible {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .loader-spinner {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 6px solid #e1e1e1;
-            border-top-color: #2c2c2c;
-            animation: spin 0.9s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .flash-stack {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: grid;
-            gap: 10px;
-            z-index: 120;
-        }
-        .flash {
-            min-width: 260px;
-            max-width: 360px;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid #b7e4c7;
-            background: #d8f3dc;
-            color: #1b4332;
-            box-shadow: 0 10px 22px rgba(0,0,0,0.12);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            letter-spacing: 0.4px;
-        }
-        .flash button {
-            background: transparent;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            font-size: 16px;
-            line-height: 1;
-        }
-        .hamburger {
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            border: 1px solid #cfcfcf;
-            background: #fff;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            z-index: 120;
-            box-shadow: 0 10px 16px rgba(0,0,0,0.08);
-            cursor: pointer;
-        }
-        @media (max-width: 960px) {
-            .dashboard-shell { flex-direction: column; }
-            .sidebar {
-                position: fixed;
-                inset: 0 auto 0 0;
-                width: 250px;
-                transform: translateX(-100%);
-                box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-                background: #fff;
-                z-index: 110;
-                padding-top: 72px;
-            }
-            .sidebar.is-open { transform: translateX(0); }
-            .sidebar .menu { grid-template-columns: 1fr; }
-            .main { padding-left: 16px; padding-right: 16px; }
-            .hamburger { display: inline-flex; }
-            .room-card { grid-template-columns: 1fr; }
-            .room-head { flex-direction: column; align-items: flex-start; }
-            .status-price { flex-direction: column; align-items: flex-start; }
-            .price { text-align: left; }
-        }
-        @media (max-width: 650px) {
-            .main { padding: 18px; }
-            .actions { width: 100%; justify-content: stretch; }
-            .btn-pill { flex: 1 1 45%; min-width: 0; }
-        }
-        @media (max-width: 960px) {
-            .dashboard-shell { flex-direction: column; }
-            .sidebar { width: 100%; box-shadow: 0 6px 16px rgba(0,0,0,0.05); }
-            .room-card { grid-template-columns: 1fr; }
-            .room-head { flex-direction: column; align-items: flex-start; }
-            .status-price { flex-direction: column; align-items: flex-start; }
-            .price { text-align: left; }
-        }
-    </style>
-</head>
-<body>
+@section('title', 'Kelola Kamar')
+
+@section('extra-css')
+<style>
+    .page-head {
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:14px;
+        margin-bottom:16px;
+    }
+    .eyebrow { text-transform: uppercase; letter-spacing: 0.26em; font-size: 11px; color:#7a7a7a; margin:0 0 6px 0; }
+    .muted { color:#7b7b7b; margin:0; }
+    .btn-primary {
+        background: linear-gradient(120deg, #0f172a, #1f2937);
+        color: #fff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 10px;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        box-shadow: 0 12px 26px rgba(0,0,0,0.16);
+    }
+    .btn-ghost, .btn-danger {
+        border: 1px solid #d7d7d7;
+        background: #fff;
+        color: #222;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        letter-spacing: 0.4px;
+    }
+    .btn-danger { color:#c53030; border-color:#f1c7c7; background:#fff7f7; }
+    .room-grid {
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap:14px;
+    }
+    .room-card {
+        background:#fff;
+        border:1px solid #e3e3e3;
+        border-radius:14px;
+        overflow:hidden;
+        box-shadow:0 14px 26px rgba(0,0,0,0.06);
+        display:flex;
+        flex-direction:column;
+    }
+    .room-media {
+        position:relative;
+        height:190px;
+        background:#f6f6f6;
+    }
+    .room-media img {
+        width:100%;
+        height:100%;
+        object-fit:cover;
+    }
+    .status-chip, .stock-chip {
+        position:absolute;
+        top:10px;
+        right:10px;
+        background:rgba(0,0,0,0.7);
+        color:#fff;
+        padding:6px 10px;
+        border-radius:999px;
+        font-size:12px;
+        letter-spacing:0.3px;
+    }
+    .stock-chip {
+        top:auto;
+        bottom:10px;
+        right:10px;
+        background:rgba(255,255,255,0.9);
+        color:#111;
+        border:1px solid #e2e2e2;
+    }
+    .room-body { padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .room-title { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .room-title h3 { margin:0; letter-spacing:0.6px; }
+    .price { font-weight:700; letter-spacing:0.4px; }
+    .meta { display:flex; flex-wrap:wrap; gap:8px; font-size:13px; color:#4b5563; }
+    .chip { background:#111; color:#fff; border-radius:999px; padding:6px 10px; font-size:11px; letter-spacing:0.4px; }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .card-actions { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin-top:6px; }
+    .alert { border-radius:10px; padding:10px 12px; margin-bottom:12px; }
+    .alert.success { background:#e7f8ef; color:#196038; border:1px solid #c1e7d0; }
+    .alert.error { background:#fdecea; color:#b00020; border:1px solid #fac7c1; }
+    .modal {
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,0.4);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        padding:16px;
+        z-index:60;
+    }
+    .modal.is-open { display:flex; }
+    .modal-card {
+        width:min(900px, 100%);
+        background:#fff;
+        border-radius:14px;
+        padding:18px;
+        box-shadow:0 22px 42px rgba(0,0,0,0.18);
+        border:1px solid #e3e3e3;
+        max-height:90vh;
+        overflow-y:auto;
+    }
+    .form-grid {
+        display:grid;
+        gap:12px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    .form-group { display:flex; flex-direction:column; gap:6px; }
+    .form-group label { font-size:12px; letter-spacing:0.5px; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width:100%;
+        border:1px solid #d6d6d6;
+        border-radius:8px;
+        padding:10px 12px;
+        background:#fafafa;
+    }
+    .form-group textarea { min-height:100px; resize:vertical; }
+    .fasilitas-grid {
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap:8px;
+    }
+    .fasilitas-item {
+        border:1px solid #e1e1e1;
+        border-radius:10px;
+        padding:8px 10px;
+        display:flex;
+        gap:8px;
+        align-items:flex-start;
+        background:#fafafa;
+    }
+    .fasilitas-item:hover { border-color:#0f172a; }
+    @media (max-width: 640px) { .room-title { flex-direction:column; } }
+</style>
+@endsection
+
+@section('content')
+    <div class="page-head">
+        <div>
+            <p class="eyebrow">Inventori</p>
+            <h1 style="margin:0;">Manajemen Kamar</h1>
+            <p class="muted">Pastikan kategori, kapasitas, dan fasilitas sesuai sebelum dipublikasikan.</p>
+        </div>
+        <button class="btn-primary" type="button" onclick="openRoomModal('create')">Tambah kamar</button>
+    </div>
+
     @if(session('ok'))
-        <div class="flash-stack" id="flashStack">
-            <div class="flash">
-                <span>{{ session('ok') }}</span>
-                <button type="button" aria-label="Tutup notifikasi" onclick="this.closest('.flash')?.remove()">&times;</button>
-            </div>
+        <div class="alert success">{{ session('ok') }}</div>
+    @endif
+    @if ($errors->any())
+        <div class="alert error">
+            <ul style="margin:0; padding-left:16px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
-    <button class="hamburger" id="sidebarToggle" aria-label="Toggle menu"><i class="bi bi-list"></i></button>
-    <div class="dashboard-shell">
-        @include('admin.partials.sidebar', ['active' => 'rooms'])
 
-        <main class="main">
-            <div class="content">
-                <div class="top-line"></div>
-                @if ($errors->any())
-                    <div style="background:#fde2e4;color:#b00020;padding:10px 12px;border-radius:8px;border:1px solid #f8d7da;margin-bottom:12px;">
-                        <ul style="margin:0;padding-left:18px;">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <div style="text-align:right; margin-bottom:12px;">
-                    <button class="btn-new" type="button" onclick="openModal()">Buat kamar baru</button>
+    <div class="room-grid">
+        @forelse($rooms as $room)
+            @php
+                $status = strtolower($room->status_kamar ?? 'Tersedia');
+                $statusLabel = $room->status_kamar ?? 'Tersedia';
+                $statusColor = $status === 'maintenance' ? '#f59e0b' : ($status === 'penuh' || $status === 'telah di reservasi' ? '#dc2626' : '#16a34a');
+            @endphp
+            <article class="room-card">
+                <div class="room-media">
+                    <img src="{{ $room->gambar ?? asset('images/default.jpg') }}"
+                         alt="{{ $room->nama_kamar }}"
+                         onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';">
+                    <span class="status-chip" style="background: {{ $statusColor }};">{{ $statusLabel }}</span>
+                    <span class="stock-chip">Stok: {{ $room->stok ?? 0 }}</span>
                 </div>
-
-                <div class="rooms">
-                    @forelse($rooms as $room)
-                        <div class="room-card">
-                            <div>
-                                <img src="{{ $room->gambar ?? asset('images/discover%20(1).jpg') }}"
-                                     alt="{{ $room->nama_kamar }}"
-                                     onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';">
-                            </div>
-                            <div class="room-body">
-                                <div class="room-head">
-                                    <h3 class="room-title">{{ strtoupper($room->nama_kamar) }}</h3>
-                                    <div class="room-count">
-                                        <div>Status: {{ $room->status_kamar ?? 'Tersedia' }}</div>
-                                        <div style="font-size: 12px; margin-top: 4px; color: #666;">Stok: <strong>{{ $room->stok ?? 0 }}</strong> kamar</div>
-                                    </div>
-                                </div>
-
-                                <div class="meta">
-                                <div class="meta-block">
-                                    <h5>Kategori</h5>
-                                    <div class="divider"></div>
-                                    <div class="meta-item"><i class="bi bi-tags"></i> {{ $room->kategoriRelasi->name ?? $room->kategori ?? 'Standar' }}</div>
-                                    <div class="meta-item"><i class="bi bi-square"></i> {{ $room->ukuran_kamar ?? '-' }}</div>
-                                    <div class="meta-item"><i class="bi bi-people"></i> Kapasitas: <strong>{{ $room->kapasitas ?? 2 }} orang</strong></div>
-                                </div>
-                                    <div class="meta-block">
-                                        <h5>Fasilitas</h5>
-                                        <div class="divider"></div>
-                                        @forelse($room->fasilitas as $f)
-                                            <div class="meta-item">
-                                                <span class="badge-muted">{{ $f->nama_fasilitas }}</span>
-                                            </div>
-                                        @empty
-                                            <div class="meta-item">
-                                                <span class="badge-muted">Tidak ada fasilitas</span>
-                                            </div>
-                                        @endforelse
-                                        <div class="meta-item"><p>DESKRIPSI:</p>{{ $room->deskripsi ?? 'Tidak ada deskripsi' }}</div>
-                                    </div>
-                                </div>
-
-                                <div class="status-price">
-                                    <div class="status-badges">
-                                        <span class="badge-muted">{{ $room->status_kamar }}</span>
-                                    </div>
-                                    <div class="price">RP{{ number_format($room->harga_permalam, 0, ',', '.') }} / MALAM</div>
-                                </div>
-
-                                <div class="actions">
-                                    <button class="btn-pill"
-                                            type="button"
-                                            data-action="{{ route('admin.rooms.update', $room->id_kamar) }}"
-                                            data-nama="{{ $room->nama_kamar }}"
-                                            data-kategori-id="{{ $room->id_kategori ?? '' }}"
-                                            data-harga="{{ $room->harga_permalam }}"
-                                            data-stok="{{ $room->stok ?? 1 }}"
-                                            data-kapasitas="{{ $room->kapasitas ?? 2 }}"
-                                            data-ukuran="{{ $room->ukuran_kamar }}"
-                                            data-status="{{ $room->status_kamar }}"
-                                            data-deskripsi="{{ e($room->deskripsi) }}"
-                                            data-img="{{ $room->gambar }}"
-                                            onclick="openEditModal(this)">
-                                        Edit
-                                    </button>
-                                    <button class="btn-pill btn-delete"
-                                        type="button"
-                                        data-room-id="{{ $room->id_kamar }}"
-                                        data-room-name="{{ $room->nama_kamar }}">
-                                        Hapus
-                                    </button>
-                                </div>
-                            </div>
+                <div class="room-body">
+                    <div class="room-title">
+                        <div>
+                            <p class="eyebrow" style="margin-bottom:4px;">{{ $room->kategoriRelasi->name ?? $room->kategori ?? 'Tanpa kategori' }}</p>
+                            <h3>{{ $room->nama_kamar }}</h3>
                         </div>
-                    @empty
-                        <p style="margin:0;">Belum ada data kamar.</p>
-                    @endforelse
+                        <div class="price">Rp{{ number_format($room->harga_permalam, 0, ',', '.') }}/malam</div>
+                    </div>
+                    <div class="meta">
+                        <span><i class="bi bi-people"></i> {{ $room->kapasitas ?? 1 }} orang</span>
+                        <span><i class="bi bi-aspect-ratio"></i> {{ $room->ukuran_kamar ?? '-' }}</span>
+                    </div>
+                    <p class="muted" style="line-height:1.5;">
+                        {{ $room->deskripsi ? \Illuminate\Support\Str::limit($room->deskripsi, 140) : 'Belum ada deskripsi.' }}
+                    </p>
+                    <div class="chips">
+                        @forelse($room->fasilitas as $f)
+                            <span class="chip">{{ $f->nama_fasilitas }}</span>
+                        @empty
+                            <span class="muted" style="font-size:12px;">Tidak ada fasilitas</span>
+                        @endforelse
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-ghost"
+                                type="button"
+                                onclick="openRoomModal('edit', this)"
+                                data-id="{{ $room->id_kamar }}"
+                                data-action="{{ route('admin.rooms.update', $room->id_kamar) }}"
+                                data-nama="{{ $room->nama_kamar }}"
+                                data-kategori-id="{{ $room->id_kategori ?? '' }}"
+                                data-harga="{{ $room->harga_permalam }}"
+                                data-stok="{{ $room->stok ?? 0 }}"
+                                data-kapasitas="{{ $room->kapasitas ?? 1 }}"
+                                data-ukuran="{{ $room->ukuran_kamar }}"
+                                data-status="{{ $room->status_kamar }}"
+                                data-deskripsi="{{ e($room->deskripsi) }}"
+                                data-fasilitas="{{ $room->fasilitas->pluck('id_fasilitas')->join(',') }}">
+                            Edit
+                        </button>
+                        <button class="btn-danger" type="button" data-delete="{{ $room->id_kamar }}">Hapus</button>
+                    </div>
                 </div>
-            </div>
-        </main>
+            </article>
+        @empty
+            <p class="muted" style="grid-column:1/-1;">Belum ada kamar.</p>
+        @endforelse
     </div>
-    <div class="page-loader" id="pageLoader" aria-hidden="true">
-        <div class="loader-spinner" role="status" aria-label="Loading"></div>
-    </div>
-    <div class="confirm-backdrop" id="confirmDeleteModal" aria-hidden="true">
-        <div class="confirm-card">
-            <h4>YAKIN INGIN HAPUS?</h4>
-            <div class="confirm-divider"></div>
-            <button class="confirm-btn" id="confirmDeleteBtn" type="button">KONFIRMASI</button>
-        </div>
-    </div>
+
     <div class="modal" id="roomModal">
-        <div class="form-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e5e5e5;">
-                <h3 id="roomModalTitle" style="margin: 0; letter-spacing: 1px; font-size: 18px;">Buat kamar baru</h3>
-                <button type="button" class="btn-new tutup-btn" onclick="closeModal()" style="padding: 8px 14px; font-size: 12px;">Tutup</button>
+        <div class="modal-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+                <div>
+                    <p class="eyebrow" style="margin:0 0 4px 0;">Form</p>
+                    <h4 id="roomModalTitle" style="margin:0;">Tambah kamar</h4>
+                </div>
+                <button class="btn-ghost" type="button" onclick="closeRoomModal()">Tutup</button>
             </div>
-            <form id="roomModalForm" method="POST" action="{{ route('admin.rooms.store') }}" enctype="multipart/form-data">
+            <form id="roomForm" method="POST" action="{{ route('admin.rooms.store') }}" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="_method" id="roomModalMethod" value="">
+                <input type="hidden" name="_method" id="roomMethod" value="">
                 <div class="form-grid">
-                    <div class="field">
+                    <div class="form-group">
                         <label>Nama kamar</label>
-                        <input id="roomNameInput" type="text" name="nama_kamar" value="{{ old('nama_kamar') }}" required>
+                        <input id="roomName" type="text" name="nama_kamar" value="{{ old('nama_kamar') }}" required>
                     </div>
-                    <div class="field">
+                    <div class="form-group">
                         <label>Kategori</label>
-                        <select id="roomKategoriSelect" name="id_kategori" required onchange="loadFasilitas()">
-                            <option value="">-- Pilih Kategori --</option>
-                            @foreach ($kategoris as $kat)
-                                <option value="{{ $kat->id }}">{{ $kat->name }}</option>
+                        <select id="roomKategori" name="id_kategori" required>
+                            <option value="">-- Pilih kategori --</option>
+                            @foreach($kategoris as $kat)
+                                <option value="{{ $kat->id }}" {{ old('id_kategori') == $kat->id ? 'selected' : '' }}>{{ $kat->name }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="field">
+                    <div class="form-group">
                         <label>Harga per malam</label>
-                        <input id="roomHargaInput" type="number" name="harga_permalam" min="0" step="1000" value="{{ old('harga_permalam') }}" required>
+                        <input id="roomHarga" type="number" name="harga_permalam" min="0" step="1000" value="{{ old('harga_permalam') }}" required>
                     </div>
-                    <div class="field">
+                    <div class="form-group">
                         <label>Stok kamar</label>
-                        <input id="roomStokInput" type="number" name="stok" min="1" value="{{ old('stok', 1) }}" required>
+                        <input id="roomStok" type="number" name="stok" min="0" value="{{ old('stok', 1) }}" required>
+                        <small class="muted">Stok 0 akan mengubah status ke Penuh.</small>
                     </div>
-                    <div class="field">
+                    <div class="form-group">
                         <label>Kapasitas (orang)</label>
-                        <input id="roomKapasitasInput" type="number" name="kapasitas" min="1" max="10" value="{{ old('kapasitas', 2) }}" required>
+                        <input id="roomKapasitas" type="number" name="kapasitas" min="1" max="10" value="{{ old('kapasitas', 2) }}" required>
                     </div>
-                    <div class="field">
+                    <div class="form-group">
                         <label>Ukuran kamar</label>
-                        <input id="roomUkuranInput" type="text" name="ukuran_kamar" value="{{ old('ukuran_kamar') }}" placeholder="contoh: 10 m2">
+                        <input id="roomUkuran" type="text" name="ukuran_kamar" value="{{ old('ukuran_kamar') }}" placeholder="Mis: 24 m2">
                     </div>
-                    <div class="field">
+                    <div class="form-group">
                         <label>Status</label>
-                        <select id="roomStatusSelect" name="status_kamar">
+                        <select id="roomStatus" name="status_kamar">
                             <option value="Tersedia" {{ old('status_kamar') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
-                            <option value="Telah di reservasi" {{ old('status_kamar') === 'Telah di reservasi' ? 'selected' : '' }}>Telah di reservasi</option>
+                            <option value="Penuh" {{ old('status_kamar') === 'Penuh' ? 'selected' : '' }}>Penuh</option>
                             <option value="Maintenance" {{ old('status_kamar') === 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
+                            <option value="Telah di reservasi" {{ old('status_kamar') === 'Telah di reservasi' ? 'selected' : '' }}>Telah di reservasi</option>
                         </select>
                     </div>
-                    <div class="field" style="grid-column: 1 / -1;">
+                    <div class="form-group" style="grid-column:1/-1;">
                         <label>Deskripsi</label>
-                        <textarea id="roomDeskripsiInput" name="deskripsi" placeholder="Detail singkat kamar">{{ old('deskripsi') }}</textarea>
+                        <textarea id="roomDeskripsi" name="deskripsi" placeholder="Detail singkat kamar">{{ old('deskripsi') }}</textarea>
                     </div>
-                    <div class="field" style="grid-column: 1 / -1;">
-                        <label>Fasilitas <small style="color:#777;">(pilih fasilitas yang tersedia)</small></label>
-                        <div id="fasilitasContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 8px;">
-                            <!-- Akan diisi dengan JS -->
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label>Fasilitas (otomatis mengikuti kategori)</label>
+                        <div id="fasilitasContainer" class="fasilitas-grid">
+                            <p class="muted" style="grid-column:1/-1;">Pilih kategori untuk memuat fasilitas.</p>
                         </div>
                     </div>
-                    <div class="field">
-                        <label>Gambar <small style="color:#777;">(kosongkan saat edit jika tidak diganti)</small></label>
-                        <input id="roomImageInput" type="file" name="image" accept="image/*" required>
+                    <div class="form-group">
+                        <label>Gambar</label>
+                        <input id="roomImage" type="file" name="image" accept="image/*" {{ old('nama_kamar') ? '' : 'required' }}>
+                        <small class="muted">Kosongkan saat edit jika tidak diganti.</small>
                     </div>
                 </div>
-                <div class="actions-inline" style="margin-top:12px;">
-                    <button id="roomModalSubmit" type="submit" class="btn-new">Simpan kamar</button>
+                <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+                    <button type="button" class="btn-ghost" onclick="closeRoomModal()">Batal</button>
+                    <button type="submit" class="btn-primary" id="roomSubmit">Simpan kamar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <style>
-        .fasilitas-checkbox {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            padding: 8px 10px;
-            background: #f8f8f8;
-            border-radius: 6px;
-            border: 1px solid #d5d5d5;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .fasilitas-checkbox:hover {
-            background: #f0f0f0;
-            border-color: #2c2c2c;
-        }
-        .fasilitas-checkbox input[type="checkbox"] {
-            margin-top: 2px;
-            cursor: pointer;
-        }
-        .fasilitas-checkbox-label {
-            display: flex;
-            flex-direction: column;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .fasilitas-checkbox-label strong {
-            font-size: 13px;
-            margin-bottom: 2px;
-        }
-        .fasilitas-checkbox-label small {
-            color: #999;
-            font-size: 11px;
-        }
-    </style>
-
-    <script>
-        const roomModal = document.getElementById('roomModal');
-        const roomForm = document.getElementById('roomModalForm');
-        const methodInput = document.getElementById('roomModalMethod');
-        const titleEl = document.getElementById('roomModalTitle');
-        const submitBtn = document.getElementById('roomModalSubmit');
-        const nameInput = document.getElementById('roomNameInput');
-        const kategoriSelect = document.getElementById('roomKategoriSelect');
-
-        const hargaInput = document.getElementById('roomHargaInput');
-        const stokInput = document.getElementById('roomStokInput');
-        const kapasitasInput = document.getElementById('roomKapasitasInput');
-        const ukuranInput = document.getElementById('roomUkuranInput');
-        const statusSelect = document.getElementById('roomStatusSelect');
-        const deskripsiInput = document.getElementById('roomDeskripsiInput');
-        const imageInput = document.getElementById('roomImageInput');
-        const fasilitasContainer = document.getElementById('fasilitasContainer');
-
-        // Load fasilitas berdasarkan kategori yang dipilih
-        async function loadFasilitas() {
-            const kategoriId = kategoriSelect.value;
-            fasilitasContainer.innerHTML = '';
-
-            if (!kategoriId) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/kategoris/${kategoriId}/fasilitas`);
-                const fasilitas = await response.json();
-
-                if (fasilitas.length === 0) {
-                    fasilitasContainer.innerHTML = '<p style="grid-column: 1/-1; color: #999; font-size: 12px;">Tidak ada fasilitas tersedia untuk kategori ini.</p>';
-                    return;
-                }
-
-                fasilitas.forEach(f => {
-                    const label = document.createElement('label');
-                    label.className = 'fasilitas-checkbox';
-                    label.innerHTML = `
-                        <input type="checkbox" name="fasilitas[]" value="${f.id_fasilitas}">
-                        <span class="fasilitas-checkbox-label">
-                            <strong>${f.nama_fasilitas}</strong>
-                            ${f.deskripsi ? `<small>${f.deskripsi}</small>` : ''}
-                        </span>
-                    `;
-                    fasilitasContainer.appendChild(label);
-                });
-            } catch (error) {
-                console.error('Error loading fasilitas:', error);
-                fasilitasContainer.innerHTML = '<p style="grid-column: 1/-1; color: #c00; font-size: 12px;">Gagal memuat fasilitas.</p>';
-            }
-        }
-
-        function openModal(){
-            resetForm();
-            titleEl.textContent = 'Buat kamar baru';
-            submitBtn.textContent = 'Simpan kamar';
-            methodInput.value = '';
-            roomForm.action = "{{ route('admin.rooms.store') }}";
-            imageInput.required = true;
-            roomModal.classList.add('is-open');
-        }
-        function closeModal(){ roomModal.classList.remove('is-open'); }
-
-        function resetForm() {
-            nameInput.value = "";
-            kategoriSelect.value = "";
-            hargaInput.value = "";
-            stokInput.value = "1";
-            kapasitasInput.value = "2";
-            ukuranInput.value = "";
-            statusSelect.value = "Tersedia";
-            deskripsiInput.value = "";
-            imageInput.value = '';
-            fasilitasContainer.innerHTML = '';
-        }
-
-        function openEditModal(button){
-            const action = button.getAttribute('data-action');
-            const nama = button.getAttribute('data-nama') || '';
-            const kategoriId = button.getAttribute('data-kategori-id') || '';
-            const harga = button.getAttribute('data-harga') || '';
-            const stok = button.getAttribute('data-stok') || '1';
-            const kapasitas = button.getAttribute('data-kapasitas') || '2';
-            const ukuran = button.getAttribute('data-ukuran') || '';
-            const status = button.getAttribute('data-status') || 'Tersedia';
-            const deskripsi = button.getAttribute('data-deskripsi') || '';
-            const img = button.getAttribute('data-img') || '';
-
-            roomForm.action = action;
-            methodInput.value = 'PUT';
-            titleEl.textContent = 'Edit kamar';
-            submitBtn.textContent = 'Update kamar';
-
-            nameInput.value = nama;
-            kategoriSelect.value = kategoriId;
-            hargaInput.value = harga;
-            stokInput.value = stok;
-            kapasitasInput.value = kapasitas;
-            ukuranInput.value = ukuran;
-            statusSelect.value = status;
-            deskripsiInput.value = deskripsi;
-
-            imageInput.required = false;
-
-            // Load fasilitas untuk kategori ini
-            loadFasilitas();
-
-            roomModal.classList.add('is-open');
-        }
-
-        @if($errors->any())
-            openModal();
-        @endif
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const flashStack = document.getElementById('flashStack');
-            if (!flashStack) return;
-            setTimeout(() => flashStack.remove(), 4200);
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const loader = document.getElementById('pageLoader');
-            if (!loader) return;
-
-            const showLoader = () => loader.classList.add('is-visible');
-
-            document.querySelectorAll('a[href]').forEach((link) => {
-                const href = link.getAttribute('href');
-                if (!href || href === '#' || href.startsWith('javascript:')) return;
-
-                link.addEventListener('click', function () {
-                    if (this.target === '_blank' || this.href === window.location.href) return;
-                    showLoader();
-                });
-            });
-
-            window.addEventListener('beforeunload', showLoader);
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('confirmDeleteModal');
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            const deleteForm = document.getElementById('deleteRoomForm');
-            let selectedId = null;
-
-            document.querySelectorAll('.btn-delete').forEach((btn) => {
-                btn.addEventListener('click', function () {
-                    selectedId = this.dataset.roomId;
-                    modal.classList.add('is-open');
-                });
-            });
-
-            modal?.addEventListener('click', function (e) {
-                if (e.target === modal) {
-                    modal.classList.remove('is-open');
-                }
-            });
-
-            confirmBtn?.addEventListener('click', function () {
-                if (!selectedId || !deleteForm) return;
-                const template = "{{ route('admin.rooms.destroy', ['id' => ':id']) }}";
-                deleteForm.action = template.replace(':id', selectedId);
-                deleteForm.submit();
-            });
-        });
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggle = document.getElementById('sidebarToggle');
-            const sidebar = document.querySelector('.sidebar');
-            toggle?.addEventListener('click', function (e) {
-                e.stopPropagation();
-                sidebar?.classList.toggle('is-open');
-            });
-            document.addEventListener('click', function (e) {
-                if (window.innerWidth > 960) return;
-                if (!sidebar?.classList.contains('is-open')) return;
-                if (!sidebar.contains(e.target) && e.target !== toggle) {
-                    sidebar.classList.remove('is-open');
-                }
-            });
-        });
-    </script>
     <form id="deleteRoomForm" method="POST" style="display:none;">
         @csrf
         @method('DELETE')
     </form>
-</body>
-</html>
+@endsection
+
+@section('extra-js')
+<script>
+    const roomModal = document.getElementById('roomModal');
+    const roomForm = document.getElementById('roomForm');
+    const roomMethod = document.getElementById('roomMethod');
+    const roomModalTitle = document.getElementById('roomModalTitle');
+    const roomSubmit = document.getElementById('roomSubmit');
+    const roomName = document.getElementById('roomName');
+    const roomKategori = document.getElementById('roomKategori');
+    const roomHarga = document.getElementById('roomHarga');
+    const roomStok = document.getElementById('roomStok');
+    const roomKapasitas = document.getElementById('roomKapasitas');
+    const roomUkuran = document.getElementById('roomUkuran');
+    const roomStatus = document.getElementById('roomStatus');
+    const roomDeskripsi = document.getElementById('roomDeskripsi');
+    const roomImage = document.getElementById('roomImage');
+    const fasilitasContainer = document.getElementById('fasilitasContainer');
+    const deleteRoomForm = document.getElementById('deleteRoomForm');
+    const updateUrlTemplate = "{{ route('admin.rooms.update', ['id' => '__ID__']) }}";
+    const deleteUrlTemplate = "{{ route('admin.rooms.destroy', ['id' => '__ID__']) }}";
+    let currentRoomId = null;
+    let selectedFasilitas = [];
+
+    const oldValues = {
+        nama: @json(old('nama_kamar')),
+        kategori: @json(old('id_kategori')),
+        harga: @json(old('harga_permalam')),
+        stok: @json(old('stok')),
+        kapasitas: @json(old('kapasitas')),
+        ukuran: @json(old('ukuran_kamar')),
+        status: @json(old('status_kamar')),
+        deskripsi: @json(old('deskripsi')),
+    };
+
+    async function loadFasilitas(preselected = [], roomId = null) {
+        const kategoriId = roomKategori.value;
+        fasilitasContainer.innerHTML = '<p class="muted" style="grid-column:1/-1;">Memuat fasilitas...</p>';
+        if (!kategoriId) {
+            fasilitasContainer.innerHTML = '<p class="muted" style="grid-column:1/-1;">Pilih kategori terlebih dahulu.</p>';
+            return;
+        }
+        try {
+            const url = roomId
+                ? `/api/kategoris/${kategoriId}/fasilitas?room_id=${roomId}`
+                : `/api/kategoris/${kategoriId}/fasilitas`;
+            const res = await fetch(url);
+            const fasilitas = await res.json();
+            if (!Array.isArray(fasilitas) || !fasilitas.length) {
+                fasilitasContainer.innerHTML = '<p class="muted" style="grid-column:1/-1;">Belum ada fasilitas untuk kategori ini.</p>';
+                return;
+            }
+            fasilitasContainer.innerHTML = '';
+            fasilitas.forEach((f) => {
+                const wrapper = document.createElement('label');
+                wrapper.className = 'fasilitas-item';
+                wrapper.innerHTML = `
+                    <input type="checkbox" name="fasilitas[]" value="${f.id_fasilitas}" ${preselected.includes(String(f.id_fasilitas)) ? 'checked' : ''}>
+                    <div>
+                        <strong style="font-size:13px;">${f.nama_fasilitas}</strong>
+                        ${f.deskripsi ? `<div class="muted" style="font-size:12px;">${f.deskripsi}</div>` : ''}
+                    </div>
+                `;
+                fasilitasContainer.appendChild(wrapper);
+            });
+        } catch (err) {
+            fasilitasContainer.innerHTML = '<p class="muted" style="grid-column:1/-1;color:#c53030;">Gagal memuat fasilitas.</p>';
+        }
+    }
+
+    function resetRoomForm() {
+        currentRoomId = null;
+        selectedFasilitas = [];
+        roomForm.action = "{{ route('admin.rooms.store') }}";
+        roomMethod.value = '';
+        roomModalTitle.textContent = 'Tambah kamar';
+        roomSubmit.textContent = 'Simpan kamar';
+        roomName.value = oldValues.nama || '';
+        roomKategori.value = oldValues.kategori || '';
+        roomHarga.value = oldValues.harga || '';
+        roomStok.value = oldValues.stok ?? 1;
+        roomKapasitas.value = oldValues.kapasitas || 2;
+        roomUkuran.value = oldValues.ukuran || '';
+        roomStatus.value = oldValues.status || 'Tersedia';
+        roomDeskripsi.value = oldValues.deskripsi || '';
+        roomImage.value = '';
+        roomImage.required = true;
+        fasilitasContainer.innerHTML = '<p class="muted" style="grid-column:1/-1;">Pilih kategori untuk memuat fasilitas.</p>';
+    }
+
+    function openRoomModal(mode = 'create', button = null) {
+        roomModal.classList.add('is-open');
+        if (mode === 'edit' && button) {
+            const data = button.dataset;
+            currentRoomId = data.id;
+            selectedFasilitas = (data.fasilitas || '').split(',').filter(Boolean);
+            roomForm.action = data.action || updateUrlTemplate.replace('__ID__', data.id);
+            roomMethod.value = 'PUT';
+            roomModalTitle.textContent = 'Edit kamar';
+            roomSubmit.textContent = 'Simpan perubahan';
+            roomName.value = data.nama || '';
+            roomKategori.value = data.kategoriId || '';
+            roomHarga.value = data.harga || '';
+            roomStok.value = data.stok || 0;
+            roomKapasitas.value = data.kapasitas || 1;
+            roomUkuran.value = data.ukuran || '';
+            roomStatus.value = data.status || 'Tersedia';
+            roomDeskripsi.value = data.deskripsi || '';
+            roomImage.required = false;
+            loadFasilitas(selectedFasilitas, currentRoomId);
+        } else {
+            resetRoomForm();
+        }
+    }
+
+    function closeRoomModal() {
+        roomModal.classList.remove('is-open');
+    }
+
+    roomKategori?.addEventListener('change', () => loadFasilitas(selectedFasilitas, currentRoomId));
+
+    document.querySelectorAll('[data-delete]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-delete');
+            if (!id) return;
+            if (!confirm('Hapus kamar ini?')) return;
+            deleteRoomForm.action = deleteUrlTemplate.replace('__ID__', id);
+            deleteRoomForm.submit();
+        });
+    });
+
+    @if($errors->any())
+        openRoomModal('create');
+    @endif
+</script>
+@endsection

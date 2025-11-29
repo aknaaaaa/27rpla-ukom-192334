@@ -27,6 +27,8 @@
         $menu = [
             ['route' => 'admin.dashboard', 'icon' => 'bi-grid-1x2-fill', 'label' => 'Dashboard', 'key' => 'dashboard'],
             ['route' => 'admin.rooms.index', 'icon' => 'bi-door-open-fill', 'label' => 'Kamar', 'key' => 'rooms'],
+            ['route' => 'admin.kategori.index', 'icon' => 'bi-journal-text', 'label' => 'Kategori', 'key' => 'kategori'],
+            ['route' => 'admin.fasilitas.index', 'icon' => 'bi-stars', 'label' => 'Fasilitas', 'key' => 'fasilitas'],
             ['route' => 'admin.orders', 'icon' => 'bi-box-seam', 'label' => 'Pesanan', 'key' => 'orders'],
             ['route' => 'admin.pelanggan', 'icon' => 'bi-people', 'label' => 'Penginap', 'key' => 'customers'],
         ]
@@ -71,13 +73,13 @@ async function doLogout() {
         document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
         
         // Redirect ke login
-        window.location.href = '{{ route('layouts.login') }}';
+        window.location.href = '{{ route('login') }}';
     } catch (e) {
         console.error('Logout error:', e);
         // Force logout bahkan jika request gagal
         localStorage.removeItem('access_token');
         document.cookie = 'sanctum_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        window.location.href = '{{ route('layouts.login') }}';
+        window.location.href = '{{ route('login') }}';
     }
 }
 </script>

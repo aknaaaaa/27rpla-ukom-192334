@@ -10,8 +10,12 @@
         <div id="cartItemsContainer" class="d-flex flex-column gap-2 mb-3 small text-muted">
             <span class="text-muted">Belum ada kamar di keranjang.</span>
         </div>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-semibold">Tanggal</span>
+            <span class="text-muted small" id="cartDateSummary">Pilih check-in & out</span>
+        </div>
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="fw-semibold">Jumlah</span>
+            <span class="fw-semibold">Total</span>
             <span class="fw-bold" id="cartTotal">Rp0</span>
         </div>
         <div class="d-grid gap-2">
@@ -34,6 +38,8 @@
     object-fit: cover;
     border-radius: 8px;
 }
+#cartItemsContainer .input-group-sm > .form-control { font-size: 12px; }
+#cartItemsContainer .input-group-sm > .btn { font-size: 12px; }
 </style>
 
 <script>
@@ -93,17 +99,29 @@
                 const statusText = (item.status || 'Tersedia').toLowerCase();
                 const isBlocked = statusText !== 'tersedia' && statusText !== 'available';
                 if (isBlocked) hasBlocked = true;
-                total += price * qty * (isBlocked ? 0 : nights);
-                    const div = document.createElement('div');
-                    div.className = 'cart-item d-flex align-items-center gap-2';
-                    div.innerHTML = `
+                const subtotal = price * qty * (isBlocked ? 0 : nights);
+                total += subtotal;
+                const div = document.createElement('div');
+                div.className = 'cart-item d-flex align-items-center gap-2';
+                div.innerHTML = `
                     <img src="${item.gambar || '{{ asset('images/default.jpg') }}'}" alt="${item.nama || 'Kamar'}" onerror="this.onerror=null;this.src='{{ asset('images/default.jpg') }}';">
                     <div class="flex-grow-1">
-                        <div class="fw-semibold">${item.nama || 'Kamar'}</div>
-                        <div class="text-muted small">${fmt(price)} x ${qty} x ${nights} malam</div>
-                        ${isBlocked ? '<div class="text-danger small fw-semibold">Tidak tersedia (maintenance / reservasi)</div>' : ''}
+                        <div class="fw-semibold d-flex justify-content-between align-items-center">
+                            <span>${item.nama || 'Kamar'}</span>
+                            <small class="text-muted">${nights} malam</small>
+                        </div>
+                        <div class="text-muted small">Check-in ${getBookingDates().check_in || '-'} | Check-out ${getBookingDates().check_out || '-'}</div>
+                        <div class="text-muted small">${fmt(price)} x ${qty} kamar x ${nights} malam</div>
+                        ${isBlocked ? '<div class="text-danger small fw-semibold">Tidak tersedia (maintenance / reservasi)</div>' : `<div class="fw-semibold">${fmt(subtotal)}</div>`}
                     </div>
-                    <button class="btn btn-link text-danger p-0 small" data-remove="${item.id}">Hapus</button>
+                    <div class="d-flex flex-column align-items-end gap-1">
+                        <div class="input-group input-group-sm" style="width:110px;">
+                            <button class="btn btn-outline-secondary" type="button" data-dec="${item.id}">-</button>
+                            <input type="number" class="form-control text-center" value="${qty}" min="1" data-qty="${item.id}">
+                            <button class="btn btn-outline-secondary" type="button" data-inc="${item.id}">+</button>
+                        </div>
+                        <button class="btn btn-link text-danger p-0 small" data-remove="${item.id}">Hapus</button>
+                    </div>
                 `;
                 container.appendChild(div);
             });
@@ -127,6 +145,39 @@
                     window.showAppToast?.('Kamar dihapus dari keranjang.', 'warning');
                 });
             });
+
+            // update quantity controls
+            container.querySelectorAll('[data-dec]').forEach((btn) => {
+                btn.addEventListener('click', () => changeQty(items, btn.getAttribute('data-dec'), -1));
+            });
+            container.querySelectorAll('[data-inc]').forEach((btn) => {
+                btn.addEventListener('click', () => changeQty(items, btn.getAttribute('data-inc'), 1));
+            });
+            container.querySelectorAll('[data-qty]').forEach((input) => {
+                input.addEventListener('change', () => setQty(items, input.getAttribute('data-qty'), Number(input.value || 1)));
+            });
+        };
+
+        const changeQty = (items, id, delta) => {
+            const updated = items.map((it) => {
+                if (String(it.id) !== String(id)) return it;
+                const stok = Number(it.stok || 0);
+                let next = Number(it.quantity || 1) + delta;
+                if (stok > 0) next = Math.min(next, stok);
+                return { ...it, quantity: Math.max(1, next) };
+            });
+            window.cartStorage.saveCart(updated);
+        };
+
+        const setQty = (items, id, val) => {
+            const updated = items.map((it) => {
+                if (String(it.id) !== String(id)) return it;
+                const stok = Number(it.stok || 0);
+                let next = val;
+                if (stok > 0) next = Math.min(next, stok);
+                return { ...it, quantity: Math.max(1, next) };
+            });
+            window.cartStorage.saveCart(updated);
         };
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -147,7 +198,7 @@
                     }
                     const ok = window.requireAuth ? await window.requireAuth({}) : true;
                     if (!ok) return;
-                    window.location.href = "{{ route('checkout') }}";
+                    window.location.href = "{{ url('/profile?tab=cart') }}";
                 });
             }
 

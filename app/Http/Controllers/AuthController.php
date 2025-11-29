@@ -159,7 +159,7 @@ class AuthController extends Controller
             ], 200);
         }
 
-        return redirect()->route('layouts.login')->with('ok', 'Berhasil logout.');
+        return redirect()->route('login')->with('ok', 'Berhasil logout.');
     }
 
     public function user(Request $request)

@@ -5,17 +5,19 @@
 @section('content')
 <style>
     .checkout-hero {
-        background: #e9f1ff;
-        border: 2px solid #2d8cff;
-        border-radius: 6px;
+        background: linear-gradient(135deg, #0f172a, #101827 55%, #0b1222);
+        border: 1px solid #0f172a;
+        border-radius: 14px;
         padding: 18px 24px;
         margin-top: 78px;
+        box-shadow: 0 20px 45px rgba(0,0,0,0.16);
+        color: #fff;
     }
     .checkout-shell {
         background: #fff;
-        border-radius: 4px;
+        border-radius: 12px;
         padding: 24px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+        box-shadow: 0 14px 30px rgba(0,0,0,0.08);
         border: 1px solid #e8e8e8;
     }
     .booking-shell {
@@ -68,10 +70,11 @@
         color: #7a7a7a;
     }
     .summary-card {
-        border: 1px solid #cda582;
+        border: 1px solid #d8d8d8;
         border-radius: 16px;
         padding: 20px;
-        background: linear-gradient(135deg, #fdf3ea, #f6ebe0);
+        background: linear-gradient(135deg, #fdf9f3, #f7f4ed);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.06);
     }
     .summary-header {
         font-weight: 700;
@@ -99,10 +102,11 @@
         padding-top: 10px;
     }
     .pill-card {
-        border: 1px solid #d5d5d5;
+        border: 1px solid #e5e5e5;
         border-radius: 14px;
         padding: 22px 22px 10px;
-        background: #fafafa;
+        background: #fff;
+        box-shadow: 0 10px 22px rgba(0,0,0,0.06);
     }
     .pill-card h6,
     .pill-card h5 {
@@ -113,7 +117,8 @@
         border: 1px solid #d5d5d5;
         border-radius: 12px;
         padding: 14px;
-        background: #fefefe;
+        background: #fff;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.06);
     }
     .group-head {
         display: flex;
@@ -149,13 +154,14 @@
         font-weight: 600;
     }
     .pay-btn {
-        background: #272727;
+        background: #0f172a;
         color: #fff;
-        border-radius: 8px;
-        height: 44px;
-        font-weight: 600;
+        border-radius: 10px;
+        height: 46px;
+        font-weight: 700;
         letter-spacing: 0.3px;
         border: none;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
     .pay-btn:disabled {
         opacity: 0.6;
@@ -410,6 +416,7 @@
         const checkInInput = document.getElementById('checkInInput');
         const checkOutInput = document.getElementById('checkOutInput');
         const otherGuestSwitch = document.getElementById('otherGuestSwitch');
+        const vaSelect = document.getElementById('vaSelect');
         const addonNodes = Array.from(document.querySelectorAll('[data-addon-id]'));
 
         const toInputDate = (dateObj) => dateObj.toISOString().split('T')[0];
@@ -612,10 +619,35 @@
             if (vaRadio) vaRadio.checked = true;
         });
 
+        const toggleLoading = (isLoading) => {
+            if (!payBtn) return;
+            payBtn.disabled = isLoading;
+            payBtn.textContent = isLoading ? 'Memproses...' : 'Bayar Sekarang';
+        };
+
         const setResult = (html, variant = 'info') => {
             if (!resultBox) return;
             resultBox.className = `mt-3 small alert alert-${variant}`;
             resultBox.innerHTML = html;
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        const renderApiError = (data, fallback = 'Gagal membuat pembayaran.') => {
+            const lines = [];
+            if (data?.message) lines.push(data.message);
+
+            const errors = data?.errors || {};
+            Object.keys(errors).forEach((key) => {
+                const val = errors[key];
+                const msg = Array.isArray(val) ? val.join(', ') : val;
+                lines.push(`${key}: ${msg}`);
+            });
+
+            if (data?.error) lines.push(`Detail: ${data.error}`);
+            if (data?.developer_hint) lines.push(`<code>${data.developer_hint}</code>`);
+
+            if (!lines.length) lines.push(fallback);
+            setResult(lines.join('<br>'), 'danger');
         };
 
         const copyVA = async (text, buttonEl) => {
@@ -783,22 +815,24 @@
 
             const nights = computeNights();
             const addons = getSelectedAddons();
-            const payload = {
-                payment_method: method,
-                amount: total,
-                items: items.map((item) => ({
-                    id: item.id ?? item.kamar_id ?? item.room_id,
-                    name: item.nama || 'Kamar',
-                    price: Number(item.harga || 0),
-                    quantity: Number(item.quantity || 1) * nights,
-                })),
-                booking,
-            };
+                const payload = {
+                    payment_method: method,
+                    amount: total,
+                    items: items.map((item) => ({
+                        id: item.id ?? item.kamar_id ?? item.room_id,
+                        name: item.nama || 'Kamar',
+                        price: Number(item.harga || 0),
+                        quantity: Number(item.quantity || 1) * nights,
+                        room_units: Number(item.quantity || 1),
+                    })),
+                    booking,
+                };
             const addonItems = addons.map((addon, idx) => ({
                 id: `ADDON-${idx + 1}-${addon.id}`,
                 name: addon.name,
                 price: Number(addon.price || 0),
                 quantity: addon.qty * (addon.perNight ? nights : 1),
+                room_units: 0,
             }));
             payload.items.push(...addonItems);
             if (orderId) {
@@ -806,7 +840,7 @@
             }
 
             setResult('Membuat transaksi ke Midtrans...', 'info');
-            payBtn.disabled = true;
+            toggleLoading(true);
 
             try {
                 const res = await fetch("{{ route('api.payments.charge') }}", {
@@ -821,8 +855,7 @@
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    const msg = data?.message || 'Gagal membuat pembayaran.';
-                    setResult(msg, 'danger');
+                    renderApiError(data);
                     return;
                 }
 
@@ -873,7 +906,7 @@
             } catch (error) {
                 setResult('Terjadi kesalahan jaringan.', 'danger');
             } finally {
-                payBtn.disabled = false;
+                toggleLoading(false);
             }
         });
     })();
